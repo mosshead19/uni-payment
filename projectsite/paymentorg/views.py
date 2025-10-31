@@ -3,10 +3,11 @@ from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib import messages
 from django.utils import timezone
 from django.db.models import Q
-from django.views.generic import ListView, CreateView, UpdateView, DeleteView, DetailView
+from django.views.generic import View, ListView, CreateView, UpdateView, DeleteView, DetailView
 from django.urls import reverse_lazy
 from .models import Student, Officer, Organization, FeeType, PaymentRequest, Payment, Receipt, ActivityLog
 import uuid
+from django.http import JsonResponse
 
 # home page
 class HomePageView(ListView):
@@ -378,3 +379,27 @@ class DeletePaymentRequestView(LoginRequiredMixin, DeleteView):
         
         messages.success(request, 'Payment request deleted successfully.')
         return super().delete(request, *args, **kwargs)
+
+ #  return JSON data for student payments status
+class PaymentStatusAPIView(LoginRequiredMixin, View):
+    def get(self, request, *args, **kwargs):
+        try:
+            student = Student.objects.get(user=request.user)
+            pending_count = student.get_pending_payments_count()
+            recent_payments = student.get_completed_payments()[:5]
+            
+            data = {
+                'pending_count': pending_count,
+                'recent_payments': [
+                    {
+                        'or_number': payment.or_number,
+                        'organization': payment.organization.name,
+                        'amount': float(payment.amount),
+                        'date': payment.created_at.isoformat()
+                    }
+                    for payment in recent_payments
+                ]
+            }
+            return JsonResponse(data)
+        except Student.DoesNotExist:
+            return JsonResponse({'error': 'Student profile not found'}, status=404)
