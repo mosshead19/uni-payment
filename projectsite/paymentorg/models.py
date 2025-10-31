@@ -4,7 +4,8 @@ from django.core.validators import MinValueValidator
 from django.utils import timezone
 from decimal import Decimal
 import uuid
-# Create your models here.
+
+# Nag-add ako CRUD methods for payment management and status updates tapos enhance sa query methods for dashboards - darcy
 
 
 class BaseModel(models.Model):
@@ -23,7 +24,7 @@ class BaseModel(models.Model):
 
 
 class Student(BaseModel):
-###################################################333
+    ###################################################333
     # Student profile linked to Django User
     #########################################
     user = models.OneToOneField(
@@ -106,9 +107,17 @@ class Student(BaseModel):
     def get_pending_payments_count(self):
         """Get count of unpaid fees"""
         return self.payment_requests.filter(status='PENDING').count()
-    
 
-    
+    def get_pending_payments(self):
+        """Get all pending payment requests for this student"""
+        return self.payment_requests.filter(status='PENDING')
+
+    def get_completed_payments(self):
+        """Get all completed payments for this student"""
+        return Payment.objects.filter(student=self, status='COMPLETED')
+
+
+
 class Officer(BaseModel):
     """
     Organization officer who can process payments
@@ -232,6 +241,19 @@ class Organization(BaseModel):
             total=models.Sum('amount')
         )
         return total['total'] or Decimal('0.00')
+
+    def get_today_collection(self):
+        """Get today's total collection"""
+        today = timezone.now().date()
+        total = self.payments.filter(
+            status='COMPLETED',
+            created_at__date=today
+        ).aggregate(total=models.Sum('amount'))
+        return total['total'] or Decimal('0.00')
+
+    def get_pending_requests_count(self):
+        """Get count of pending payment requests"""
+        return self.payment_requests.filter(status='PENDING').count()
 
 
 class FeeType(BaseModel):
@@ -410,6 +432,18 @@ class PaymentRequest(BaseModel):
         self.paid_at = timezone.now()
         self.save()
 
+    def mark_as_cancelled(self):
+        """Update status to cancelled"""
+        self.status = 'CANCELLED'
+        self.save()
+
+    def get_time_remaining(self):
+        """Get human-readable time remaining"""
+        from django.utils.timesince import timesuntil
+        if self.status == 'PENDING' and not self.is_expired():
+            return timesuntil(self.expires_at, timezone.now())
+        return "Expired" if self.is_expired() else "Completed"
+
 
 class Payment(BaseModel):
     """
@@ -546,6 +580,15 @@ class Payment(BaseModel):
         if self.amount_received and self.amount:
             self.change_given = self.amount_received - self.amount
         super().save(*args, **kwargs)
+
+    def mark_as_void(self, officer, reason):
+        """Mark payment as void"""
+        self.status = 'VOID'
+        self.is_void = True
+        self.void_reason = reason
+        self.voided_by = officer
+        self.voided_at = timezone.now()
+        self.save()
 
 
 class Receipt(BaseModel):
