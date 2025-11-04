@@ -5,9 +5,6 @@ from django.utils import timezone
 from decimal import Decimal
 import uuid
 
-# Nag-add ako CRUD methods for payment management and status updates tapos enhance sa query methods for dashboards - darcy
-
-
 class BaseModel(models.Model):
     created_at = models.DateTimeField(auto_now_add=True,verbose_name="Created At")
     updated_at = models.DateTimeField(auto_now=True,verbose_name="Updated At")
@@ -17,11 +14,7 @@ class BaseModel(models.Model):
         abstract = True
         ordering = ['-created_at']
 
-
-
 # USER PROFILE MODELS
-
-
 
 class Student(BaseModel):
     ###################################################333

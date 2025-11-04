@@ -2,10 +2,7 @@ from django.contrib import admin
 from django.utils.html import format_html
 from django.urls import reverse
 from django.utils.safestring import mark_safe
-
 from .models import Student, Officer, Organization, FeeType, PaymentRequest, Payment, Receipt, ActivityLog, AcademicYearConfig
-
-# nag add ako admin interfaces - darcy
 
 @admin.register(Student)
 class StudentAdmin(admin.ModelAdmin):
