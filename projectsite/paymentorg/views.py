@@ -237,7 +237,7 @@ class GenerateQRPaymentView(StudentRequiredMixin, CreateView):
         payment_request.queue_number = queue_number
         payment_request.payment_method = 'CASH'  # default payment method(for now)
         payment_request.expires_at = timezone.now() + timedelta(minutes=15)
-        payment_request.qr_signature = create_signature(payment_request.request_id)
+        payment_request.qr_signature = create_signature(f"PAYMENT_REQUEST|{payment_request.request_id}")
         payment_request.save()
         
         ActivityLog.objects.create(
@@ -281,7 +281,7 @@ class PaymentRequestDetailView(StudentRequiredMixin, TemplateView):
         
         # if qr signature is empty, generate it
         if not payment_request.qr_signature:
-            payment_request.qr_signature = create_signature(payment_request.request_id)
+            payment_request.qr_signature = create_signature(f"PAYMENT_REQUEST|{payment_request.request_id}")
             payment_request.save(update_fields=['qr_signature'])
         
         context['payment_request'] = payment_request
@@ -312,7 +312,7 @@ class ViewPaymentRequestQRView(StudentRequiredMixin, View):
         
         # if qr signature is empty, generate it
         if not payment_request.qr_signature:
-            payment_request.qr_signature = create_signature(payment_request.request_id)
+            payment_request.qr_signature = create_signature(f"PAYMENT_REQUEST|{payment_request.request_id}")
             payment_request.save(update_fields=['qr_signature'])
         
         context = {
@@ -642,8 +642,8 @@ class PostBulkPaymentView(OfficerRequiredMixin, View):
                         notes=notes
                     )
                     
-                    # generate qr signature for the request_id
-                    payment_request.qr_signature = create_signature(payment_request.request_id)
+                    # generate qr signature for the request_id (must match verification format)
+                    payment_request.qr_signature = create_signature(f"PAYMENT_REQUEST|{payment_request.request_id}")
                     payment_request.save(update_fields=['qr_signature'])
                     
                     created_count += 1

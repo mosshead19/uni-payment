@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+
+{% block title %}Payment Request{% endblock %}
+
+{% block content %}
+<h1 class="h4 mb-4">Payment Request</h1>
+<div class="card shadow-sm">
+    <div class="card-body">
+        <div class="row">
+            <div class="col-md-6">
+                <div class="mb-2"><strong>Queue:</strong> {{ payment_request.queue_number }}</div>
+                <div class="mb-2"><strong>Organization:</strong> {{ payment_request.organization.name }}</div>
+                <div class="mb-2"><strong>Fee:</strong> {{ payment_request.fee_type.name }}</div>
+            </div>
+            <div class="col-md-6">
+                <div class="mb-2"><strong>Amount:</strong> ₱{{ payment_request.amount }}</div>
+                <div class="mb-2"><strong>Status:</strong> {{ payment_request.get_status_display }}</div>
+                <div class="mb-2"><strong>Expires:</strong> {{ payment_request.expires_at }}</div>
+            </div>
+        </div>
+        <a href="{% url 'view_payment_request_qr' payment_request.request_id %}" class="btn btn-primary">
+            <i class="fas fa-qrcode me-2"></i>View QR
+        </a>
+    </div>
+{% endblock %}
+
+

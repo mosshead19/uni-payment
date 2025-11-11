@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+
+{% block title %}Payment QR{% endblock %}
+
+{% block content %}
+<h1 class="h4 mb-4">Payment QR</h1>
+<div class="card shadow-sm">
+    <div class="card-body">
+        <p class="text-muted mb-2">Present this QR to the officer to process your payment.</p>
+        <div class="mb-3"><strong>Queue:</strong> {{ payment_request.queue_number }}</div>
+        <div class="mb-3"><strong>Fee:</strong> {{ payment_request.fee_type.name }} (₱{{ payment_request.amount }})</div>
+
+        <!-- Simple QR representation (text). You may replace with rendered QR image later -->
+        <pre class="p-3 bg-light border">{{ qr_data }}</pre>
+
+        <a href="{% url 'student_dashboard' %}" class="btn btn-outline-secondary">Back to Dashboard</a>
+    </div>
+</div>
+{% endblock %}
+
+
