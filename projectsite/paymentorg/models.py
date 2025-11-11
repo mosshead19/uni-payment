@@ -4,6 +4,7 @@ from django.core.validators import MinValueValidator
 from django.utils import timezone
 from decimal import Decimal
 import uuid
+from django.db.models import Sum
 
 class BaseModel(models.Model):
     created_at = models.DateTimeField(auto_now_add=True,verbose_name="Created At")
@@ -17,9 +18,6 @@ class BaseModel(models.Model):
 # USER PROFILE MODELS
 
 class Student(BaseModel):
-    ###################################################333
-    # Student profile linked to Django User
-    #########################################
     user = models.OneToOneField(
         User, 
         on_delete=models.CASCADE, 
@@ -106,9 +104,8 @@ class Student(BaseModel):
         return self.payment_requests.filter(status='PENDING')
 
     def get_completed_payments(self):
-        """Get all completed payments for this student"""
-        return Payment.objects.filter(student=self, status='COMPLETED')
-
+        """Get all completed payments for this student (excluding voided)"""
+        return Payment.objects.filter(student=self, status='COMPLETED', is_void=False)
 
 
 class Officer(BaseModel):
@@ -229,17 +226,18 @@ class Organization(BaseModel):
         return self.fee_types.filter(is_active=True).count()
 
     def get_total_collected(self):
-        """Get total amount collected"""
-        total = self.payments.filter(status='COMPLETED').aggregate(
+        """Get total amount collected (excluding voided payments)"""
+        total = self.payments.filter(status='COMPLETED', is_void=False).aggregate(
             total=models.Sum('amount')
         )
         return total['total'] or Decimal('0.00')
 
     def get_today_collection(self):
-        """Get today's total collection"""
+        """Get today's total collection (excluding voided payments)"""
         today = timezone.now().date()
         total = self.payments.filter(
             status='COMPLETED',
+            is_void=False,
             created_at__date=today
         ).aggregate(total=models.Sum('amount'))
         return total['total'] or Decimal('0.00')
@@ -375,6 +373,19 @@ class PaymentRequest(BaseModel):
         help_text="e.g., A-042"
     )
     
+    # Payment Method (selected by student when generating QR)
+    payment_method = models.CharField(
+        max_length=20,
+        choices=[
+            ('CASH', 'Cash'),
+            ('GCASH', 'GCash'),
+            ('BANK', 'Bank Transfer'),
+        ],
+        default='CASH',
+        verbose_name="Payment Method",
+        help_text="Payment method selected by student"
+    )
+    
     status = models.CharField(
         max_length=20,
         choices=[
@@ -434,7 +445,8 @@ class PaymentRequest(BaseModel):
         """Get human-readable time remaining"""
         from django.utils.timesince import timesuntil
         if self.status == 'PENDING' and not self.is_expired():
-            return timesuntil(self.expires_at, timezone.now())
+            # Correct use of timesuntil: (future_time, current_time)
+            return timesuntil(self.expires_at, timezone.now()) 
         return "Expired" if self.is_expired() else "Completed"
 
 
@@ -446,7 +458,10 @@ class Payment(BaseModel):
         PaymentRequest,
         on_delete=models.CASCADE,
         related_name='payment',
-        verbose_name="Payment Request"
+        verbose_name="Payment Request",
+        null=True,
+        blank=True,
+        help_text="Leave blank for direct payments (not from QR code)"
     )
     
     student = models.ForeignKey(
@@ -763,5 +778,6 @@ class AcademicYearConfig(BaseModel):
     def save(self, *args, **kwargs):
         """Ensure only one period is marked as current"""
         if self.is_current:
-            AcademicYearConfig.objects.filter(is_current=True).update(is_current=False)
+            # Prevents race conditions by excluding the current object (self.pk)
+            AcademicYearConfig.objects.filter(is_current=True).exclude(pk=self.pk).update(is_current=False) 
         super().save(*args, **kwargs)
