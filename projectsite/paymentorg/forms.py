@@ -9,7 +9,7 @@ from django.db import transaction
 
 from .models import (
     Student, Organization, FeeType, PaymentRequest,
-    Payment, Officer, AcademicYearConfig
+    Payment, Officer, AcademicYearConfig, Course, College, UserProfile
 )
 
 # ==================== registration forms ====================
@@ -39,20 +39,24 @@ class StudentRegistrationForm(UserCreationForm):
         widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': '09XX-XXX-XXXX'}),
         required=False
     )
-    course = forms.CharField(
-        max_length=100,
+    college = forms.ModelChoiceField(
+        queryset=College.objects.none(),
+        label="College/Department",
+        widget=forms.Select(attrs={'class': 'form-select'}),
+        empty_label="Select College/Department",
+        help_text="College of Sciences (COS) - This system is designed for College of Sciences only"
+    )
+    course = forms.ModelChoiceField(
+        queryset=Course.objects.none(),
         label="Course/Program",
-        widget=forms.TextInput(attrs={'class': 'form-control'})
+        widget=forms.Select(attrs={'class': 'form-select'}),
+        empty_label="Select Course/Program",
+        help_text="Select one of the 5 supported programs: Medical Biology, Marine Biology, Computer Science, Environmental Science, or Information Technology"
     )
     year_level = forms.IntegerField(
         min_value=1, max_value=5,
         label="Year Level",
         widget=forms.NumberInput(attrs={'class': 'form-control'})
-    )
-    college = forms.CharField(
-        max_length=100,
-        label="College/Department",
-        widget=forms.TextInput(attrs={'class': 'form-control', 'value': 'College of Sciences'})
     )
 
     class Meta:
@@ -80,6 +84,16 @@ class StudentRegistrationForm(UserCreationForm):
         if User.objects.filter(username=username).exists():
             raise ValidationError("This username is already taken.")
         return username
+
+    def clean(self):
+        cleaned_data = super().clean()
+        course = cleaned_data.get('course')
+        college = cleaned_data.get('college')
+        
+        if course and college and course.college != college:
+            raise ValidationError("The selected course does not belong to the selected college.")
+        
+        return cleaned_data
 
     @transaction.atomic
     def save(self, commit=True):
@@ -113,7 +127,48 @@ class StudentRegistrationForm(UserCreationForm):
                 academic_year=academic_year,
                 semester=semester
             )
+            # Create/update UserProfile with Officer Status Flag (False for students)
+            UserProfile.objects.get_or_create(
+                user=user,
+                defaults={'is_officer': False}
+            )
         return user
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+        # System is focused on College of Sciences only
+        colleges_qs = College.objects.filter(code="COS", is_active=True).order_by('name')
+        # Only show the 5 supported programs (filter by program_type to exclude 'OTHER')
+        courses_qs = Course.objects.filter(
+            college__code="COS", 
+            is_active=True,
+            program_type__in=['MEDICAL_BIOLOGY', 'MARINE_BIOLOGY', 'COMPUTER_SCIENCE', 'ENVIRONMENTAL_SCIENCE', 'INFORMATION_TECHNOLOGY']
+        ).select_related('college').order_by('name')
+
+        self.fields['college'].queryset = colleges_qs
+        self.fields['course'].queryset = courses_qs
+        self.fields['course'].label_from_instance = lambda obj: f"{obj.name}"
+
+        selected_college = None
+        if 'college' in self.data and self.data.get('college'):
+            selected_college = self.data.get('college')
+        elif self.initial.get('college'):
+            initial_college = self.initial.get('college')
+            if hasattr(initial_college, 'pk'):
+                selected_college = initial_college.pk
+            else:
+                selected_college = initial_college
+
+        if selected_college:
+            try:
+                selected_college_id = int(selected_college)
+                self.fields['course'].queryset = courses_qs.filter(college_id=selected_college_id)
+            except (ValueError, TypeError):
+                self.fields['course'].queryset = courses_qs
+
+        self.fields['college'].widget.attrs.setdefault('class', 'form-select')
+        self.fields['course'].widget.attrs.setdefault('class', 'form-select')
 
 class OfficerRegistrationForm(UserCreationForm):
     employee_id = forms.CharField(
@@ -181,6 +236,7 @@ class OfficerRegistrationForm(UserCreationForm):
         
         if commit:
             user.save()
+            # Create Officer profile
             Officer.objects.create(
                 user=user,
                 employee_id=self.cleaned_data['employee_id'],
@@ -190,6 +246,11 @@ class OfficerRegistrationForm(UserCreationForm):
                 phone_number=self.cleaned_data['phone_number'],
                 organization=self.cleaned_data['organization'],
                 role=self.cleaned_data['role']
+            )
+            # Create/update UserProfile with Officer Status Flag
+            UserProfile.objects.get_or_create(
+                user=user,
+                defaults={'is_officer': True}
             )
         return user
 
@@ -208,31 +269,19 @@ class StudentPaymentRequestForm(forms.ModelForm):
         self.student = kwargs.pop('student', None)
         super().__init__(*args, **kwargs)
         if self.student:
-            paid_fees = Payment.objects.filter(
-                student=self.student, status='COMPLETED'
-            ).values_list('fee_type_id', flat=True)
+            # Use two-tiered fee system: get applicable fees from Student model
+            applicable_fees = self.student.get_applicable_fees()
             
-            pending_requests = PaymentRequest.objects.filter(
-                student=self.student, status='PENDING'
-            ).values_list('fee_type_id', flat=True)
-            
-            self.fields['fee_type'].queryset = FeeType.objects.filter(
-                is_active=True,
-                academic_year=self.student.academic_year,
-                semester=self.student.semester
-            ).filter(
-                Q(applicable_year_levels__icontains=str(self.student.year_level)) |
-                Q(applicable_year_levels__iexact='All')
-            ).exclude(
-                id__in=list(paid_fees) + list(pending_requests)
-            ).distinct().select_related('organization').order_by('organization__name', 'name')
+            self.fields['fee_type'].queryset = applicable_fees.select_related('organization').order_by(
+                'organization__fee_tier', 'organization__name', 'name'
+            )
             
             self.fields['fee_type'].empty_label = "Select an available fee..."
         
         self.fields['fee_type'].label = "Select Fee to Pay"
         if self.fields['fee_type'].queryset.exists():
             self.fields['fee_type'].choices = [
-                (fee.id, f"{fee.organization.code} - {fee.name} (₱{fee.amount:.2f})") 
+                (fee.id, f"[{fee.organization.get_fee_tier_display()}] {fee.organization.code} - {fee.name} (₱{fee.amount:.2f})") 
                 for fee in self.fields['fee_type'].queryset
             ]
 
@@ -466,13 +515,15 @@ class OrganizationForm(forms.ModelForm):
     class Meta:
         model = Organization
         fields = [
-            'name', 'code', 'department', 'description',
-            'contact_email', 'contact_phone', 'booth_location'
+            'name', 'code', 'department', 'fee_tier', 'program_affiliation',
+            'description', 'contact_email', 'contact_phone', 'booth_location'
         ]
         widgets = {
             'name': forms.TextInput(attrs={'class': 'form-control'}),
             'code': forms.TextInput(attrs={'class': 'form-control'}),
             'department': forms.TextInput(attrs={'class': 'form-control'}),
+            'fee_tier': forms.Select(attrs={'class': 'form-select'}),
+            'program_affiliation': forms.Select(attrs={'class': 'form-select'}),
             'description': forms.Textarea(attrs={'class': 'form-control', 'rows': 3}),
             'contact_email': forms.EmailInput(attrs={'class': 'form-control'}),
             'contact_phone': forms.TextInput(attrs={'class': 'form-control'}),

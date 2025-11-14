@@ -1,0 +1,113 @@
+{% extends "base.html" %}
+
+{% block title %}{{ officer.get_full_name }}{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2><i class="fas fa-user-tie me-2"></i>{{ officer.employee_id }} - {{ officer.get_full_name }}</h2>
+    <div>
+        <a href="{% url 'officer_update' officer.pk %}" class="btn btn-warning"><i class="fas fa-edit me-2"></i>Edit</a>
+        <a href="{% url 'officer_list' %}" class="btn btn-secondary"><i class="fas fa-arrow-left me-2"></i>Back to List</a>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-6">
+        <div class="card shadow mb-4">
+            <div class="card-header card-header-admin">
+                <h4 class="mb-0">Officer Information</h4>
+            </div>
+            <div class="card-body">
+                <dl class="row">
+                    <dt class="col-sm-5">Employee ID:</dt>
+                    <dd class="col-sm-7"><strong>{{ officer.employee_id }}</strong></dd>
+                    
+                    <dt class="col-sm-5">Name:</dt>
+                    <dd class="col-sm-7">{{ officer.get_full_name }}</dd>
+                    
+                    <dt class="col-sm-5">Organization:</dt>
+                    <dd class="col-sm-7"><strong>{{ officer.organization.name }} ({{ officer.organization.code }})</strong></dd>
+                    
+                    <dt class="col-sm-5">Role:</dt>
+                    <dd class="col-sm-7">{{ officer.role }}</dd>
+                    
+                    <dt class="col-sm-5">Email:</dt>
+                    <dd class="col-sm-7">{{ officer.email }}</dd>
+                    
+                    <dt class="col-sm-5">Phone:</dt>
+                    <dd class="col-sm-7">{{ officer.phone_number }}</dd>
+                    
+                    <dt class="col-sm-5">Permissions:</dt>
+                    <dd class="col-sm-7">
+                        {% if officer.can_process_payments %}<span class="badge bg-success">Process Payments</span>{% endif %}
+                        {% if officer.can_void_payments %}<span class="badge bg-warning">Void Payments</span>{% endif %}
+                        {% if officer.can_generate_reports %}<span class="badge bg-info">Generate Reports</span>{% endif %}
+                    </dd>
+                </dl>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-6">
+        <div class="card shadow mb-4">
+            <div class="card-header card-header-admin">
+                <h4 class="mb-0">Recent Processed Payments</h4>
+            </div>
+            <div class="card-body">
+                {% if processed_payments %}
+                    <div class="list-group">
+                        {% for payment in processed_payments %}
+                        <div class="list-group-item">
+                            <div class="d-flex justify-content-between">
+                                <div>
+                                    <strong>OR#{{ payment.or_number }}</strong><br>
+                                    <small>{{ payment.student.student_id_number }} | ₱{{ payment.amount|floatformat:2 }}</small>
+                                </div>
+                                <span class="badge bg-success">{{ payment.status }}</span>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <p class="text-muted">No processed payments.</p>
+                {% endif %}
+            </div>
+        </div>
+        
+        {% if voided_payments %}
+        <div class="card shadow">
+            <div class="card-header card-header-admin">
+                <h4 class="mb-0">Voided Payments</h4>
+            </div>
+            <div class="card-body">
+                <div class="list-group">
+                    {% for payment in voided_payments %}
+                    <div class="list-group-item">
+                        <div class="d-flex justify-content-between">
+                            <div>
+                                <strong>OR#{{ payment.or_number }}</strong><br>
+                                <small>{{ payment.void_reason|truncatewords:10 }}</small>
+                            </div>
+                            <span class="badge bg-danger">VOID</span>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}
+
+
+
+
+
+
+
+
+
+
+
+

@@ -1,0 +1,137 @@
+{% extends "base.html" %}
+
+{% block title %}Process Payment - UniPay{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center py-5">
+    <div class="col-md-10">
+        <div class="card border-0 shadow-lg">
+            <div class="card-header bg-primary text-white">
+                <h4 class="mb-0 fw-bold"><i class="fas fa-cash-register me-2"></i>Process Payment</h4>
+            </div>
+            <div class="card-body p-4">
+                <div class="row">
+                    <div class="col-md-5 border-end pe-4">
+                        <h5 class="mb-3 fw-bold text-primary"><i class="fas fa-user-graduate me-2"></i>Student & Request</h5>
+                        <table class="table table-sm table-borderless">
+                            <tr>
+                                <th class="text-muted">Name:</th>
+                                <td class="fw-bold">{{ student.get_full_name }}</td>
+                            </tr>
+                            <tr>
+                                <th class="text-muted">Student ID:</th>
+                                <td>{{ student.student_id_number }}</td>
+                            </tr>
+                            <tr>
+                                <th class="text-muted">Course:</th>
+                                <td>{{ student.course }} (Yr {{ student.year_level }})</td>
+                            </tr>
+                            <tr>
+                                <th class="text-muted">Organization:</th>
+                                <td><span class="badge bg-secondary">{{ request.organization.code }}</span></td>
+                            </tr>
+                        </table>
+
+                        <hr>
+                        
+                        <h5 class="mb-3 fw-bold text-primary"><i class="fas fa-file-invoice-dollar me-2"></i>Amount Due</h5>
+                        <div class="alert alert-success text-center py-3">
+                            <p class="mb-1 text-muted small">{{ request.fee_type.name }}</p>
+                            <h2 class="mb-0 fw-bold text-success">₱{{ request.amount|floatformat:2 }}</h2>
+                        </div>
+                    </div>
+                    
+                    <div class="col-md-7 ps-4">
+                        <h5 class="mb-3 fw-bold text-primary"><i class="fas fa-money-check-alt me-2"></i>Payment Confirmation</h5>
+                        <form method="post" class="needs-validation" novalidate>
+                            {% csrf_token %}
+
+                            {% for hidden in form.hidden_fields %}{{ hidden }}{% endfor %}
+                            
+                            <div class="mb-3">
+                                <label class="form-label fw-bold">Official Receipt Number</label>
+                                <input type="text" class="form-control form-control-lg" value="{{ or_number }}" readonly>
+                                <small class="form-text text-muted">Auto-generated from QR code transaction ID</small>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label for="{{ form.payment_method.id_for_label }}" class="form-label fw-bold">
+                                    <i class="fas fa-credit-card me-2 text-primary"></i>{{ form.payment_method.label }}
+                                </label>
+                                {{ form.payment_method }}
+                                {% if form.payment_method.help_text %}
+                                    <small class="form-text text-muted">{{ form.payment_method.help_text }}</small>
+                                {% endif %}
+                                {% for error in form.payment_method.errors %}
+                                    <div class="text-danger small mt-1">
+                                        <i class="fas fa-exclamation-circle me-1"></i>{{ error }}
+                                    </div>
+                                {% endfor %}
+                            </div>
+
+                            <div class="mb-3">
+                                <label for="{{ form.amount_received.id_for_label }}" class="form-label fw-bold">Amount Received (₱)</label>
+                                {{ form.amount_received }}
+                                {% for error in form.amount_received.errors %}
+                                    <div class="text-danger small mt-1">
+                                        <i class="fas fa-exclamation-circle me-1"></i>{{ error }}
+                                    </div>
+                                {% endfor %}
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label class="form-label fw-bold">Change Due</label>
+                                <input type="text" class="form-control form-control-lg" id="change_display" 
+                                       value="₱0.00" readonly>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label for="{{ form.notes.id_for_label }}" class="form-label fw-bold">{{ form.notes.label }}</label>
+                                {{ form.notes }}
+                                {% for error in form.notes.errors %}
+                                    <div class="text-danger small mt-1">
+                                        <i class="fas fa-exclamation-circle me-1"></i>{{ error }}
+                                    </div>
+                                {% endfor %}
+                            </div>
+
+                            <div class="d-grid gap-2 mt-4">
+                                <button type="submit" class="btn btn-success btn-lg">
+                                    <i class="fas fa-check-circle me-2"></i>Confirm Payment & Issue Receipt
+                                </button>
+                                <a href="{% url 'officer_dashboard' %}" class="btn btn-outline-secondary">Cancel</a>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const amountReceivedInput = document.getElementById('id_amount_received');
+        const changeDisplay = document.getElementById('change_display');
+        const amountDue = parseFloat('{{ request.amount|unlocalize }}'); 
+        
+        function calculateChange() {
+            const cashReceived = parseFloat(amountReceivedInput.value) || 0;
+            const change = cashReceived - amountDue;
+            
+            if (cashReceived < amountDue) {
+                changeDisplay.value = '₱' + change.toFixed(2) + ' (Insufficient)';
+                changeDisplay.style.color = '#ef4444';
+            } else {
+                changeDisplay.value = '₱' + change.toFixed(2);
+                changeDisplay.style.color = '#10b981';
+            }
+        }
+        
+        if (amountReceivedInput) {
+            amountReceivedInput.addEventListener('input', calculateChange);
+            calculateChange();
+        }
+    });
+</script>
+{% endblock %}

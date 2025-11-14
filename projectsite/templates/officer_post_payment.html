@@ -1,0 +1,96 @@
+{% extends "base.html" %}
+
+{% block title %}Post Bulk Payment - UniPay{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center py-5">
+    <div class="col-md-10 col-lg-8">
+        <div class="card border-0 shadow-lg">
+            <div class="card-header bg-success text-white py-4">
+                <div class="d-flex align-items-center">
+                    <div class="bg-white bg-opacity-20 rounded-circle d-inline-flex align-items-center justify-content-center me-3" style="width: 50px; height: 50px;">
+                        <i class="fas fa-bullhorn fa-lg text-white"></i>
+                    </div>
+                    <div>
+                        <h3 class="mb-0 fw-bold">Post Payment to All Students</h3>
+                        <small class="opacity-75">Create payment requests for eligible students</small>
+                    </div>
+                </div>
+            </div>
+            <div class="card-body p-4">
+                <div class="alert alert-info shadow-sm mb-4">
+                    <i class="fas fa-info-circle me-2"></i>
+                    <strong>Info:</strong> This will create payment requests for <strong>ALL eligible students</strong> registered to 
+                    <strong>{{ organization.name }}</strong> who haven't paid this fee yet. Students will see these fees on their dashboard and can generate QR codes to pay.
+                </div>
+                
+                <form method="post">
+                    {% csrf_token %}
+                    
+                    {% if form.non_field_errors %}
+                        <div class="alert alert-danger shadow-sm mb-4">
+                            <i class="fas fa-exclamation-circle me-2"></i>
+                            {% for error in form.non_field_errors %}
+                                <p class="mb-0">{{ error }}</p>
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+                    
+                    <div class="row g-3 mb-4">
+                        <div class="col-md-6">
+                            <label for="{{ form.fee_type_name.id_for_label }}" class="form-label fw-semibold">
+                                <i class="fas fa-tag me-2 text-primary"></i>{{ form.fee_type_name.label }} <span class="text-danger">*</span>
+                            </label>
+                            {{ form.fee_type_name }}
+                            {% if form.fee_type_name.help_text %}
+                                <div class="form-text">{{ form.fee_type_name.help_text }}</div>
+                            {% endif %}
+                            {% for error in form.fee_type_name.errors %}
+                                <div class="text-danger small mt-1">
+                                    <i class="fas fa-exclamation-circle me-1"></i>{{ error }}
+                                </div>
+                            {% endfor %}
+                        </div>
+                        
+                        <div class="col-md-6">
+                            <label for="{{ form.fee_amount.id_for_label }}" class="form-label fw-semibold">
+                                <i class="fas fa-money-bill-wave me-2 text-success"></i>{{ form.fee_amount.label }} <span class="text-danger">*</span>
+                            </label>
+                            {{ form.fee_amount }}
+                            {% if form.fee_amount.help_text %}
+                                <div class="form-text">{{ form.fee_amount.help_text }}</div>
+                            {% endif %}
+                            {% for error in form.fee_amount.errors %}
+                                <div class="text-danger small mt-1">
+                                    <i class="fas fa-exclamation-circle me-1"></i>{{ error }}
+                                </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                    
+                    <div class="mb-4">
+                        <label for="{{ form.notes.id_for_label }}" class="form-label fw-semibold">
+                            <i class="fas fa-sticky-note me-2 text-info"></i>{{ form.notes.label }}
+                        </label>
+                        {{ form.notes }}
+                        {% for error in form.notes.errors %}
+                            <div class="text-danger small mt-1">
+                                <i class="fas fa-exclamation-circle me-1"></i>{{ error }}
+                            </div>
+                        {% endfor %}
+                    </div>
+                    
+                    <div class="d-grid gap-2 d-md-flex justify-content-md-end mt-4">
+                        <a href="{% url 'officer_dashboard' %}" class="btn btn-outline-secondary">
+                            <i class="fas fa-times me-2"></i>Cancel
+                        </a>
+                        <button type="submit" class="btn btn-success btn-lg shadow-lg">
+                            <i class="fas fa-bullhorn me-2"></i>Post Payment to All Students
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

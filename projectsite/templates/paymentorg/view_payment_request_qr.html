@@ -1,0 +1,168 @@
+{% extends 'base.html' %}
+
+{% block title %}Generate QR Code for Payment - UniPay{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-lg-10">
+        <div class="card border-0 shadow-lg mb-4">
+            <div class="card-header bg-primary text-white">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <h3 class="mb-1"><i class="fas fa-qrcode me-2"></i>Payment QR Code</h3>
+                        <p class="mb-0 opacity-75">Request ID: {{ payment_request.request_id|truncatechars:8 }}</p>
+                    </div>
+                    <span class="badge bg-white text-dark fs-6 px-3 py-2">{{ payment_request.get_status_display }}</span>
+                </div>
+            </div>
+            <div class="card-body p-4">
+                <div class="row">
+                    <!-- Left Column - Payment Details -->
+                    <div class="col-lg-5 border-end pe-4">
+                        <h5 class="mb-4 fw-bold text-primary"><i class="fas fa-info-circle me-2"></i>Payment Details</h5>
+                        <div class="table-responsive">
+                            <table class="table table-borderless">
+                                <tbody>
+                                    <tr>
+                                        <td class="fw-bold text-muted" style="width: 40%;">
+                                            <i class="fas fa-hashtag me-2 text-primary"></i>Request ID:
+                                        </td>
+                                        <td><code class="small text-muted">{{ payment_request.request_id }}</code></td>
+                                    </tr>
+                                    <tr>
+                                        <td class="fw-bold text-muted">
+                                            <i class="fas fa-building me-2 text-primary"></i>Organization:
+                                        </td>
+                                        <td>
+                                            <div class="d-flex align-items-center gap-2">
+                                                {% if payment_request.organization.get_logo_path %}
+                                                    <img src="{{ payment_request.organization.get_logo_path }}" alt="{{ payment_request.organization.name }} Logo" 
+                                                         class="img-fluid" style="max-height: 40px; max-width: 120px; object-fit: contain;">
+                                                {% endif %}
+                                                <div>
+                                                    <strong>{{ payment_request.organization.name }}</strong>
+                                                    <span class="text-muted">({{ payment_request.organization.code }})</span>
+                                                </div>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td class="fw-bold text-muted">
+                                            <i class="fas fa-tag me-2 text-primary"></i>Fee Type:
+                                        </td>
+                                        <td><strong>{{ payment_request.fee_type.name }}</strong></td>
+                                    </tr>
+                                    <tr>
+                                        <td class="fw-bold text-muted">
+                                            <i class="fas fa-money-bill-wave me-2 text-primary"></i>Amount:
+                                        </td>
+                                        <td>
+                                            <span class="fs-4 fw-bold text-success">₱{{ payment_request.amount|floatformat:2 }}</span>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td class="fw-bold text-muted">
+                                            <i class="fas fa-clock me-2 text-primary"></i>Expires:
+                                        </td>
+                                        <td>
+                                            <span class="text-muted">{{ payment_request.expires_at|date:"M d, Y h:i A" }}</span>
+                                            <span class="badge bg-warning text-dark ms-2">
+                                                {{ payment_request.expires_at|timesince }} remaining
+                                            </span>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                    
+                    <!-- Right Column - QR Code -->
+                    <div class="col-lg-7 ps-4">
+                        <h5 class="mb-4 text-center fw-bold text-primary"><i class="fas fa-qrcode me-2"></i>QR Code</h5>
+                        <div class="bg-light rounded-3 mb-3 text-center p-5" style="min-height: 350px; display: flex; align-items: center; justify-content: center; border: 2px dashed var(--border-medium);">
+                            <div id="qrcode" style="display: inline-block; position: relative;"></div>
+                        </div>
+                        <div class="alert alert-info mb-0 text-center">
+                            <i class="fas fa-info-circle me-2"></i>
+                            <strong>Show this QR code</strong> to the payment officer at the <strong>{{ payment_request.organization.code }}</strong> booth.
+                        </div>
+                    </div>
+                </div>
+                
+                <hr class="my-4">
+                
+                <!-- Instructions -->
+                <div class="card border mb-4">
+                    <div class="card-body">
+                        <h6 class="mb-3 fw-bold text-primary"><i class="fas fa-list-ol me-2"></i>Payment Instructions:</h6>
+                        <ol class="mb-0">
+                            <li class="mb-2">Go to the <strong>{{ payment_request.organization.code }}</strong> payment booth</li>
+                            <li class="mb-2">Show this QR code to the payment officer</li>
+                            <li class="mb-2">Pay the amount of <strong>₱{{ payment_request.amount|floatformat:2 }}</strong></li>
+                            <li class="mb-2">The officer will select your payment method (Cash, GCash, or Bank Transfer)</li>
+                            <li>Wait for confirmation and receipt via email</li>
+                        </ol>
+                    </div>
+                </div>
+
+                <!-- Actions -->
+                <div class="d-grid gap-2 d-md-flex justify-content-md-between">
+                    <a href="{% url 'payment_request_detail' request_id=payment_request.request_id %}" class="btn btn-outline-secondary">
+                        <i class="fas fa-arrow-left me-2"></i>Back to Details
+                    </a>
+                    <div>
+                        <button onclick="window.print()" class="btn btn-primary me-2">
+                            <i class="fas fa-print me-2"></i>Print QR Code
+                        </button>
+                        <a href="{% url 'student_dashboard' %}" class="btn btn-outline-primary">
+                            <i class="fas fa-home me-2"></i>Dashboard
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+@media print {
+    .btn, .alert, hr { display: none !important; }
+    .card { border: none !important; box-shadow: none !important; }
+}
+</style>
+
+<script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        function renderQRCode() {
+            if (typeof QRCode === 'undefined') {
+                return false;
+            }
+            var qrContainer = document.getElementById('qrcode');
+            if (!qrContainer) {
+                return false;
+            }
+            qrContainer.innerHTML = '';
+            new QRCode(qrContainer, {
+                text: "{{ qr_data }}",
+                width: 256,
+                height: 256,
+                colorDark: '#000000',
+                colorLight: '#ffffff',
+                correctLevel: QRCode.CorrectLevel.H
+            });
+            return true;
+        }
+
+        if (!renderQRCode()) {
+            var fallback = document.createElement('script');
+            fallback.src = 'https://unpkg.com/qrcodejs@1.0.0/qrcode.min.js';
+            fallback.onload = renderQRCode;
+            fallback.onerror = function () {
+                document.getElementById('qrcode').innerHTML = '<div class="alert alert-danger">Failed to load QR code library. Please refresh.</div>';
+            };
+            document.head.appendChild(fallback);
+        }
+    });
+</script>
+{% endblock %}

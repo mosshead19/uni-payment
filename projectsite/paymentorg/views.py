@@ -15,12 +15,14 @@ from django.conf import settings
 from decimal import Decimal
 from django.db.models import Sum, Q
 import logging
+import json
 
 logger = logging.getLogger(__name__)
 
 from .models import (
     Student, Officer, Organization, FeeType,
-    PaymentRequest, Payment, Receipt, ActivityLog, AcademicYearConfig
+    PaymentRequest, Payment, Receipt, ActivityLog, AcademicYearConfig,
+    Course, College, UserProfile
 )
 from .forms import (
     StudentPaymentRequestForm, OfficerPaymentProcessForm, OrganizationForm, 
@@ -50,15 +52,6 @@ def validate_signature(message_string, provided_signature):
     expected_signature = create_signature(message_string)
     return hmac.compare_digest(expected_signature, provided_signature)
 
-def generate_queue_number(organization):
-    today = timezone.now().date()
-    count = PaymentRequest.objects.filter(
-        organization=organization,
-        created_at__date=today
-    ).count()
-    prefix = organization.code[:3].upper()
-    return f"{prefix}-{count + 1:03d}"
-
 # authentication views
 class CustomLoginView(LoginView):
     template_name = 'registration/login.html'
@@ -66,12 +59,29 @@ class CustomLoginView(LoginView):
     def get_success_url(self):
         user = self.request.user
         
-        if hasattr(user, 'student_profile'):
-            return reverse_lazy('student_dashboard')
+        # Unified login system: Check Officer Status Flag
+        is_officer = False
+        if hasattr(user, 'user_profile'):
+            is_officer = user.user_profile.is_officer
         elif hasattr(user, 'officer_profile'):
+            is_officer = True
+            # Sync UserProfile if it doesn't exist
+            if not hasattr(user, 'user_profile'):
+                UserProfile.objects.get_or_create(
+                    user=user,
+                    defaults={'is_officer': True}
+                )
+        
+        if is_officer or user.is_superuser:
             return reverse_lazy('officer_dashboard')
-        elif user.is_superuser:
-            return reverse_lazy('officer_dashboard') 
+        elif hasattr(user, 'student_profile'):
+            # Ensure UserProfile exists for students
+            if not hasattr(user, 'user_profile'):
+                UserProfile.objects.get_or_create(
+                    user=user,
+                    defaults={'is_officer': False}
+                )
+            return reverse_lazy('student_dashboard')
         elif user.is_staff:
             return '/admin/'
         else:
@@ -101,10 +111,46 @@ class StudentRegistrationView(CreateView):
                 messages.error(self.request, f"{field}: {error}")
         return super().form_invalid(form) 
 
-class OfficerRegistrationView(CreateView):
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+
+        # System is focused on College of Sciences only
+        courses = Course.objects.filter(
+            college__code="COS", 
+            is_active=True,
+            program_type__in=['MEDICAL_BIOLOGY', 'MARINE_BIOLOGY', 'COMPUTER_SCIENCE', 'ENVIRONMENTAL_SCIENCE', 'INFORMATION_TECHNOLOGY']
+        ).select_related('college').order_by('name')
+        course_payload = [
+            {
+                'id': course.id,
+                'label': course.name,
+                'college_id': course.college_id,
+                'program_type': course.program_type,
+            }
+            for course in courses
+        ]
+
+        selected_course = self.request.POST.get('course') or self.request.GET.get('course') or ''
+        selected_college = self.request.POST.get('college') or self.request.GET.get('college') or ''
+
+        context.update({
+            'course_options_json': json.dumps(course_payload),
+            'selected_course_id': selected_course,
+            'selected_college_id': selected_college,
+        })
+        return context
+
+class OfficerRegistrationView(LoginRequiredMixin, UserPassesTestMixin, CreateView):
     form_class = OfficerRegistrationForm
     template_name = 'registration/officer_register.html'
     success_url = reverse_lazy('login')
+    
+    def test_func(self):
+        return self.request.user.is_staff
+    
+    def handle_no_permission(self):
+        messages.error(self.request, "Administrator access required.")
+        return redirect('login')
     
     def form_valid(self, form):
         user = form.save()
@@ -129,7 +175,13 @@ class StudentRequiredMixin(LoginRequiredMixin, UserPassesTestMixin):
 class OfficerRequiredMixin(LoginRequiredMixin, UserPassesTestMixin):
     def test_func(self):
         user = self.request.user
-        return hasattr(user, 'officer_profile') or user.is_superuser
+        # Unified login: Check Officer Status Flag
+        is_officer = False
+        if hasattr(user, 'user_profile'):
+            is_officer = user.user_profile.is_officer
+        elif hasattr(user, 'officer_profile'):
+            is_officer = True
+        return is_officer or user.is_superuser
     
     def handle_no_permission(self):
         messages.error(self.request, "Officer or Superuser privilege required.")
@@ -169,9 +221,16 @@ class StudentDashboardView(StudentRequiredMixin, TemplateView):
         
         pending_payments = student.payment_requests.filter(status='PENDING').order_by('-created_at')
         
+        # Calculate statistics
         completed_payments = student.get_completed_payments()
         total_paid = completed_payments.aggregate(Sum('amount'))['amount__sum'] or 0
         payments_count = completed_payments.count()
+        
+        # Two-tiered fee system: Get applicable fees
+        applicable_fees = student.get_applicable_fees()
+        tier1_fees = student.get_tier1_fees()
+        tier2_fees = student.get_tier2_fees()
+        total_outstanding = student.get_total_outstanding_fees()
         
         context.update({
             'student': student,
@@ -179,6 +238,10 @@ class StudentDashboardView(StudentRequiredMixin, TemplateView):
             'completed_payments': completed_payments.order_by('-created_at')[:5],
             'total_paid': total_paid,
             'payments_count': payments_count,
+            'applicable_fees': applicable_fees,
+            'tier1_fees': tier1_fees,
+            'tier2_fees': tier2_fees,
+            'total_outstanding': total_outstanding,
         })
         return context
 
@@ -215,8 +278,26 @@ class GenerateQRPaymentView(StudentRequiredMixin, CreateView):
     
     def get_form_kwargs(self):
         kwargs = super().get_form_kwargs()
-        kwargs['student'] = self.request.user.student_profile
+        student = self.request.user.student_profile
+        kwargs['student'] = student
+        # Use two-tiered fee system: only show applicable fees
         return kwargs
+    
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        student = self.request.user.student_profile
+        applicable_fees = student.get_applicable_fees()
+        fee_org_map = {
+            fee.id: {
+                'org_name': fee.organization.name,
+                'org_code': fee.organization.code,
+                'org_logo': fee.organization.get_logo_path(),
+            }
+            for fee in applicable_fees
+        }
+        import json
+        context['fee_org_map_json'] = json.dumps(fee_org_map)
+        return context
     
     @transaction.atomic
     def form_valid(self, form):
@@ -227,14 +308,11 @@ class GenerateQRPaymentView(StudentRequiredMixin, CreateView):
            Payment.objects.filter(student=student, fee_type=fee_type, status='COMPLETED').exists():
             messages.error(self.request, "You already have a pending or completed payment for this fee.")
             return redirect('student_dashboard')
-            
-        queue_number = generate_queue_number(fee_type.organization)
         
         payment_request = form.save(commit=False)
         payment_request.student = student
         payment_request.organization = fee_type.organization
         payment_request.amount = fee_type.amount
-        payment_request.queue_number = queue_number
         payment_request.payment_method = 'CASH'  # default payment method(for now)
         payment_request.expires_at = timezone.now() + timedelta(minutes=15)
         payment_request.qr_signature = create_signature(payment_request.request_id)
@@ -243,14 +321,14 @@ class GenerateQRPaymentView(StudentRequiredMixin, CreateView):
         ActivityLog.objects.create(
             user=self.request.user,
             action='qr_generated',
-            description=f'Student {student.student_id_number} generated QR for {fee_type.name} - {queue_number}',
+            description=f'Student {student.student_id_number} generated QR for {fee_type.name}',
             payment_request=payment_request,
             ip_address=self.request.META.get('REMOTE_ADDR')
         )
         
         messages.success(
             self.request, 
-            f'QR code generated! Queue: {queue_number} at {fee_type.organization.code} booth.'
+            f'QR code generated! Present this at the {fee_type.organization.code} booth.'
         )
         return redirect('show_payment_qr', request_id=payment_request.request_id)
 
@@ -354,8 +432,8 @@ class OfficerDashboardView(OfficerRequiredMixin, TemplateView):
         context = super().get_context_data(**kwargs)
         user = self.request.user
         
-        if user.is_superuser and not hasattr(user, 'officer_profile'):
-            messages.info(self.request, "Superuser: Not assigned to an organization. Displaying system stats.")
+        if user.is_superuser:
+            messages.info(self.request, "Superuser: Displaying system-wide statistics.")
             
             context.update({
                 'is_superuser_only': True,
@@ -524,16 +602,46 @@ class OfficerScanQRView(OfficerRequiredMixin, TemplateView):
     # scan qr codes
     template_name = 'officer_scan_qr.html'
 
+class AdminOrganizationDashboardView(StaffRequiredMixin, TemplateView):
+    template_name = 'admin_org_dashboard.html'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        code = self.kwargs.get('code')
+        organization = get_object_or_404(Organization, code=code)
+        today = timezone.now().date()
+
+        pending_requests = PaymentRequest.objects.filter(
+            organization=organization,
+            status='PENDING',
+            expires_at__gt=timezone.now()
+        ).order_by('created_at')[:10]
+
+        context.update({
+            'organization': organization,
+            'today_collections': organization.get_today_collection(),
+            'total_collected': organization.get_total_collected(),
+            'pending_requests': pending_requests,
+            'recent_payments': Payment.objects.filter(
+                organization=organization,
+                status='COMPLETED',
+                is_void=False,
+                created_at__date=today
+            ).order_by('-created_at')[:5],
+        })
+        return context
+
 class PostBulkPaymentView(OfficerRequiredMixin, View):
     # post payments in bulk
     template_name = 'officer_post_payment.html'
     
     def get_organization(self):
         user = self.request.user
-        if user.is_superuser:
-            return None  # Superuser can post payments for any organization
-        elif hasattr(user, 'officer_profile'):
+        if hasattr(user, 'officer_profile'):
             return user.officer_profile.organization
+        # fallback for superuser without officer profile: use first organization
+        if user.is_superuser:
+            return Organization.objects.first()
         return None
     
     def get(self, request):
@@ -591,13 +699,16 @@ class PostBulkPaymentView(OfficerRequiredMixin, View):
                 fee_type.amount = fee_amount
                 fee_type.save()
             
-            # get all students registered to this organization
+            # get all students belonging to this organization by matching course/college
             students = Student.objects.filter(
-                college=organization.department  # Students in same department/college
+                Q(course__code__iexact=organization.code) |
+                Q(course__name__iexact=organization.name) |
+                Q(college__name__iexact=organization.department) |
+                Q(college__code__iexact=organization.code)
             ).filter(
                 academic_year=academic_year,
                 semester=semester
-            )
+            ).distinct()
             
             # exclude students who already paid this fee
             paid_students = Payment.objects.filter(
@@ -615,7 +726,7 @@ class PostBulkPaymentView(OfficerRequiredMixin, View):
             students = students.exclude(id__in=list(paid_students) + list(pending_requests))
             
             if not students.exists():
-                messages.warning(request, "No eligible students found for this fee type.")
+                messages.warning(request, "No eligible students found in your organization for this fee type.")
                 context = {'form': form, 'organization': organization}
                 return render(request, self.template_name, context)
             
@@ -625,16 +736,12 @@ class PostBulkPaymentView(OfficerRequiredMixin, View):
             # create paymentrequest objects for each student
             for student in students:
                 try:
-                    # generate queue number
-                    queue_number = generate_queue_number(organization)
-                    
                     # create paymentrequest with unique request_id
                     payment_request = PaymentRequest.objects.create(
                         student=student,
                         organization=organization,
                         fee_type=fee_type,
                         amount=fee_amount,
-                        queue_number=queue_number,
                         payment_method='CASH',  # Default, student will select when generating QR
                         status='PENDING',
                         expires_at=timezone.now() + timedelta(days=30),  # Give students 30 days to pay

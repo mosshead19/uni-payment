@@ -7,7 +7,7 @@ from django.contrib.auth.models import User
 from .models import (
     Student, Officer, Organization, FeeType,
     PaymentRequest, Payment, Receipt,
-    ActivityLog, AcademicYearConfig
+    ActivityLog, AcademicYearConfig, Course, College, UserProfile
 )
 
 # custom user admin to show profiles
@@ -31,6 +31,31 @@ except admin.sites.NotRegistered:
     pass
 admin.site.register(User, CustomUserAdmin)
 
+
+@admin.register(UserProfile)
+class UserProfileAdmin(admin.ModelAdmin):
+    list_display = ('user', 'is_officer', 'is_active', 'created_at')
+    list_display_links = ('user',)
+    list_filter = ('is_officer', 'is_active')
+    search_fields = ('user__username', 'user__email')
+    list_editable = ('is_officer', 'is_active')
+    raw_id_fields = ('user',)
+
+@admin.register(College)
+class CollegeAdmin(admin.ModelAdmin):
+    list_display = ('name', 'code', 'is_active', 'created_at')
+    list_display_links = ('name',)
+    list_filter = ('is_active',)
+    search_fields = ('name', 'code')
+    list_editable = ('is_active',)
+
+@admin.register(Course)
+class CourseAdmin(admin.ModelAdmin):
+    list_display = ('name', 'code', 'college', 'program_type', 'is_active', 'created_at')
+    list_display_links = ('name',)
+    list_filter = ('college', 'program_type', 'is_active')
+    search_fields = ('name', 'code', 'college__name')
+    list_editable = ('is_active',)
 
 @admin.register(Student)
 class StudentAdmin(admin.ModelAdmin):
@@ -92,15 +117,32 @@ class OfficerAdmin(admin.ModelAdmin):
 @admin.register(Organization)
 class OrganizationAdmin(admin.ModelAdmin):
     list_display = (
-        'name', 'code', 'department', 'active_fees_count_display',
-        'total_collected_display', 'today_collection_display', 'pending_requests_display', 'is_active'
+        'name', 'code', 'fee_tier', 'program_affiliation', 'department', 
+        'active_fees_count_display', 'total_collected_display', 
+        'today_collection_display', 'pending_requests_display', 'is_active'
     )
     list_display_links = ('name', 'code')
     search_fields = ('name', 'code', 'department')
-    list_filter = ('department', 'is_active')
+    list_filter = ('fee_tier', 'program_affiliation', 'department', 'is_active')
     list_editable = ('is_active',)
     list_per_page = 50
     readonly_fields = ('created_at', 'updated_at')
+    fieldsets = (
+        (None, {
+            'fields': ('name', 'code', 'is_active')
+        }),
+        ('Two-Tiered Fee System', {
+            'fields': ('fee_tier', 'program_affiliation'),
+            'description': 'Tier 1: Program-specific fees. Tier 2: College-wide mandatory fees.'
+        }),
+        ('Organization Details', {
+            'fields': ('department', 'description', 'contact_email', 'contact_phone', 'booth_location')
+        }),
+        ('Timestamps', {
+            'fields': ('created_at', 'updated_at'),
+            'classes': ('collapse',)
+        }),
+    )
     
     def active_fees_count_display(self, obj):
         return obj.get_active_fees_count()
@@ -144,16 +186,16 @@ class FeeTypeAdmin(admin.ModelAdmin):
 @admin.register(PaymentRequest)
 class PaymentRequestAdmin(admin.ModelAdmin):
     list_display = (
-        'queue_number', 'student_info', 'organization', 'fee_type',
+        'request_id', 'student_info', 'organization', 'fee_type',
         'amount', 'status_display', 'created_at', 'expires_at', 'is_expired_display'
     )
-    list_display_links = ('queue_number',)
+    list_display_links = ('request_id',)
     list_filter = ('status', 'organization', 'created_at', 'is_active')
-    search_fields = ('queue_number', 'student__student_id_number', 'student__last_name', 'organization__code')
+    search_fields = ('request_id', 'student__student_id_number', 'student__last_name', 'organization__code')
     readonly_fields = (
         'request_id', 'student', 'organization', 'fee_type',
         'qr_signature', 'created_at', 'updated_at', 'expires_at', 'paid_at',
-        'amount', 'queue_number', 'status'
+        'amount', 'status'
     )
     list_per_page = 50
     actions = ['mark_as_cancelled_action', 'mark_as_expired_action']

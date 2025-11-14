@@ -1,0 +1,95 @@
+{% extends "base.html" %}
+
+{% block title %}Payment Request {{ request.request_id|truncatechars:8 }}{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2><i class="fas fa-qrcode me-2"></i>Payment Request: {{ request.request_id|truncatechars:12 }}</h2>
+    <a href="{% url 'paymentrequest_list' %}" class="btn btn-secondary"><i class="fas fa-arrow-left me-2"></i>Back to List</a>
+</div>
+
+<div class="row">
+    <div class="col-md-8">
+        <div class="card shadow mb-4">
+            <div class="card-header card-header-admin">
+                <h4 class="mb-0">Request Details</h4>
+            </div>
+            <div class="card-body">
+                <dl class="row">
+                    <dt class="col-sm-4">Request ID:</dt>
+                    <dd class="col-sm-8"><code>{{ request.request_id }}</code></dd>
+                    
+                    <dt class="col-sm-4">Student:</dt>
+                    <dd class="col-sm-8">{{ request.student.student_id_number }} - {{ request.student.get_full_name }}</dd>
+                    
+                    <dt class="col-sm-4">Organization:</dt>
+                    <dd class="col-sm-8">{{ request.organization.name }} ({{ request.organization.code }})</dd>
+                    
+                    <dt class="col-sm-4">Fee Type:</dt>
+                    <dd class="col-sm-8">{{ request.fee_type.name }}</dd>
+                    
+                    <dt class="col-sm-4">Amount:</dt>
+                    <dd class="col-sm-8"><strong class="text-success">₱{{ request.amount|floatformat:2 }}</strong></dd>
+                    
+                    <dt class="col-sm-4">Status:</dt>
+                    <dd class="col-sm-8">
+                        {% if request.status == 'PENDING' %}
+                            <span class="badge bg-warning">{{ request.status }}</span>
+                        {% elif request.status == 'PAID' %}
+                            <span class="badge bg-success">{{ request.status }}</span>
+                        {% elif request.status == 'EXPIRED' %}
+                            <span class="badge bg-danger">{{ request.status }}</span>
+                        {% else %}
+                            <span class="badge bg-secondary">{{ request.status }}</span>
+                        {% endif %}
+                    </dd>
+                    
+                    <dt class="col-sm-4">Created At:</dt>
+                    <dd class="col-sm-8">{{ request.created_at|date:"F d, Y H:i:s" }}</dd>
+                    
+                    <dt class="col-sm-4">Expires At:</dt>
+                    <dd class="col-sm-8">
+                        {{ request.expires_at|date:"F d, Y H:i:s" }}
+                        {% if request.is_expired %}
+                            <span class="badge bg-danger ms-2">Expired</span>
+                        {% else %}
+                            <span class="badge bg-info ms-2">{{ request.get_time_remaining }} remaining</span>
+                        {% endif %}
+                    </dd>
+                    
+                    {% if request.paid_at %}
+                    <dt class="col-sm-4">Paid At:</dt>
+                    <dd class="col-sm-8">{{ request.paid_at|date:"F d, Y H:i:s" }}</dd>
+                    {% endif %}
+                </dl>
+            </div>
+        </div>
+        
+        {% if request.status == 'PAID' and request.payment %}
+        <div class="card shadow">
+            <div class="card-header card-header-admin">
+                <h4 class="mb-0">Payment Information</h4>
+            </div>
+            <div class="card-body">
+                <p><strong>OR Number:</strong> {{ request.payment.or_number }}</p>
+                <p><strong>Processed By:</strong> {{ request.payment.processed_by.get_full_name|default:"N/A" }}</p>
+                <p><strong>Payment Method:</strong> {{ request.payment.get_payment_method_display }}</p>
+                <a href="{% url 'payment_detail' request.payment.pk %}" class="btn btn-primary">View Payment Details</a>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}
+
+
+
+
+
+
+
+
+
+
+
+

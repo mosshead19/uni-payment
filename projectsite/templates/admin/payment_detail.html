@@ -1,0 +1,109 @@
+{% extends "base.html" %}
+
+{% block title %}Payment OR#{{ payment.or_number }}{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2><i class="fas fa-money-bill-wave me-2"></i>Payment: OR#{{ payment.or_number }}</h2>
+    <div>
+        {% if not payment.is_void %}
+            <a href="{% url 'officer_void_payment' payment.pk %}" class="btn btn-danger"><i class="fas fa-ban me-2"></i>Void Payment</a>
+        {% endif %}
+        <a href="{% url 'payment_list' %}" class="btn btn-secondary"><i class="fas fa-arrow-left me-2"></i>Back to List</a>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-8">
+        <div class="card shadow mb-4">
+            <div class="card-header {% if payment.is_void %}bg-danger{% else %}card-header-admin{% endif %}">
+                <h4 class="mb-0">Payment Details</h4>
+            </div>
+            <div class="card-body">
+                <dl class="row">
+                    <dt class="col-sm-4">OR Number:</dt>
+                    <dd class="col-sm-8"><strong>{{ payment.or_number }}</strong></dd>
+                    
+                    <dt class="col-sm-4">Student:</dt>
+                    <dd class="col-sm-8">{{ payment.student.student_id_number }} - {{ payment.student.get_full_name }}</dd>
+                    
+                    <dt class="col-sm-4">Organization:</dt>
+                    <dd class="col-sm-8">{{ payment.organization.name }} ({{ payment.organization.code }})</dd>
+                    
+                    <dt class="col-sm-4">Fee Type:</dt>
+                    <dd class="col-sm-8">{{ payment.fee_type.name }}</dd>
+                    
+                    <dt class="col-sm-4">Amount:</dt>
+                    <dd class="col-sm-8"><strong class="text-success">₱{{ payment.amount|floatformat:2 }}</strong></dd>
+                    
+                    <dt class="col-sm-4">Amount Received:</dt>
+                    <dd class="col-sm-8">₱{{ payment.amount_received|floatformat:2 }}</dd>
+                    
+                    <dt class="col-sm-4">Change Given:</dt>
+                    <dd class="col-sm-8">₱{{ payment.change_given|floatformat:2 }}</dd>
+                    
+                    <dt class="col-sm-4">Payment Method:</dt>
+                    <dd class="col-sm-8">{{ payment.get_payment_method_display }}</dd>
+                    
+                    <dt class="col-sm-4">Status:</dt>
+                    <dd class="col-sm-8">
+                        {% if payment.is_void %}
+                            <span class="badge bg-danger">VOID</span>
+                        {% else %}
+                            <span class="badge bg-success">{{ payment.status }}</span>
+                        {% endif %}
+                    </dd>
+                    
+                    <dt class="col-sm-4">Processed By:</dt>
+                    <dd class="col-sm-8">{{ payment.processed_by.get_full_name|default:"N/A" }}</dd>
+                    
+                    <dt class="col-sm-4">Created At:</dt>
+                    <dd class="col-sm-8">{{ payment.created_at|date:"F d, Y H:i:s" }}</dd>
+                    
+                    {% if payment.is_void %}
+                    <dt class="col-sm-4">Voided By:</dt>
+                    <dd class="col-sm-8">{{ payment.voided_by.get_full_name|default:"N/A" }}</dd>
+                    
+                    <dt class="col-sm-4">Voided At:</dt>
+                    <dd class="col-sm-8">{{ payment.voided_at|date:"F d, Y H:i:s" }}</dd>
+                    
+                    <dt class="col-sm-4">Void Reason:</dt>
+                    <dd class="col-sm-8">{{ payment.void_reason }}</dd>
+                    {% endif %}
+                    
+                    {% if payment.notes %}
+                    <dt class="col-sm-4">Notes:</dt>
+                    <dd class="col-sm-8">{{ payment.notes }}</dd>
+                    {% endif %}
+                </dl>
+            </div>
+        </div>
+        
+        {% if payment.receipt %}
+        <div class="card shadow">
+            <div class="card-header card-header-admin">
+                <h4 class="mb-0">Receipt</h4>
+            </div>
+            <div class="card-body">
+                <p><strong>Receipt OR Number:</strong> {{ payment.receipt.or_number }}</p>
+                <p><strong>Email Sent:</strong> {% if payment.receipt.email_sent %}<span class="badge bg-success">Yes</span>{% else %}<span class="badge bg-secondary">No</span>{% endif %}</p>
+                
+                <a href="{% url 'receipt_detail' payment.receipt.pk %}" class="btn btn-primary">View Receipt</a>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}
+
+
+
+
+
+
+
+
+
+
+
+

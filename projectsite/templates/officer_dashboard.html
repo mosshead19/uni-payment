@@ -1,0 +1,256 @@
+{% extends "base.html" %}
+
+{% block title %}Officer Dashboard - UniPay{% endblock %}
+
+{% block content %}
+<!-- Welcome Header -->
+<div class="card border-0 shadow-lg mb-4">
+    <div class="card-header bg-primary text-white">
+        <div class="row align-items-center">
+            <div class="col-md-8">
+                {% if is_superuser_only %}
+                    <h2 class="mb-2 fw-bold">
+                        <i class="fas fa-user-shield me-2"></i>Superuser Panel
+                    </h2>
+                    <p class="mb-0 opacity-75">Global Access - System-wide Financial Overview</p>
+                {% else %}
+                    <h2 class="mb-2 fw-bold">
+                        <i class="fas fa-cash-register me-2"></i>{{ officer.get_full_name }}'s Panel
+                    </h2>
+                    <p class="mb-0 opacity-75">
+                        <i class="fas fa-building me-2"></i>{{ organization.name }} ({{ organization.code }})
+                        <span class="ms-3"><i class="fas fa-user-tag me-2"></i>{{ officer.role }}</span>
+                    </p>
+                {% endif %}
+            </div>
+            <div class="col-md-4 text-end">
+                {% if not is_superuser_only and organization.get_logo_path %}
+                    <img src="{{ organization.get_logo_path }}" alt="{{ organization.name }} Logo" 
+                         class="img-fluid" style="max-height: 80px; max-width: 200px; object-fit: contain;">
+                {% else %}
+                    <div class="bg-white bg-opacity-20 rounded-circle d-inline-flex align-items-center justify-content-center" style="width: 80px; height: 80px;">
+                        <i class="fas fa-user-cog fa-3x text-white"></i>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Statistics Cards -->
+<div class="row g-4 mb-4">
+    <div class="col-md-4">
+        <div class="card stat-card border-0 shadow">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-start">
+                    <div class="flex-grow-1">
+                        <p class="text-muted small text-uppercase fw-bold mb-2">
+                            {% if is_superuser_only %}Total System Collection{% else %}Today's Net Collection{% endif %}
+                        </p>
+                        <h2 class="mb-0 fw-bold text-success">
+                            ₱{% if is_superuser_only %}{{ total_collected_system|floatformat:2 }}{% else %}{{ today_collections|floatformat:2 }}{% endif %}
+                        </h2>
+                    </div>
+                    <div class="bg-success bg-opacity-10 rounded-circle p-3">
+                        <i class="fas fa-money-bill-wave fa-2x text-success"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-4">
+        <div class="card stat-card border-0 shadow">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-start">
+                    <div class="flex-grow-1">
+                        <p class="text-muted small text-uppercase fw-bold mb-2">Active Pending Requests</p>
+                        <h2 class="mb-0 fw-bold text-warning">{{ pending_requests|length }}</h2>
+                        <small class="text-muted">
+                            {% if is_superuser_only %}System-wide queue{% else %}Queue for {{ organization.code }}{% endif %}
+                        </small>
+                    </div>
+                    <div class="bg-warning bg-opacity-10 rounded-circle p-3">
+                        <i class="fas fa-clock fa-2x text-warning"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-4">
+        <div class="card stat-card border-0 shadow">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-start">
+                    <div class="flex-grow-1">
+                        <p class="text-muted small text-uppercase fw-bold mb-2">Permissions</p>
+                        <h5 class="mb-2">
+                            {% if officer and officer.can_process_payments or is_superuser_only %}
+                                <span class="badge bg-success fs-6"><i class="fas fa-check-circle me-1"></i>Processor</span>
+                            {% else %}
+                                <span class="badge bg-secondary fs-6"><i class="fas fa-times-circle me-1"></i>Auditor</span>
+                            {% endif %}
+                        </h5>
+                        {% if officer and officer.can_void_payments or is_superuser_only %}
+                            <span class="badge bg-danger"><i class="fas fa-shield-alt me-1"></i>Void Authorized</span>
+                        {% else %}
+                            <span class="badge bg-secondary"><i class="fas fa-lock me-1"></i>Void Restricted</span>
+                        {% endif %}
+                    </div>
+                    <div class="bg-primary bg-opacity-10 rounded-circle p-3">
+                        <i class="fas fa-user-shield fa-2x text-primary"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Quick Actions -->
+<div class="row g-4 mb-4">
+    <div class="col-md-6">
+        <div class="card border-0 shadow">
+            <div class="card-header bg-primary text-white">
+                <h5 class="mb-0 fw-bold">
+                    <i class="fas fa-qrcode me-2"></i>QR Code Scanner
+                </h5>
+            </div>
+            <div class="card-body text-center p-4">
+                <div class="bg-primary bg-opacity-10 rounded-circle d-inline-flex align-items-center justify-content-center mb-3" style="width: 100px; height: 100px;">
+                    <i class="fas fa-camera fa-4x text-primary"></i>
+                </div>
+                <p class="text-muted mb-4">Scan student QR code to process payment instantly</p>
+                <a href="{% url 'officer_scan_qr' %}" class="btn btn-primary btn-lg w-100">
+                    <i class="fas fa-qrcode me-2"></i>Open QR Scanner
+                </a>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-6">
+        <div class="card border-0 shadow">
+            <div class="card-header bg-success text-white">
+                <h5 class="mb-0 fw-bold">
+                    <i class="fas fa-bullhorn me-2"></i>Post Bulk Payment
+                </h5>
+            </div>
+            <div class="card-body text-center p-4">
+                <div class="bg-success bg-opacity-10 rounded-circle d-inline-flex align-items-center justify-content-center mb-3" style="width: 100px; height: 100px;">
+                    <i class="fas fa-users fa-4x text-success"></i>
+                </div>
+                <p class="text-muted mb-4">Post payment requests to all students in your organization</p>
+                <a href="{% url 'officer_post_bulk_payment' %}" class="btn btn-success btn-lg w-100">
+                    <i class="fas fa-bullhorn me-2"></i>Post Bulk Payment
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Queue and Recent Payments -->
+<div class="row g-4">
+    <div class="col-md-6">
+        <div class="card border-0 shadow">
+            <div class="card-header bg-warning text-white">
+                <h5 class="mb-0 fw-bold">
+                    <i class="fas fa-list-ol me-2"></i>Queue for {{ organization.code|default:"System" }}
+                </h5>
+            </div>
+            <div class="card-body p-0">
+                {% if pending_requests %}
+                    <div class="list-group list-group-flush">
+                        {% for request in pending_requests %}
+                            <div class="list-group-item">
+                                <div class="d-flex justify-content-between align-items-start">
+                                    <div class="flex-grow-1">
+                                        <h6 class="mb-1 fw-bold">
+                                            {{ request.student.get_full_name }}
+                                        </h6>
+                                        <p class="mb-1 text-muted small">
+                                            <i class="fas fa-tag me-1"></i>{{ request.fee_type.name }}
+                                        </p>
+                                        <p class="mb-0">
+                                            <span class="fw-bold text-success">₱{{ request.amount|floatformat:2 }}</span>
+                                        </p>
+                                    </div>
+                                    {% if officer and officer.can_process_payments or is_superuser_only %}
+                                        {% if request.qr_signature %}
+                                            <a href="{% url 'officer_process_payment' request.request_id request.qr_signature %}"
+                                               class="btn btn-sm btn-success">
+                                               <i class="fas fa-arrow-right me-1"></i>Process
+                                            </a>
+                                        {% else %}
+                                            <a href="{% url 'view_payment_request_qr' request_id=request.request_id %}"
+                                               class="btn btn-sm btn-outline-primary">
+                                               <i class="fas fa-qrcode me-1"></i>Generate QR
+                                            </a>
+                                        {% endif %}
+                                    {% endif %}
+                                </div>
+                            </div>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <div class="text-center py-5">
+                        <i class="fas fa-inbox fa-4x text-muted mb-3"></i>
+                        <p class="text-muted">No active requests in the queue</p>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-6">
+        <div class="card border-0 shadow">
+            <div class="card-header bg-primary text-white">
+                <h5 class="mb-0 fw-bold">
+                    <i class="fas fa-receipt me-2"></i>Recent Payments Processed
+                </h5>
+            </div>
+            <div class="card-body p-0">
+                {% if recent_payments %}
+                    <div class="list-group list-group-flush">
+                        {% for payment in recent_payments %}
+                            <div class="list-group-item">
+                                <div class="d-flex justify-content-between align-items-start">
+                                    <div class="flex-grow-1">
+                                        <h6 class="mb-1 fw-bold text-success">
+                                            <i class="fas fa-receipt me-1"></i>OR#{{ payment.or_number }}
+                                        </h6>
+                                        <p class="mb-1 text-muted small">
+                                            <i class="fas fa-user me-1"></i>{{ payment.student.get_full_name }}
+                                        </p>
+                                        <p class="mb-0">
+                                            <span class="badge bg-primary">{{ payment.get_payment_method_display }}</span>
+                                            <span class="ms-2 fw-bold">₱{{ payment.amount|floatformat:2 }}</span>
+                                        </p>
+                                    </div>
+                                    <div>
+                                        {% if payment.is_void %}
+                                            <span class="badge bg-danger p-2">
+                                                <i class="fas fa-times me-1"></i>VOIDED
+                                            </span>
+                                        {% elif officer and officer.can_void_payments or is_superuser_only %}
+                                            <a href="{% url 'officer_void_payment' payment.pk %}" 
+                                               class="btn btn-sm btn-outline-danger">
+                                                <i class="fas fa-trash-alt me-1"></i>Void
+                                            </a>
+                                        {% else %}
+                                            <span class="badge bg-success p-2">₱{{ payment.amount|floatformat:2 }}</span>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </div>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <div class="text-center py-5">
+                        <i class="fas fa-receipt fa-4x text-muted mb-3"></i>
+                        <p class="text-muted">No recent payments found</p>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

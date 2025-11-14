@@ -1,0 +1,101 @@
+{% extends 'base.html' %}
+
+{% block title %}Generate QR Code - UniPay{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-lg-8">
+        <div class="card border-0 shadow-lg">
+            <div class="card-header bg-primary text-white">
+                <h4 class="mb-0 fw-bold"><i class="fas fa-qrcode me-2"></i>Generate Payment QR Code</h4>
+            </div>
+            <div class="card-body p-4">
+                <form method="post">
+                    {% csrf_token %}
+                    
+                    <div class="mb-4">
+                        <label for="{{ form.fee_type.id_for_label }}" class="form-label fw-semibold">
+                            <i class="fas fa-tag me-2 text-primary"></i>Select Fee Type <span class="text-danger">*</span>
+                        </label>
+                        {{ form.fee_type }}
+                        {% if form.fee_type.help_text %}
+                            <div class="form-text">{{ form.fee_type.help_text }}</div>
+                        {% endif %}
+                        {% for error in form.fee_type.errors %}
+                            <div class="text-danger small mt-1">
+                                <i class="fas fa-exclamation-circle me-1"></i>{{ error }}
+                            </div>
+                        {% endfor %}
+                        {% if not form.fee_type.field.queryset|length %}
+                        <div class="alert alert-warning mt-2">
+                            <i class="fas fa-exclamation-triangle me-2"></i>No available fees found for your program.
+                        </div>
+                        {% endif %}
+                        <!-- Organization Logo Preview -->
+                        <div id="org-logo-preview" class="mt-3 text-center" style="display: none;">
+                            <img id="org-logo-img" src="" alt="Organization Logo" 
+                                 class="img-fluid border rounded p-2" style="max-height: 80px; max-width: 200px; object-fit: contain; background: #f8f9fa;">
+                            <p class="text-muted small mt-2 mb-0" id="org-name-preview"></p>
+                        </div>
+                    </div>
+
+                    <div class="d-grid gap-2 mt-4">
+                        {% if form.fee_type.field.queryset|length %}
+                        <button type="submit" class="btn btn-success btn-lg">
+                            <i class="fas fa-qrcode me-2"></i>Generate QR Code
+                        </button>
+                        {% else %}
+                        <button type="button" class="btn btn-success btn-lg" disabled style="opacity: 0.5;">
+                            <i class="fas fa-qrcode me-2"></i>Generate QR Code (No fees available)
+                        </button>
+                        {% endif %}
+                        <a href="{% url 'student_dashboard' %}" class="btn btn-outline-secondary">
+                            <i class="fas fa-arrow-left me-2"></i>Back to Dashboard
+                        </a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    const feeOrgMap = {{ fee_org_map_json|default:'{}'|safe }};
+    const feeTypeSelect = document.getElementById('id_fee_type');
+    const orgLogoPreview = document.getElementById('org-logo-preview');
+    const orgLogoImg = document.getElementById('org-logo-img');
+    const orgNamePreview = document.getElementById('org-name-preview');
+
+    function updateOrgLogo(feeTypeId) {
+        if (!feeTypeId || !feeOrgMap || !orgLogoPreview || !orgLogoImg || !orgNamePreview) {
+            if (orgLogoPreview) orgLogoPreview.style.display = 'none';
+            return;
+        }
+
+        const orgData = feeOrgMap[feeTypeId];
+        
+        if (orgData && orgData.org_logo) {
+            orgLogoImg.src = orgData.org_logo;
+            orgLogoImg.alt = orgData.org_name + ' Logo';
+            orgNamePreview.textContent = orgData.org_name + ' (' + orgData.org_code + ')';
+            orgLogoPreview.style.display = 'block';
+        } else {
+            orgLogoPreview.style.display = 'none';
+        }
+    }
+
+    // Show logo when fee type is selected
+    if (feeTypeSelect) {
+        feeTypeSelect.addEventListener('change', function() {
+            updateOrgLogo(this.value);
+        });
+        
+        // Show logo if fee type is pre-selected
+        if (feeTypeSelect.value) {
+            updateOrgLogo(feeTypeSelect.value);
+        }
+    }
+});
+</script>
+{% endblock %}

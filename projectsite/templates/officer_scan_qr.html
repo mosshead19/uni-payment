@@ -1,0 +1,131 @@
+{% extends "base.html" %}
+
+{% block title %}QR Code Scanner - UniPay{% endblock %}
+
+{% block extra_head %}
+<script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
+<style>
+    #qr-reader {
+        width: 100%;
+        max-width: 500px;
+        margin: 0 auto;
+    }
+    #qr-reader__dashboard_section_csr {
+        text-align: center;
+    }
+    .scanner-container {
+        background: var(--bg-secondary);
+        border-radius: 1rem;
+        padding: 2rem;
+        border: 1px solid var(--border-light);
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center py-5">
+    <div class="col-md-10 col-lg-8">
+        <div class="card border-0 shadow-lg">
+            <div class="card-header bg-primary text-white py-4">
+                <div class="d-flex align-items-center">
+                    <div class="bg-white bg-opacity-20 rounded-circle d-inline-flex align-items-center justify-content-center me-3" style="width: 50px; height: 50px;">
+                        <i class="fas fa-qrcode fa-lg text-white"></i>
+                    </div>
+                    <div>
+                        <h3 class="mb-0 fw-bold">QR Code Scanner</h3>
+                        <small class="opacity-75">Scan student QR code to process payment</small>
+                    </div>
+                </div>
+            </div>
+            <div class="card-body p-4">
+                <div class="text-center mb-4">
+                    <p class="lead text-muted mb-4">
+                        <i class="fas fa-camera me-2 text-primary"></i>
+                        Point your camera at the student's QR code
+                    </p>
+                </div>
+                
+                <div class="scanner-container mb-4">
+                    <div id="qr-reader"></div>
+                </div>
+                
+                <div id="qr-reader-results" class="alert alert-info shadow-sm" style="display: none;">
+                    <i class="fas fa-spinner fa-spin me-2"></i>
+                    <strong>Processing QR code...</strong> Please wait.
+                </div>
+                
+                <div id="error-message" class="alert alert-danger shadow-sm" style="display: none;"></div>
+                
+                <div class="d-grid gap-2 d-md-flex justify-content-md-center mt-4">
+                    <a href="{% url 'officer_dashboard' %}" class="btn btn-outline-secondary">
+                        <i class="fas fa-arrow-left me-2"></i>Back to Dashboard
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+let html5QrcodeScanner = null;
+
+function onScanSuccess(decodedText, decodedResult) {
+    // Stop scanning
+    if (html5QrcodeScanner) {
+        html5QrcodeScanner.clear();
+    }
+    
+    // Show processing message
+    document.getElementById('qr-reader-results').style.display = 'block';
+    document.getElementById('error-message').style.display = 'none';
+    
+    // Parse QR data
+    const parts = decodedText.split('|');
+    if (parts.length === 3 && parts[0] === 'PAYMENT_REQUEST') {
+        const requestId = parts[1];
+        const signature = parts[2];
+        
+        // Redirect to process payment
+        window.location.href = `/officer/process/${requestId}/${signature}/`;
+    } else {
+        document.getElementById('qr-reader-results').style.display = 'none';
+        document.getElementById('error-message').innerHTML = 
+            '<i class="fas fa-exclamation-triangle me-2"></i><strong>Invalid QR Code:</strong> This QR code is not a valid payment request.';
+        document.getElementById('error-message').style.display = 'block';
+        
+        // Restart scanner after 2 seconds
+        setTimeout(() => {
+            startScanner();
+        }, 2000);
+    }
+}
+
+function onScanFailure(error) {
+    // Ignore scan failures
+}
+
+function startScanner() {
+    html5QrcodeScanner = new Html5Qrcode("qr-reader");
+    html5QrcodeScanner.start(
+        { facingMode: "environment" },
+        {
+            fps: 10,
+            qrbox: { width: 250, height: 250 }
+        },
+        onScanSuccess,
+        onScanFailure
+    ).catch(err => {
+        document.getElementById('error-message').innerHTML = 
+            '<i class="fas fa-exclamation-triangle me-2"></i><strong>Camera Error:</strong> ' + err;
+        document.getElementById('error-message').style.display = 'block';
+    });
+}
+
+// Start scanner when page loads
+document.addEventListener('DOMContentLoaded', function() {
+    startScanner();
+});
+</script>
+{% endblock %}

@@ -1,0 +1,114 @@
+{% extends "base.html" %}
+
+{% block title %}{{ student.get_full_name }}{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2><i class="fas fa-user-graduate me-2"></i>{{ student.student_id_number }} - {{ student.get_full_name }}</h2>
+    <div>
+        <a href="{% url 'student_update' student.pk %}" class="btn btn-warning"><i class="fas fa-edit me-2"></i>Edit</a>
+        <a href="{% url 'student_list' %}" class="btn btn-secondary"><i class="fas fa-arrow-left me-2"></i>Back to List</a>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-6">
+        <div class="card shadow mb-4">
+            <div class="card-header card-header-admin">
+                <h4 class="mb-0">Student Information</h4>
+            </div>
+            <div class="card-body">
+                <dl class="row">
+                    <dt class="col-sm-5">Student ID:</dt>
+                    <dd class="col-sm-7"><strong>{{ student.student_id_number }}</strong></dd>
+                    
+                    <dt class="col-sm-5">Full Name:</dt>
+                    <dd class="col-sm-7">{{ student.get_full_name }}</dd>
+                    
+                    <dt class="col-sm-5">Email:</dt>
+                    <dd class="col-sm-7">{{ student.email }}</dd>
+                    
+                    <dt class="col-sm-5">Phone:</dt>
+                    <dd class="col-sm-7">{{ student.phone_number }}</dd>
+                    
+                    <dt class="col-sm-5">Course:</dt>
+                    <dd class="col-sm-7">{{ student.course }}</dd>
+                    
+                    <dt class="col-sm-5">Year Level:</dt>
+                    <dd class="col-sm-7">{{ student.year_level }}</dd>
+                    
+                    <dt class="col-sm-5">College:</dt>
+                    <dd class="col-sm-7">{{ student.college }}</dd>
+                    
+                    <dt class="col-sm-5">Academic Year:</dt>
+                    <dd class="col-sm-7">{{ student.academic_year }} - {{ student.semester }}</dd>
+                </dl>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-6">
+        <div class="card shadow mb-4">
+            <div class="card-header card-header-admin">
+                <h4 class="mb-0">Pending Payment Requests</h4>
+            </div>
+            <div class="card-body">
+                {% if pending_payments %}
+                    <div class="list-group">
+                        {% for request in pending_payments %}
+                        <div class="list-group-item">
+                            <div class="d-flex justify-content-between">
+                                <div>
+                                    <strong>{{ request.fee_type.organization.code }} - {{ request.fee_type.name }}</strong><br>
+                                    <small>Request ID: {{ request.request_id|truncatechars:8 }} | ₱{{ request.amount|floatformat:2 }}</small>
+                                </div>
+                                <span class="badge bg-warning">{{ request.status }}</span>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <p class="text-muted">No pending payments.</p>
+                {% endif %}
+            </div>
+        </div>
+        
+        <div class="card shadow">
+            <div class="card-header card-header-admin">
+                <h4 class="mb-0">Recent Completed Payments</h4>
+            </div>
+            <div class="card-body">
+                {% if completed_payments %}
+                    <div class="list-group">
+                        {% for payment in completed_payments %}
+                        <div class="list-group-item">
+                            <div class="d-flex justify-content-between">
+                                <div>
+                                    <strong>OR#{{ payment.or_number }}</strong><br>
+                                    <small>{{ payment.fee_type.name }} | ₱{{ payment.amount|floatformat:2 }}</small>
+                                </div>
+                                <span class="badge bg-success">{{ payment.status }}</span>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <p class="text-muted">No completed payments.</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+
+
+
+
+
+
+
+
+
+
+

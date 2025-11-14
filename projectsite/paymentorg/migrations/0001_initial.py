@@ -26,7 +26,7 @@ class Migration(migrations.Migration):
                 ('first_name', models.CharField(max_length=100, verbose_name='First Name')),
                 ('last_name', models.CharField(max_length=100, verbose_name='Last Name')),
                 ('middle_name', models.CharField(blank=True, max_length=100, null=True, verbose_name='Middle Name')),
-                ('course', models.CharField(help_text='e.g., BS Biology, BS Chemistry', max_length=100, verbose_name='Course/Program')),
+                ('course', models.CharField(help_text='e.g., BS Biology, BS Computer Science', max_length=100, verbose_name='Course/Program')),
                 ('year_level', models.IntegerField(help_text='1, 2, 3, 4, or 5', validators=[django.core.validators.MinValueValidator(1)], verbose_name='Year Level')),
                 ('college', models.CharField(default='College of Sciences', max_length=100, verbose_name='College/Department')),
                 ('email', models.EmailField(max_length=254, unique=True, verbose_name='Email Address')),

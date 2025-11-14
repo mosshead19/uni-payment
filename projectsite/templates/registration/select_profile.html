@@ -1,0 +1,59 @@
+{% extends "base.html" %}
+
+{% block title %}Select Account Type - UniPay{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center py-5">
+    <div class="col-12 text-center mb-5">
+        <div class="mb-4">
+            <div class="bg-primary rounded-circle d-inline-flex align-items-center justify-content-center mb-3" style="width: 100px; height: 100px;">
+                <i class="fas fa-user-plus fa-4x text-white"></i>
+            </div>
+        </div>
+        <h1 class="display-5 fw-bold mb-3 text-primary">Create Your Account</h1>
+        <p class="lead text-muted">Choose your role to get started with UniPay</p>
+    </div>
+</div>
+
+<div class="row justify-content-center g-4 mb-5">
+    <div class="col-md-5">
+        <div class="card shadow-lg h-100 border-0 hover-lift">
+            <div class="card-header bg-primary text-white py-4 text-center">
+                <div class="bg-white bg-opacity-20 rounded-circle d-inline-flex align-items-center justify-content-center mb-3" style="width: 80px; height: 80px;">
+                    <i class="fas fa-graduation-cap fa-3x"></i>
+                </div>
+                <h3 class="mb-0 fw-bold">Student Account</h3>
+            </div>
+            <div class="card-body p-4">
+                <ul class="list-unstyled mb-4">
+                    <li class="mb-3"><i class="fas fa-check-circle text-success me-2"></i>Access outstanding fees</li>
+                    <li class="mb-3"><i class="fas fa-check-circle text-success me-2"></i>Generate QR codes instantly</li>
+                    <li class="mb-3"><i class="fas fa-check-circle text-success me-2"></i>View payment history</li>
+                    <li class="mb-0"><i class="fas fa-check-circle text-success me-2"></i>Receive receipts via email</li>
+                </ul>
+                <a href="{% url 'student_register' %}" class="btn btn-primary btn-lg w-100">
+                    <i class="fas fa-user-plus me-2"></i>Register as Student
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="text-center">
+    <p class="text-muted">
+        Officer accounts are created by administrators through the staff dashboard.<br>
+        Already have an account? <a href="{% url 'login' %}" class="fw-bold text-primary">Sign in here</a>
+    </p>
+</div>
+
+<style>
+.hover-lift {
+    transition: all 0.3s ease;
+}
+
+.hover-lift:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 15px 35px rgba(0,0,0,0.1) !important;
+}
+</style>
+{% endblock %}

@@ -1,0 +1,329 @@
+{% extends "base.html" %}
+
+{% block title %}Student Registration - UniPay{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center py-5">
+    <div class="col-md-10 col-lg-9">
+        <div class="card shadow-lg border-0 fade-in">
+            <div class="card-header bg-primary text-white py-4">
+                <div class="d-flex align-items-center">
+                    <div class="bg-white bg-opacity-20 rounded-circle d-inline-flex align-items-center justify-content-center me-3" style="width: 50px; height: 50px;">
+                        <i class="fas fa-graduation-cap fa-lg"></i>
+                    </div>
+                    <div>
+                        <h3 class="mb-0 fw-bold">Student Account Registration</h3>
+                        <small class="opacity-75">College of Sciences - Create your student account to start paying fees</small>
+                    </div>
+                </div>
+            </div>
+            <div class="card-body p-4">
+                <form method="post">
+                    {% csrf_token %}
+                    
+                    {% if form.non_field_errors %}
+                        <div class="alert alert-danger shadow-sm">
+                            <i class="fas fa-exclamation-circle me-2"></i>
+                            <strong>Registration Errors:</strong>
+                            {% for error in form.non_field_errors %}
+                                <p class="mb-0 mt-2">{{ error }}</p>
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+                    
+                    <div class="mb-4">
+                        <h5 class="text-primary fw-bold mb-3 border-bottom pb-2">
+                            <i class="fas fa-id-card me-2"></i>Account & Personal Details
+                        </h5>
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <label for="{{ form.username.id_for_label }}" class="form-label fw-semibold">
+                                    {{ form.username.label }} <span class="text-danger">*</span>
+                                </label>
+                                {{ form.username }}
+                                {% for error in form.username.errors %}
+                                    <div class="text-danger small mt-1">
+                                        <i class="fas fa-exclamation-circle me-1"></i>{{ error }}
+                                    </div>
+                                {% endfor %}
+                            </div>
+                            <div class="col-md-6">
+                                <label for="{{ form.student_id_number.id_for_label }}" class="form-label fw-semibold">
+                                    {{ form.student_id_number.label }} <span class="text-danger">*</span>
+                                </label>
+                                {{ form.student_id_number }}
+                                {% for error in form.student_id_number.errors %}
+                                    <div class="text-danger small mt-1">
+                                        <i class="fas fa-exclamation-circle me-1"></i>{{ error }}
+                                    </div>
+                                {% endfor %}
+                            </div>
+                            <div class="col-md-4">
+                                <label for="{{ form.first_name.id_for_label }}" class="form-label fw-semibold">
+                                    {{ form.first_name.label }} <span class="text-danger">*</span>
+                                </label>
+                                {{ form.first_name }}
+                                {% for error in form.first_name.errors %}
+                                    <div class="text-danger small mt-1">
+                                        <i class="fas fa-exclamation-circle me-1"></i>{{ error }}
+                                    </div>
+                                {% endfor %}
+                            </div>
+                            <div class="col-md-4">
+                                <label for="{{ form.last_name.id_for_label }}" class="form-label fw-semibold">
+                                    {{ form.last_name.label }} <span class="text-danger">*</span>
+                                </label>
+                                {{ form.last_name }}
+                                {% for error in form.last_name.errors %}
+                                    <div class="text-danger small mt-1">
+                                        <i class="fas fa-exclamation-circle me-1"></i>{{ error }}
+                                    </div>
+                                {% endfor %}
+                            </div>
+                            <div class="col-md-4">
+                                <label for="{{ form.phone_number.id_for_label }}" class="form-label fw-semibold">
+                                    {{ form.phone_number.label }}
+                                </label>
+                                {{ form.phone_number }}
+                                {% for error in form.phone_number.errors %}
+                                    <div class="text-danger small mt-1">
+                                        <i class="fas fa-exclamation-circle me-1"></i>{{ error }}
+                                    </div>
+                                {% endfor %}
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="mb-4">
+                        <h5 class="text-primary fw-bold mb-3 border-bottom pb-2">
+                            <i class="fas fa-book-open me-2"></i>Academic Details
+                        </h5>
+                        <div class="alert alert-info mb-3">
+                            <i class="fas fa-info-circle me-2"></i>
+                            <strong>College of Sciences:</strong> Select from one of the 5 supported programs: 
+                            Medical Biology, Marine Biology, Computer Science, Environmental Science, or Information Technology.
+                        </div>
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <label for="{{ form.course.id_for_label }}" class="form-label fw-semibold">
+                                    {{ form.course.label }} <span class="text-danger">*</span>
+                                </label>
+                                {{ form.course }}
+                                {% if form.course.help_text %}
+                                    <div class="form-text">
+                                        <i class="fas fa-info-circle me-1 text-info"></i>{{ form.course.help_text }}
+                                    </div>
+                                {% endif %}
+                                {% for error in form.course.errors %}
+                                    <div class="text-danger small mt-1">
+                                        <i class="fas fa-exclamation-circle me-1"></i>{{ error }}
+                                    </div>
+                                {% endfor %}
+                                <!-- Program Logo Preview -->
+                                <div id="program-logo-preview" class="mt-3 text-center" style="display: none;">
+                                    <img id="program-logo-img" src="" alt="Program Logo" 
+                                         class="img-fluid border rounded p-2" style="max-height: 100px; max-width: 200px; object-fit: contain; background: #f8f9fa;">
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <label for="{{ form.year_level.id_for_label }}" class="form-label fw-semibold">
+                                    {{ form.year_level.label }} <span class="text-danger">*</span>
+                                </label>
+                                {{ form.year_level }}
+                                {% for error in form.year_level.errors %}
+                                    <div class="text-danger small mt-1">
+                                        <i class="fas fa-exclamation-circle me-1"></i>{{ error }}
+                                    </div>
+                                {% endfor %}
+                            </div>
+                            <div class="col-md-3">
+                                <label for="{{ form.email.id_for_label }}" class="form-label fw-semibold">
+                                    {{ form.email.label }} <span class="text-danger">*</span>
+                                </label>
+                                {{ form.email }}
+                                {% for error in form.email.errors %}
+                                    <div class="text-danger small mt-1">
+                                        <i class="fas fa-exclamation-circle me-1"></i>{{ error }}
+                                    </div>
+                                {% endfor %}
+                            </div>
+                            <div class="col-md-12">
+                                <label for="{{ form.college.id_for_label }}" class="form-label fw-semibold">
+                                    {{ form.college.label }} <span class="text-danger">*</span>
+                                </label>
+                                {{ form.college }}
+                                {% if form.college.help_text %}
+                                    <div class="form-text">
+                                        <i class="fas fa-info-circle me-1 text-info"></i>{{ form.college.help_text }}
+                                    </div>
+                                {% endif %}
+                                {% for error in form.college.errors %}
+                                    <div class="text-danger small mt-1">
+                                        <i class="fas fa-exclamation-circle me-1"></i>{{ error }}
+                                    </div>
+                                {% endfor %}
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="mb-4">
+                        <h5 class="text-primary fw-bold mb-3 border-bottom pb-2">
+                            <i class="fas fa-key me-2"></i>Security
+                        </h5>
+                        <div class="row g-3">
+                            {% for field in form.visible_fields %}
+                                {% if 'password' in field.name %}
+                                    <div class="col-md-6">
+                                        <label for="{{ field.id_for_label }}" class="form-label fw-semibold">
+                                            {{ field.label }} <span class="text-danger">*</span>
+                                        </label>
+                                        {{ field }}
+                                        {% if field.help_text %}
+                                            <div class="form-text">
+                                                <i class="fas fa-info-circle me-1 text-info"></i>{{ field.help_text }}
+                                            </div>
+                                        {% endif %}
+                                        {% for error in field.errors %}
+                                            <div class="text-danger small mt-1">
+                                                <i class="fas fa-exclamation-circle me-1"></i>{{ error }}
+                                            </div>
+                                        {% endfor %}
+                                    </div>
+                                {% endif %}
+                            {% endfor %}
+                        </div>
+                    </div>
+
+                    <hr class="my-4">
+                    
+                    <div class="d-grid gap-2 mt-4">
+                        <button type="submit" class="btn btn-primary btn-lg">
+                            <i class="fas fa-user-plus me-2"></i>Register Student Account
+                        </button>
+                        <a href="{% url 'login' %}" class="btn btn-outline-secondary">
+                            <i class="fas fa-sign-in-alt me-2"></i>Already have an account? Login
+                        </a>
+                        <a href="{% url 'select_profile' %}" class="btn btn-outline-primary">
+                            <i class="fas fa-arrow-left me-2"></i>Back to Account Selection
+                        </a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+{% load static %}
+{{ block.super }}
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    const courseOptions = {{ course_options_json|default:'[]'|safe }};
+    const courseSelect = document.getElementById('id_course');
+    const collegeSelect = document.getElementById('id_college');
+    const selectedCourseId = '{{ selected_course_id|default:""|escapejs }}';
+    const selectedCollegeId = '{{ selected_college_id|default:""|escapejs }}';
+
+    function buildPlaceholderOption() {
+        const placeholder = document.createElement('option');
+        placeholder.value = '';
+        placeholder.textContent = 'Select Course/Program';
+        placeholder.disabled = true;
+        placeholder.selected = true;
+        return placeholder;
+    }
+
+    function renderCourses(collegeId) {
+        const fragment = document.createDocumentFragment();
+        fragment.appendChild(buildPlaceholderOption());
+
+        // Since we only have College of Sciences, show all courses
+        // But filter by college_id if provided for consistency
+        courseOptions
+            .filter(option => !collegeId || String(option.college_id) === String(collegeId))
+            .forEach(option => {
+                const opt = document.createElement('option');
+                opt.value = option.id;
+                opt.textContent = option.label;
+                fragment.appendChild(opt);
+            });
+
+        courseSelect.innerHTML = '';
+        courseSelect.appendChild(fragment);
+    }
+
+    // Auto-select College of Sciences if only one college exists
+    if (collegeSelect) {
+        // Wait for options to be populated
+        setTimeout(function() {
+            if (collegeSelect.options.length === 2) { // 1 placeholder + 1 college (College of Sciences)
+                collegeSelect.selectedIndex = 1;
+                renderCourses(collegeSelect.value);
+            } else if (selectedCollegeId) {
+                collegeSelect.value = selectedCollegeId;
+                renderCourses(selectedCollegeId);
+            } else {
+                renderCourses('');
+            }
+        }, 100);
+        
+        collegeSelect.addEventListener('change', function () {
+            renderCourses(this.value || '');
+            courseSelect.selectedIndex = 0;
+        });
+    } else {
+        // If no college select (shouldn't happen), just render all courses
+        if (courseSelect) {
+            renderCourses('');
+        }
+    }
+
+    // Set selected course if provided
+    if (courseSelect && selectedCourseId) {
+        setTimeout(function() {
+            courseSelect.value = selectedCourseId;
+            updateProgramLogo(selectedCourseId);
+        }, 200);
+    }
+
+    // Program logo mapping - use Django static URL
+    const staticUrl = '{% static "" %}';
+    const programLogoMap = {
+        'MEDICAL_BIOLOGY': staticUrl + 'Medical Biology.jpg',
+        'MARINE_BIOLOGY': staticUrl + 'Marine Biology.jpg',
+        'COMPUTER_SCIENCE': staticUrl + 'Computer Science.jpg',
+        'ENVIRONMENTAL_SCIENCE': staticUrl + 'Environmental Science.jpg',
+        'INFORMATION_TECHNOLOGY': staticUrl + 'Information Technology.jpg',
+    };
+
+    function updateProgramLogo(courseId) {
+        const logoPreview = document.getElementById('program-logo-preview');
+        const logoImg = document.getElementById('program-logo-img');
+        
+        if (!courseId || !logoPreview || !logoImg) {
+            if (logoPreview) logoPreview.style.display = 'none';
+            return;
+        }
+
+        // Find the selected course in courseOptions
+        const selectedCourse = courseOptions.find(opt => String(opt.id) === String(courseId));
+        
+        if (selectedCourse && selectedCourse.program_type && programLogoMap[selectedCourse.program_type]) {
+            logoImg.src = programLogoMap[selectedCourse.program_type];
+            logoImg.alt = selectedCourse.label + ' Logo';
+            logoPreview.style.display = 'block';
+        } else {
+            logoPreview.style.display = 'none';
+        }
+    }
+
+    // Show logo when course is selected
+    if (courseSelect) {
+        courseSelect.addEventListener('change', function() {
+            updateProgramLogo(this.value);
+        });
+    }
+});
+</script>
+{% endblock %}

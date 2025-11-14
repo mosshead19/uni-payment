@@ -1,0 +1,79 @@
+{% extends "base.html" %}
+
+{% block title %}Receipt OR#{{ receipt.or_number }}{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2><i class="fas fa-receipt me-2"></i>Receipt: OR#{{ receipt.or_number }}</h2>
+    <a href="{% url 'receipt_list' %}" class="btn btn-secondary"><i class="fas fa-arrow-left me-2"></i>Back to List</a>
+</div>
+
+<div class="row">
+    <div class="col-md-8">
+        <div class="card shadow mb-4">
+            <div class="card-header card-header-admin">
+                <h4 class="mb-0">Receipt Information</h4>
+            </div>
+            <div class="card-body">
+                <dl class="row">
+                    <dt class="col-sm-4">OR Number:</dt>
+                    <dd class="col-sm-8"><strong>{{ receipt.or_number }}</strong></dd>
+                    
+                    <dt class="col-sm-4">Payment:</dt>
+                    <dd class="col-sm-8">
+                        <a href="{% url 'payment_detail' receipt.payment.pk %}">View Payment Details</a>
+                    </dd>
+                    
+                    <dt class="col-sm-4">Student:</dt>
+                    <dd class="col-sm-8">{{ receipt.payment.student.student_id_number }} - {{ receipt.payment.student.get_full_name }}</dd>
+                    
+                    <dt class="col-sm-4">Organization:</dt>
+                    <dd class="col-sm-8">{{ receipt.payment.organization.name }} ({{ receipt.payment.organization.code }})</dd>
+                    
+                    <dt class="col-sm-4">Amount:</dt>
+                    <dd class="col-sm-8"><strong class="text-success">₱{{ receipt.payment.amount|floatformat:2 }}</strong></dd>
+                    
+                    <dt class="col-sm-4">Email Sent:</dt>
+                    <dd class="col-sm-8">
+                        {% if receipt.email_sent %}
+                            <span class="badge bg-success">Yes</span> - {{ receipt.email_sent_at|date:"F d, Y H:i:s" }}
+                        {% else %}
+                            <span class="badge bg-secondary">No</span>
+                        {% endif %}
+                    </dd>
+                    
+                    
+                    <dt class="col-sm-4">Created At:</dt>
+                    <dd class="col-sm-8">{{ receipt.created_at|date:"F d, Y H:i:s" }}</dd>
+                </dl>
+            </div>
+        </div>
+        
+        {% if receipt.receipt_pdf %}
+        <div class="card shadow">
+            <div class="card-header card-header-admin">
+                <h4 class="mb-0">Receipt Files</h4>
+            </div>
+            <div class="card-body">
+                <p><a href="{{ receipt.receipt_pdf.url }}" class="btn btn-primary" target="_blank"><i class="fas fa-file-pdf me-2"></i>Download PDF</a></p>
+                {% if receipt.receipt_qr %}
+                <p><a href="{{ receipt.receipt_qr.url }}" class="btn btn-info" target="_blank"><i class="fas fa-qrcode me-2"></i>View QR Code</a></p>
+                {% endif %}
+            </div>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}
+
+
+
+
+
+
+
+
+
+
+
+
