@@ -70,7 +70,7 @@ class Course(BaseModel):
         ('COMPUTER_SCIENCE', 'Computer Science'),
         ('ENVIRONMENTAL_SCIENCE', 'Environmental Science'),
         ('INFORMATION_TECHNOLOGY', 'Information Technology'),
-        ('OTHER', 'Other'),  # Reserved for edge cases, not used in normal operations
+        ('OTHER', 'Other'),
     ]
     
     name = models.CharField(max_length=200, verbose_name="Course/Program Name")
@@ -79,7 +79,7 @@ class Course(BaseModel):
     program_type = models.CharField(
         max_length=50,
         choices=PROGRAM_CHOICES,
-        default='MEDICAL_BIOLOGY',  # Default to first of the 5 supported programs
+        default='MEDICAL_BIOLOGY',
         verbose_name="Program Type",
         help_text="Select one of the 5 supported programs: Medical Biology, Marine Biology, Computer Science, Environmental Science, or Information Technology"
     )
@@ -103,7 +103,6 @@ class Course(BaseModel):
         from django.contrib.staticfiles.storage import staticfiles_storage
         from django.conf import settings
         
-        # Map program types to logo filenames
         logo_map = {
             'MEDICAL_BIOLOGY': 'Medical Biology.png',
             'MARINE_BIOLOGY': 'Marine Biology.png',
@@ -519,13 +518,11 @@ class Organization(BaseModel):
         from django.contrib.staticfiles.storage import staticfiles_storage
         from django.conf import settings
         
-        # Explicit map for known organization logos
         name_logo_map = {
             'College Student Government': 'College Student Government.png',
             'Compendium': 'Compendium.png',
         }
         
-        # Reuse program logos for Tier 1 orgs via their program affiliation
         program_logo_map = {
             'MEDICAL_BIOLOGY': 'Medical Biology.png',
             'MARINE_BIOLOGY': 'Marine Biology.png',
@@ -744,10 +741,9 @@ class PaymentRequest(BaseModel):
 
     def get_time_remaining(self):
         """Get human-readable time remaining"""
-        from django.utils.timesince import timesuntil
+        from django.utils.timesince import timeuntil
         if self.status == 'PENDING' and not self.is_expired():
-            # Correct use of timesuntil: (future_time, current_time)
-            return timesuntil(self.expires_at, timezone.now()) 
+            return timeuntil(self.expires_at, timezone.now())
         return "Expired" if self.is_expired() else "Completed"
 
 

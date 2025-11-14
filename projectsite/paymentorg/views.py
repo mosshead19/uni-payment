@@ -444,8 +444,8 @@ class OfficerDashboardView(OfficerRequiredMixin, TemplateView):
         context = super().get_context_data(**kwargs)
         user = self.request.user
         
-        if user.is_superuser and not hasattr(user, 'officer_profile'):
-            messages.info(self.request, "Superuser: Not assigned to an organization. Displaying system stats.")
+        if user.is_superuser:
+            messages.info(self.request, "Superuser: Displaying system-wide statistics.")
             
             context.update({
                 'is_superuser_only': True,
