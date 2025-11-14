@@ -1,85 +1,232 @@
 <!DOCTYPE html>
-<html lang="en" data-bs-theme="light">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{% block title %}UniPay - Fee Payment System{% endblock %}</title>
+    
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Lucide Icons CDN -->
+    <script src="https://unpkg.com/lucide@latest"></script>
     
     <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     
-    <!-- Bootstrap 5 -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
-    
-    <!-- Font Awesome -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
-    
-    <!-- Custom Styles -->
-    {% load static %}
-    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        
+        /* Custom scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #f1f5f9;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #10b981;
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #059669;
+        }
+    </style>
     
     {% block extra_head %}{% endblock %}
 </head>
-<body>
-    <nav class="navbar navbar-expand-lg navbar-light bg-light shadow-sm">
-        <div class="container">
-            <a class="navbar-brand fw-bold d-flex align-items-center" href="{% url 'home' %}">
-                <i class="fas fa-qrcode text-primary me-2"></i>
-                <span>UniPay</span>
-            </a>
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
-                <span class="navbar-toggler-icon"></span>
-            </button>
-            <div class="collapse navbar-collapse" id="navbarNav">
-                <ul class="navbar-nav ms-auto">
+<body class="bg-gradient-to-br from-green-50 via-emerald-50 to-green-100 min-h-screen">
+    
+    <!-- Navigation Bar -->
+    <nav class="bg-white shadow-lg border-b-4 border-green-500">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center h-16">
+                <!-- Logo -->
+                <a href="{% url 'home' %}" class="flex items-center gap-3 hover:opacity-80 transition-opacity">
+                    <div class="w-10 h-10 bg-gradient-to-br from-green-500 to-emerald-600 rounded-lg flex items-center justify-center">
+                        <i data-lucide="wallet" class="w-6 h-6 text-white"></i>
+                    </div>
+                    <div>
+                        <h1 class="text-xl font-bold text-gray-900">UniPay</h1>
+                        <p class="text-xs text-gray-600">Payment System</p>
+                    </div>
+                </a>
+
+                <!-- Desktop Navigation -->
+                <div class="hidden md:flex items-center gap-4">
                     {% if user.is_authenticated %}
                         {% if user.student_profile %}
-                            <li class="nav-item"><a class="nav-link" href="{% url 'student_dashboard' %}"><i class="fas fa-chart-line me-1"></i> Dashboard</a></li>
-                            <li class="nav-item"><a class="nav-link" href="{% url 'student_profile_update' %}"><i class="fas fa-user-circle me-1"></i> Profile</a></li>
+                            <a href="{% url 'student_dashboard' %}" class="flex items-center gap-2 px-4 py-2 text-gray-700 hover:bg-green-50 hover:text-green-700 rounded-lg transition-colors font-medium">
+                                <i data-lucide="layout-dashboard" class="w-4 h-4"></i>
+                                <span>Dashboard</span>
+                            </a>
+                            <a href="{% url 'student_profile_update' %}" class="flex items-center gap-2 px-4 py-2 text-gray-700 hover:bg-green-50 hover:text-green-700 rounded-lg transition-colors font-medium">
+                                <i data-lucide="user-circle" class="w-4 h-4"></i>
+                                <span>Profile</span>
+                            </a>
                         {% elif user.officer_profile or user.is_superuser %}
-                            <li class="nav-item"><a class="nav-link" href="{% url 'officer_dashboard' %}"><i class="fas fa-cash-register me-1"></i> Officer Panel</a></li>
+                            <a href="{% url 'officer_dashboard' %}" class="flex items-center gap-2 px-4 py-2 text-gray-700 hover:bg-green-50 hover:text-green-700 rounded-lg transition-colors font-medium">
+                                <i data-lucide="briefcase" class="w-4 h-4"></i>
+                                <span>Officer Panel</span>
+                            </a>
                             {% if user.officer_profile %}
-                                <li class="nav-item"><a class="nav-link" href="{% url 'officer_profile_update' %}"><i class="fas fa-user-cog me-1"></i> Profile</a></li>
+                                <a href="{% url 'officer_profile_update' %}" class="flex items-center gap-2 px-4 py-2 text-gray-700 hover:bg-green-50 hover:text-green-700 rounded-lg transition-colors font-medium">
+                                    <i data-lucide="user-cog" class="w-4 h-4"></i>
+                                    <span>Profile</span>
+                                </a>
                             {% endif %}
                             {% if user.is_staff %}
-                                <li class="nav-item"><a class="nav-link btn btn-sm btn-outline-primary ms-2" href="/admin/"><i class="fas fa-cog"></i> Admin</a></li>
+                                <a href="/admin/" class="flex items-center gap-2 px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded-lg transition-colors font-medium">
+                                    <i data-lucide="settings" class="w-4 h-4"></i>
+                                    <span>Admin</span>
+                                </a>
                             {% endif %}
                         {% endif %}
                         
-                        <li class="nav-item">
-                            <form method="post" action="{% url 'logout' %}" style="display: inline;">
-                                {% csrf_token %}
-                                <button type="submit" class="nav-link btn btn-sm btn-outline-secondary ms-2 border-0" style="background: transparent;">
-                                    <i class="fas fa-sign-out-alt me-1"></i>Logout ({{ user.username }})
-                                </button>
-                            </form>
-                        </li>
+                        <div class="flex items-center gap-2 px-3 py-2 bg-gray-100 rounded-lg">
+                            <i data-lucide="user" class="w-4 h-4 text-gray-600"></i>
+                            <span class="text-sm font-medium text-gray-700">{{ user.username }}</span>
+                        </div>
+                        
+                        <form method="post" action="{% url 'logout' %}" class="inline">
+                            {% csrf_token %}
+                            <button type="submit" class="flex items-center gap-2 px-4 py-2 bg-red-500 hover:bg-red-600 text-white rounded-lg transition-colors font-medium">
+                                <i data-lucide="log-out" class="w-4 h-4"></i>
+                                <span>Logout</span>
+                            </button>
+                        </form>
                     {% else %}
-                        <li class="nav-item"><a class="nav-link" href="{% url 'login' %}"><i class="fas fa-sign-in-alt me-1"></i> Login</a></li>
-                        <li class="nav-item"><a class="nav-link btn btn-sm btn-primary ms-2" href="{% url 'select_profile' %}"><i class="fas fa-user-plus me-1"></i> Register</a></li>
+                        <a href="{% url 'login' %}" class="flex items-center gap-2 px-4 py-2 text-gray-700 hover:bg-green-50 hover:text-green-700 rounded-lg transition-colors font-medium">
+                            <i data-lucide="log-in" class="w-4 h-4"></i>
+                            <span>Login</span>
+                        </a>
+                        <a href="{% url 'select_profile' %}" class="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white rounded-lg transition-all font-medium shadow-lg">
+                            <i data-lucide="user-plus" class="w-4 h-4"></i>
+                            <span>Register</span>
+                        </a>
                     {% endif %}
-                </ul>
+                </div>
+
+                <!-- Mobile Menu Button -->
+                <button id="mobile-menu-button" class="md:hidden p-2 text-gray-700 hover:bg-gray-100 rounded-lg">
+                    <i data-lucide="menu" class="w-6 h-6"></i>
+                </button>
+            </div>
+
+            <!-- Mobile Navigation -->
+            <div id="mobile-menu" class="hidden md:hidden pb-4">
+                {% if user.is_authenticated %}
+                    {% if user.student_profile %}
+                        <a href="{% url 'student_dashboard' %}" class="flex items-center gap-2 px-4 py-3 text-gray-700 hover:bg-green-50 hover:text-green-700 rounded-lg transition-colors font-medium">
+                            <i data-lucide="layout-dashboard" class="w-4 h-4"></i>
+                            <span>Dashboard</span>
+                        </a>
+                        <a href="{% url 'student_profile_update' %}" class="flex items-center gap-2 px-4 py-3 text-gray-700 hover:bg-green-50 hover:text-green-700 rounded-lg transition-colors font-medium">
+                            <i data-lucide="user-circle" class="w-4 h-4"></i>
+                            <span>Profile</span>
+                        </a>
+                    {% elif user.officer_profile or user.is_superuser %}
+                        <a href="{% url 'officer_dashboard' %}" class="flex items-center gap-2 px-4 py-3 text-gray-700 hover:bg-green-50 hover:text-green-700 rounded-lg transition-colors font-medium">
+                            <i data-lucide="briefcase" class="w-4 h-4"></i>
+                            <span>Officer Panel</span>
+                        </a>
+                        {% if user.officer_profile %}
+                            <a href="{% url 'officer_profile_update' %}" class="flex items-center gap-2 px-4 py-3 text-gray-700 hover:bg-green-50 hover:text-green-700 rounded-lg transition-colors font-medium">
+                                <i data-lucide="user-cog" class="w-4 h-4"></i>
+                                <span>Profile</span>
+                            </a>
+                        {% endif %}
+                        {% if user.is_staff %}
+                            <a href="/admin/" class="flex items-center gap-2 px-4 py-3 bg-blue-500 text-white rounded-lg transition-colors font-medium mt-2">
+                                <i data-lucide="settings" class="w-4 h-4"></i>
+                                <span>Admin</span>
+                            </a>
+                        {% endif %}
+                    {% endif %}
+                    
+                    <div class="flex items-center gap-2 px-4 py-3 bg-gray-100 rounded-lg mt-2">
+                        <i data-lucide="user" class="w-4 h-4 text-gray-600"></i>
+                        <span class="text-sm font-medium text-gray-700">{{ user.username }}</span>
+                    </div>
+                    
+                    <form method="post" action="{% url 'logout' %}" class="mt-2">
+                        {% csrf_token %}
+                        <button type="submit" class="w-full flex items-center gap-2 px-4 py-3 bg-red-500 hover:bg-red-600 text-white rounded-lg transition-colors font-medium">
+                            <i data-lucide="log-out" class="w-4 h-4"></i>
+                            <span>Logout</span>
+                        </button>
+                    </form>
+                {% else %}
+                    <a href="{% url 'login' %}" class="flex items-center gap-2 px-4 py-3 text-gray-700 hover:bg-green-50 hover:text-green-700 rounded-lg transition-colors font-medium">
+                        <i data-lucide="log-in" class="w-4 h-4"></i>
+                        <span>Login</span>
+                    </a>
+                    <a href="{% url 'select_profile' %}" class="flex items-center gap-2 px-4 py-3 bg-gradient-to-r from-green-500 to-emerald-600 text-white rounded-lg transition-all font-medium shadow-lg mt-2">
+                        <i data-lucide="user-plus" class="w-4 h-4"></i>
+                        <span>Register</span>
+                    </a>
+                {% endif %}
             </div>
         </div>
     </nav>
 
-    <div class="container mt-4">
+    <!-- Main Content -->
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <!-- Messages/Alerts -->
         {% if messages %}
-            {% for message in messages %}
-                <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
-                    <i class="fas fa-{% if message.tags == 'success' %}check-circle{% elif message.tags == 'error' or message.tags == 'danger' %}exclamation-circle{% elif message.tags == 'warning' %}exclamation-triangle{% else %}info-circle{% endif %} me-2"></i>
-                    {{ message }}
-                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-                </div>
-            {% endfor %}
+            <div class="space-y-4 mb-6">
+                {% for message in messages %}
+                    <div class="{% if message.tags == 'success' %}bg-green-50 border-green-500 text-green-900{% elif message.tags == 'error' or message.tags == 'danger' %}bg-red-50 border-red-500 text-red-900{% elif message.tags == 'warning' %}bg-yellow-50 border-yellow-500 text-yellow-900{% else %}bg-blue-50 border-blue-500 text-blue-900{% endif %} border-l-4 p-4 rounded-lg shadow-lg flex items-start gap-3">
+                        <i data-lucide="{% if message.tags == 'success' %}check-circle{% elif message.tags == 'error' or message.tags == 'danger' %}alert-circle{% elif message.tags == 'warning' %}alert-triangle{% else %}info{% endif %}" class="w-5 h-5 flex-shrink-0 mt-0.5"></i>
+                        <div class="flex-1">
+                            <p class="font-medium">{{ message }}</p>
+                        </div>
+                        <button onclick="this.parentElement.remove()" class="text-gray-500 hover:text-gray-700">
+                            <i data-lucide="x" class="w-5 h-5"></i>
+                        </button>
+                    </div>
+                {% endfor %}
+            </div>
         {% endif %}
 
         {% block content %}{% endblock %}
-    </div>
+    </main>
 
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- Footer -->
+    <footer class="bg-white border-t-2 border-green-200 mt-12 py-6">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center text-gray-600 text-sm">
+            <p>College of Sciences • University Payment System</p>
+            <p class="mt-1">© 2024 UniPay System. All rights reserved.</p>
+        </div>
+    </footer>
+
+    <script>
+        // Initialize Lucide icons
+        lucide.createIcons();
+
+        // Mobile menu toggle
+        document.getElementById('mobile-menu-button')?.addEventListener('click', function() {
+            const menu = document.getElementById('mobile-menu');
+            menu.classList.toggle('hidden');
+            
+            // Re-render icons after menu opens
+            setTimeout(() => {
+                lucide.createIcons();
+            }, 50);
+        });
+
+        // Auto-refresh icons after dynamic content loads
+        document.addEventListener('DOMContentLoaded', function() {
+            setTimeout(() => {
+                lucide.createIcons();
+            }, 100);
+        });
+    </script>
+    
     {% block extra_js %}{% endblock %}
 </body>
 </html>
