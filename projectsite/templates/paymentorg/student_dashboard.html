@@ -54,6 +54,20 @@
     <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div class="space-y-6">
             
+            <!-- Django Messages -->
+            {% if messages %}
+            <div class="space-y-2">
+                {% for message in messages %}
+                <div class="{% if message.tags == 'success' %}bg-green-100 border-green-500 text-green-800{% elif message.tags == 'error' %}bg-red-100 border-red-500 text-red-800{% elif message.tags == 'warning' %}bg-yellow-100 border-yellow-500 text-yellow-800{% else %}bg-blue-100 border-blue-500 text-blue-800{% endif %} border-l-4 p-4 rounded-lg shadow-md">
+                    <div class="flex items-center gap-3">
+                        <i data-lucide="{% if message.tags == 'success' %}check-circle{% elif message.tags == 'error' %}x-circle{% elif message.tags == 'warning' %}alert-triangle{% else %}info{% endif %}" class="w-5 h-5"></i>
+                        <p class="font-medium">{{ message }}</p>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+            {% endif %}
+            
             <!-- Header Section -->
             <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
                 <div class="md:col-span-3 bg-gradient-to-r from-green-400 to-emerald-500 rounded-2xl p-6 shadow-xl border-l-8 border-green-600">
@@ -163,192 +177,95 @@
                             </tr>
                         </thead>
                         <tbody>
-                            {% for payment in pending_payments %}
-                            <!-- Unpaid Fee Row -->
-                            <tr class="bg-white hover:bg-green-50 transition-colors border-b border-gray-100">
+                            {% for fee_info in all_fees_with_status %}
+                            <tr class="{% if fee_info.is_paid %}bg-gray-50{% else %}bg-white{% endif %} hover:bg-green-50 transition-colors border-b border-gray-100">
                                 <td class="px-6 py-4">
                                     <div>
-                                        <p class="font-bold text-gray-900">{{ payment.fee_type.name }}</p>
-                                        {% if payment.fee_type.due_date %}
+                                        <p class="font-bold text-gray-900">{{ fee_info.fee_type.name }}</p>
+                                        {% if fee_info.fee_type.due_date %}
                                         <p class="text-sm text-gray-600 flex items-center gap-1 mt-1">
                                             <i data-lucide="calendar" class="w-3 h-3"></i>
-                                            Due: {{ payment.fee_type.due_date|date:"M d, Y" }}
+                                            Due: {{ fee_info.fee_type.due_date|date:"M d, Y" }}
                                         </p>
                                         {% endif %}
                                     </div>
                                 </td>
                                 <td class="px-6 py-4">
                                     <div class="flex items-center gap-2">
-                                        {% if payment.organization.get_logo_path %}
-                                            <img src="{{ payment.organization.get_logo_path }}" alt="{{ payment.organization.name }}" 
+                                        {% if fee_info.organization.get_logo_path %}
+                                            <img src="{{ fee_info.organization.get_logo_path }}" alt="{{ fee_info.organization.name }}" 
                                                  class="h-6 w-14 object-contain">
                                         {% endif %}
                                         <div>
-                                            <p class="font-semibold text-gray-900">{{ payment.organization.name }}</p>
-                                            <p class="text-sm text-gray-600">{{ payment.organization.code }}</p>
+                                            <p class="font-semibold text-gray-900">{{ fee_info.organization.name }}</p>
+                                            <p class="text-sm text-gray-600">{{ fee_info.organization.code }}</p>
                                         </div>
                                     </div>
                                 </td>
                                 <td class="px-6 py-4">
-                                    <p class="text-xl font-bold text-gray-900">₱{{ payment.amount|floatformat:2 }}</p>
+                                    <p class="text-xl font-bold text-gray-900">₱{{ fee_info.amount|floatformat:2 }}</p>
                                 </td>
                                 <td class="px-6 py-4">
-                                    <span class="inline-flex items-center gap-2 bg-red-500 text-white px-4 py-2 rounded-full text-sm font-bold shadow-lg">
-                                        <i data-lucide="x-circle" class="w-4 h-4"></i>
-                                        Unpaid
-                                    </span>
-                                </td>
-                                <td class="px-6 py-4">
-                                    <a href="{% url 'view_payment_request_qr' request_id=payment.request_id %}" 
-                                       class="inline-flex items-center gap-2 px-5 py-2.5 bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white rounded-lg font-bold transition-all transform hover:scale-105 shadow-lg">
-                                        <i data-lucide="qr-code" class="w-4 h-4"></i>
-                                        View QR
-                                    </a>
-                                </td>
-                            </tr>
-                            {% endfor %}
-
-                            {% for payment in completed_payments %}
-                            <!-- Paid Fee Row -->
-                            <tr class="bg-gray-50 hover:bg-green-50 transition-colors border-b border-gray-100">
-                                <td class="px-6 py-4">
-                                    <div>
-                                        <p class="font-bold text-gray-900">{{ payment.fee_type.name }}</p>
-                                        <p class="text-sm text-gray-600 flex items-center gap-1 mt-1">
-                                            <i data-lucide="check" class="w-3 h-3"></i>
-                                            Paid: {{ payment.created_at|date:"M d, Y" }}
-                                        </p>
-                                    </div>
-                                </td>
-                                <td class="px-6 py-4">
-                                    <div class="flex items-center gap-2">
-                                        {% if payment.organization.get_logo_path %}
-                                            <img src="{{ payment.organization.get_logo_path }}" alt="{{ payment.organization.name }}" 
-                                                 class="h-6 w-14 object-contain">
-                                        {% endif %}
-                                        <div>
-                                            <p class="font-semibold text-gray-900">{{ payment.organization.name }}</p>
-                                            <p class="text-sm text-gray-600">{{ payment.organization.code }}</p>
+                                    {% if fee_info.is_paid %}
+                                        <span class="inline-flex items-center gap-2 bg-green-500 text-white px-4 py-2 rounded-full text-sm font-bold shadow-lg">
+                                            <i data-lucide="check-circle" class="w-4 h-4"></i>
+                                            Paid
+                                        </span>
+                                    {% elif fee_info.has_pending_request %}
+                                        <div class="flex flex-col gap-1">
+                                            <span class="inline-flex items-center gap-2 bg-yellow-500 text-white px-4 py-2 rounded-full text-sm font-bold shadow-lg">
+                                                <i data-lucide="clock" class="w-4 h-4"></i>
+                                                Pending
+                                            </span>
+                                            <p class="text-xs text-gray-600 mt-1">
+                                                Expires: {{ fee_info.pending_request.expires_at|date:"M d, H:i" }}
+                                            </p>
                                         </div>
-                                    </div>
+                                    {% else %}
+                                        <span class="inline-flex items-center gap-2 bg-red-500 text-white px-4 py-2 rounded-full text-sm font-bold shadow-lg">
+                                            <i data-lucide="x-circle" class="w-4 h-4"></i>
+                                            Unpaid
+                                        </span>
+                                    {% endif %}
                                 </td>
                                 <td class="px-6 py-4">
-                                    <p class="text-xl font-bold text-gray-900">₱{{ payment.amount }}</p>
-                                </td>
-                                <td class="px-6 py-4">
-                                    <span class="inline-flex items-center gap-2 bg-green-500 text-white px-4 py-2 rounded-full text-sm font-bold shadow-lg">
-                                        <i data-lucide="check-circle" class="w-4 h-4"></i>
-                                        Paid
-                                    </span>
-                                </td>
-                                <td class="px-6 py-4">
-                                    <a href="{% url 'payment_detail' payment.id %}" 
-                                       class="inline-flex items-center gap-2 px-5 py-2.5 bg-gray-300 hover:bg-gray-400 text-gray-700 rounded-lg font-bold transition-colors">
-                                        <i data-lucide="file-check" class="w-4 h-4"></i>
-                                        View Receipt
-                                    </a>
+                                    {% if fee_info.is_paid %}
+                                        <a href="{% url 'payment_detail' fee_info.payment.id %}" 
+                                           class="inline-flex items-center gap-2 px-5 py-2.5 bg-gray-300 hover:bg-gray-400 text-gray-700 rounded-lg font-bold transition-colors">
+                                            <i data-lucide="file-check" class="w-4 h-4"></i>
+                                            View Receipt
+                                        </a>
+                                    {% elif fee_info.has_pending_request %}
+                                        <a href="{% url 'view_payment_request_qr' request_id=fee_info.pending_request.request_id %}" 
+                                           class="inline-flex items-center gap-2 px-5 py-2.5 bg-gradient-to-r from-yellow-500 to-yellow-600 hover:from-yellow-600 hover:to-yellow-700 text-white rounded-lg font-bold transition-all transform hover:scale-105 shadow-lg">
+                                            <i data-lucide="qr-code" class="w-4 h-4"></i>
+                                            View QR
+                                        </a>
+                                    {% else %}
+                                        <form method="post" action="{% url 'quick_generate_qr' fee_info.fee_type.id %}" class="inline">
+                                            {% csrf_token %}
+                                            <button type="submit" 
+                                                    class="inline-flex items-center gap-2 px-5 py-2.5 bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white rounded-lg font-bold transition-all transform hover:scale-105 shadow-lg">
+                                                <i data-lucide="qr-code" class="w-4 h-4"></i>
+                                                Generate QR
+                                            </button>
+                                        </form>
+                                    {% endif %}
                                 </td>
                             </tr>
-                            {% endfor %}
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-
-            <!-- Pending Payments Section -->
-            <div class="bg-white rounded-2xl shadow-xl border-2 border-gray-200 overflow-hidden">
-                <div class="bg-gradient-to-r from-green-500 to-emerald-600 px-6 py-5 border-b-2 border-green-600">
-                    <div class="flex justify-between items-center">
-                        <div>
-                            <h3 class="text-xl font-bold text-white flex items-center gap-3">
-                                <i data-lucide="clock" class="w-6 h-6"></i>
-                                Pending Payment Requests
-                            </h3>
-                            <p class="text-green-50 text-sm mt-1">Click any row to view QR code</p>
-                        </div>
-                        <span class="bg-white text-gray-900 px-4 py-2 rounded-full text-lg font-bold">{{ pending_payments.count }}</span>
-                    </div>
-                </div>
-                
-                <div class="overflow-x-auto">
-                    {% if pending_payments %}
-                    <table class="w-full">
-                        <thead class="bg-gray-100 border-b-2 border-gray-200">
+                            {% empty %}
                             <tr>
-                                <th class="px-6 py-4 text-left text-sm font-bold text-gray-700">
-                                    <i data-lucide="building" class="w-4 h-4 inline mr-1"></i>
-                                    Organization
-                                </th>
-                                <th class="px-6 py-4 text-left text-sm font-bold text-gray-700">
-                                    <i data-lucide="tag" class="w-4 h-4 inline mr-1"></i>
-                                    Fee Type
-                                </th>
-                                <th class="px-6 py-4 text-left text-sm font-bold text-gray-700">
-                                    <i data-lucide="dollar-sign" class="w-4 h-4 inline mr-1"></i>
-                                    Amount
-                                </th>
-                                <th class="px-6 py-4 text-left text-sm font-bold text-gray-700">
-                                    <i data-lucide="circle-dot" class="w-4 h-4 inline mr-1"></i>
-                                    Status
-                                </th>
-                                <th class="px-6 py-4 text-left text-sm font-bold text-gray-700">
-                                    <i data-lucide="zap" class="w-4 h-4 inline mr-1"></i>
-                                    Action
-                                </th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {% for payment in pending_payments %}
-                            <tr class="bg-white hover:bg-green-50 transition-colors border-b border-gray-100 cursor-pointer">
-                                <td class="px-6 py-4">
-                                    <div class="flex items-center gap-3">
-                                        {% if payment.organization.get_logo_path %}
-                                            <img src="{{ payment.organization.get_logo_path }}" alt="{{ payment.organization.name }}" 
-                                                 class="h-8 w-16 object-contain">
-                                        {% endif %}
-                                        <div>
-                                            <p class="font-semibold text-gray-900">{{ payment.organization.name }}</p>
-                                            <p class="text-sm text-gray-600">{{ payment.organization.code }}</p>
-                                        </div>
-                                    </div>
-                                </td>
-                                <td class="px-6 py-4">
-                                    <p class="font-bold text-gray-900">{{ payment.fee_type.name }}</p>
-                                </td>
-                                <td class="px-6 py-4">
-                                    <p class="text-xl font-bold text-gray-900">₱{{ payment.amount|floatformat:2 }}</p>
-                                </td>
-                                <td class="px-6 py-4">
-                                    <span class="inline-flex items-center gap-2 bg-yellow-500 text-white px-4 py-2 rounded-full text-sm font-bold shadow-lg">
-                                        <i data-lucide="clock" class="w-4 h-4"></i>
-                                        Pending
-                                    </span>
-                                </td>
-                                <td class="px-6 py-4">
-                                    <a href="{% url 'view_payment_request_qr' request_id=payment.request_id %}" 
-                                       class="inline-flex items-center gap-2 px-5 py-2.5 bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white rounded-lg font-bold transition-all transform hover:scale-105 shadow-lg">
-                                        <i data-lucide="qr-code" class="w-4 h-4"></i>
-                                        View QR
-                                    </a>
+                                <td colspan="5" class="px-6 py-12 text-center">
+                                    <i data-lucide="inbox" class="w-16 h-16 text-gray-400 mx-auto mb-4"></i>
+                                    <h5 class="text-xl font-bold text-gray-900 mb-2">No Fees Available</h5>
+                                    <p class="text-gray-600">No applicable fees found for your program.</p>
                                 </td>
                             </tr>
                             {% endfor %}
                         </tbody>
                     </table>
-                    {% else %}
-                    <div class="text-center py-12">
-                        <i data-lucide="check-circle" class="w-16 h-16 text-green-600 mx-auto mb-4"></i>
-                        <h5 class="text-xl font-bold text-gray-900 mb-2">All Clear!</h5>
-                        <p class="text-gray-600 mb-4">You have no pending payments.</p>
-                        <a href="{% url 'generate_qr' %}" class="inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white rounded-lg font-bold transition-all shadow-lg">
-                            <i data-lucide="qr-code" class="w-5 h-5"></i>
-                            Generate New QR Code
-                        </a>
-                    </div>
-                    {% endif %}
                 </div>
             </div>
-
 
             <!-- Recent Payments -->
             <div class="bg-white rounded-2xl shadow-xl border-2 border-gray-200 overflow-hidden">
@@ -503,6 +420,33 @@
         lucide.createIcons();
         document.addEventListener('DOMContentLoaded', () => {
             setTimeout(() => lucide.createIcons(), 100);
+            
+            // Auto-refresh page when any QR code expires
+            {% if all_fees_with_status %}
+            const expirationTimes = [
+                {% for fee_info in all_fees_with_status %}
+                    {% if fee_info.has_pending_request and fee_info.pending_request %}
+                        new Date('{{ fee_info.pending_request.expires_at|date:"c" }}').getTime(),
+                    {% endif %}
+                {% endfor %}
+            ].filter(time => time > Date.now());
+            
+            if (expirationTimes.length > 0) {
+                // Find the earliest expiration time
+                const earliestExpiration = Math.min(...expirationTimes);
+                const timeUntilExpiration = earliestExpiration - Date.now();
+                
+                // Refresh the page 2 seconds after expiration
+                if (timeUntilExpiration > 0) {
+                    setTimeout(() => {
+                        console.log('QR code expired, refreshing page...');
+                        window.location.reload();
+                    }, timeUntilExpiration + 2000);
+                    
+                    console.log(`Page will refresh in ${Math.round(timeUntilExpiration / 1000)} seconds when QR expires`);
+                }
+            }
+            {% endif %}
         });
     </script>
 </body>

@@ -45,6 +45,7 @@ urlpatterns = [
     path('student/payment-history/', views.PaymentHistoryView.as_view(), name='payment_history'),
     
     path('student/request/generate/', views.GenerateQRPaymentView.as_view(), name='generate_qr'),
+    path('student/request/quick-generate/<int:fee_id>/', views.QuickGenerateQRView.as_view(), name='quick_generate_qr'),
     path('student/request/<uuid:request_id>/', views.PaymentRequestDetailView.as_view(), name='payment_request_detail'),
     path('student/request/<uuid:request_id>/view-qr/', views.ViewPaymentRequestQRView.as_view(), name='view_payment_request_qr'),
     path('student/request/<uuid:request_id>/qr/', views.ShowPaymentQRView.as_view(), name='show_payment_qr'),

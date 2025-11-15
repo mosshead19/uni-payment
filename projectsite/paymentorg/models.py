@@ -259,20 +259,14 @@ class Student(BaseModel):
         # Combine both tiers
         all_fees = (tier1_fees | tier2_fees).distinct()
         
-        # Exclude already paid fees
-        paid_fee_ids = Payment.objects.filter(
-            student=self,
-            status='COMPLETED',
-            is_void=False
-        ).values_list('fee_type_id', flat=True)
+        # Don't exclude any fees - we want to show all applicable fees
+        # in the dashboard table with their current status:
+        # - Paid fees show "View Receipt" button
+        # - Pending fees show "View QR" button
+        # - Unpaid fees show "Generate QR" button
+        # The view logic handles showing the correct status for each fee.
         
-        # Exclude pending payment requests
-        pending_fee_ids = PaymentRequest.objects.filter(
-            student=self,
-            status='PENDING'
-        ).values_list('fee_type_id', flat=True)
-        
-        return all_fees.exclude(id__in=list(paid_fee_ids) + list(pending_fee_ids))
+        return all_fees
     
     def get_total_outstanding_fees(self):
         """Calculate total amount of outstanding fees"""

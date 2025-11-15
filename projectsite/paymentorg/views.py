@@ -232,6 +232,37 @@ class StudentDashboardView(StudentRequiredMixin, TemplateView):
         tier2_fees = student.get_tier2_fees()
         total_outstanding = student.get_total_outstanding_fees()
         
+        # Build a comprehensive list of all fees with their payment status
+        all_fees_with_status = []
+        for fee in applicable_fees:
+            # Check if student has paid this fee
+            payment = completed_payments.filter(fee_type=fee).first()
+            
+            # Check if student has a VALID pending request for this fee (not expired)
+            pending_request = pending_payments.filter(fee_type=fee).first()
+            
+            # Double-check the pending request hasn't expired (in case of race condition)
+            has_valid_pending = False
+            if pending_request:
+                if pending_request.expires_at > timezone.now():
+                    has_valid_pending = True
+                else:
+                    # Mark as expired if somehow it slipped through
+                    pending_request.status = 'EXPIRED'
+                    pending_request.save()
+                    pending_request = None
+            
+            fee_info = {
+                'fee_type': fee,
+                'organization': fee.organization,
+                'amount': fee.amount,
+                'is_paid': payment is not None,
+                'payment': payment,
+                'has_pending_request': has_valid_pending,
+                'pending_request': pending_request,
+            }
+            all_fees_with_status.append(fee_info)
+        
         context.update({
             'student': student,
             'pending_payments': pending_payments,
@@ -242,6 +273,7 @@ class StudentDashboardView(StudentRequiredMixin, TemplateView):
             'tier1_fees': tier1_fees,
             'tier2_fees': tier2_fees,
             'total_outstanding': total_outstanding,
+            'all_fees_with_status': all_fees_with_status,
         })
         return context
 
@@ -331,6 +363,61 @@ class GenerateQRPaymentView(StudentRequiredMixin, CreateView):
             f'QR code generated! Present this at the {fee_type.organization.code} booth.'
         )
         return redirect('show_payment_qr', request_id=payment_request.request_id)
+
+class QuickGenerateQRView(StudentRequiredMixin, View):
+    """Quick QR generation from dashboard - directly creates payment request for a specific fee"""
+    
+    @transaction.atomic
+    def post(self, request, fee_id):
+        student = request.user.student_profile
+        
+        try:
+            fee_type = get_object_or_404(FeeType, id=fee_id, is_active=True)
+            
+            # Verify this fee is applicable to the student
+            applicable_fees = student.get_applicable_fees()
+            if fee_type not in applicable_fees:
+                messages.error(request, "This fee is not applicable to you.")
+                return redirect('student_dashboard')
+            
+            # Check if already has pending request or completed payment
+            if PaymentRequest.objects.filter(student=student, fee_type=fee_type, status='PENDING').exists():
+                messages.warning(request, f"You already have a pending payment request for {fee_type.name}.")
+                return redirect('student_dashboard')
+            
+            if Payment.objects.filter(student=student, fee_type=fee_type, status='COMPLETED').exists():
+                messages.info(request, f"You have already paid for {fee_type.name}.")
+                return redirect('student_dashboard')
+            
+            # Create payment request
+            payment_request = PaymentRequest.objects.create(
+                student=student,
+                organization=fee_type.organization,
+                fee_type=fee_type,
+                amount=fee_type.amount,
+                payment_method='CASH',
+                expires_at=timezone.now() + timedelta(minutes=15),
+                qr_signature=create_signature(uuid.uuid4().hex[:12])
+            )
+            
+            ActivityLog.objects.create(
+                user=request.user,
+                action='qr_generated',
+                description=f'Student {student.student_id_number} generated QR for {fee_type.name}',
+                payment_request=payment_request,
+                ip_address=request.META.get('REMOTE_ADDR')
+            )
+            
+            messages.success(
+                request, 
+                f'QR code generated! Present this at the {fee_type.organization.code} booth.'
+            )
+            # Redirect directly to QR page
+            return redirect('show_payment_qr', request_id=payment_request.request_id)
+            
+        except Exception as e:
+            messages.error(request, f"Error generating QR code: {str(e)}")
+            return redirect('student_dashboard')
 
 class PaymentRequestDetailView(StudentRequiredMixin, TemplateView):
     # payment request details and qr
