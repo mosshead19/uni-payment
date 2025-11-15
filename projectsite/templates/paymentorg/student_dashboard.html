@@ -1,276 +1,251 @@
-{% extends 'base.html' %}
-
+{% extends "base.html" %}
 {% block title %}Student Dashboard - UniPay{% endblock %}
 
 {% block content %}
-<!-- Welcome Section -->
-<div class="card border-0 shadow-lg mb-4">
-    <div class="card-header bg-primary text-white">
-        <div class="row align-items-center">
-            <div class="col-md-8">
-                <h3 class="mb-2 fw-bold">Welcome back, {{ student.get_full_name }}!</h3>
-                <p class="mb-0 opacity-75">
-                    <i class="fas fa-id-card me-2"></i>Student ID: <strong>{{ student.student_id_number }}</strong>
-                    <span class="ms-3"><i class="fas fa-graduation-cap me-2"></i>{{ student.course.name }}</span>
-                    {% if student.course.program_type != 'OTHER' %}
-                        <span class="ms-2 badge bg-success">{{ student.course.get_program_type_display }} Student</span>
-                    {% endif %}
-                </p>
-            </div>
-            <div class="col-md-4 text-end">
-                {% if student.course.get_logo_path %}
-                    <img src="{{ student.course.get_logo_path }}" alt="{{ student.course.name }} Logo" 
-                         class="img-fluid" style="max-height: 80px; max-width: 200px; object-fit: contain;">
-                {% else %}
-                    <div class="bg-white bg-opacity-20 rounded-circle d-inline-flex align-items-center justify-content-center" style="width: 80px; height: 80px;">
-                        <i class="fas fa-user-graduate fa-3x text-white"></i>
-                    </div>
-                {% endif %}
-            </div>
-        </div>
-    </div>
-</div>
 
-<!-- Statistics Cards -->
-<div class="row g-4 mb-4">
-    <div class="col-xl-3 col-md-6">
-        <div class="card stat-card border-0 shadow">
-            <div class="card-body">
-                <div class="d-flex justify-content-between align-items-start">
-                    <div class="flex-grow-1">
-                        <p class="text-muted small text-uppercase fw-bold mb-2">Total Paid</p>
-                        <h3 class="mb-0 fw-bold text-primary">₱{{ total_paid|floatformat:2 }}</h3>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Student Dashboard - UniPay</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        ::-webkit-scrollbar{width:8px;height:8px}
+        ::-webkit-scrollbar-track{background:#f1f5f9}
+        ::-webkit-scrollbar-thumb{background:#10b981;border-radius:4px}
+        ::-webkit-scrollbar-thumb:hover{background:#059669}
+    </style>
+</head>
+<body class="bg-gradient-to-br from-green-50 via-emerald-50 to-green-100 min-h-screen">
+    
+    <!-- Navigation Bar -->
+    <nav class="bg-white shadow-lg border-b-4 border-green-500">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center h-16">
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 bg-gradient-to-br from-green-500 to-emerald-600 rounded-lg flex items-center justify-center">
+                        <i data-lucide="wallet" class="w-6 h-6 text-white"></i>
                     </div>
-                    <div class="bg-success bg-opacity-10 rounded-circle p-3">
-                        <i class="fas fa-money-bill-wave fa-2x text-success"></i>
+                    <div>
+                        <h1 class="text-xl font-bold text-gray-900">UniPay</h1>
+                        <p class="text-xs text-gray-600">Student Portal</p>
                     </div>
+                </div>
+                <div class="flex items-center gap-4">
+                    <div class="hidden md:flex items-center gap-2 text-sm text-gray-700">
+                        <i data-lucide="user" class="w-4 h-4"></i>
+                        <span class="font-medium">{{ student.get_full_name }}</span>
+                    </div>
+                    <form method="post" action="{% url 'logout' %}" class="inline">
+                        {% csrf_token %}
+                        <button type="submit" class="px-4 py-2 bg-red-500 hover:bg-red-600 text-white rounded-lg font-medium transition-colors flex items-center gap-2">
+                            <i data-lucide="log-out" class="w-4 h-4"></i>
+                            <span>Logout</span>
+                        </button>
+                    </form>
                 </div>
             </div>
         </div>
-    </div>
+    </nav>
 
-    <div class="col-xl-3 col-md-6">
-        <div class="card stat-card border-0 shadow">
-            <div class="card-body">
-                <div class="d-flex justify-content-between align-items-start">
-                    <div class="flex-grow-1">
-                        <p class="text-muted small text-uppercase fw-bold mb-2">Payments Made</p>
-                        <h3 class="mb-0 fw-bold text-primary">{{ payments_count }}</h3>
+    <!-- Main Content -->
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <div class="space-y-6">
+            
+            <!-- Header Section -->
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+                <div class="md:col-span-3 bg-gradient-to-r from-green-400 to-emerald-500 rounded-2xl p-6 shadow-xl border-l-8 border-green-600">
+                    <div class="flex items-center gap-3 mb-2">
+                        <div class="w-12 h-12 bg-white/20 backdrop-blur-sm rounded-xl flex items-center justify-center">
+                            <i data-lucide="layout-dashboard" class="w-7 h-7 text-white"></i>
+                        </div>
+                        <h2 class="text-3xl font-bold text-white drop-shadow-lg">Dashboard</h2>
                     </div>
-                    <div class="bg-info bg-opacity-10 rounded-circle p-3">
-                        <i class="fas fa-receipt fa-2x text-info"></i>
+                    <p class="text-green-50 text-lg">Welcome back, <span class="font-semibold">{{ student.get_full_name }}</span>!</p>
+                    <p class="text-green-100 text-sm mt-1">{{ student.course.name }} - Year {{ student.year_level }}
+                        {% if student.course.program_type != 'OTHER' %}
+                            <span class="ml-2 bg-white/20 px-2 py-1 rounded text-xs">{{ student.course.get_program_type_display }}</span>
+                        {% endif %}
+                    </p>
+                </div>
+                <div class="bg-white rounded-2xl p-6 shadow-lg border-2 border-green-200">
+                    <div class="flex items-center gap-2 mb-2">
+                        <i data-lucide="id-card" class="w-5 h-5 text-green-600"></i>
+                        <p class="text-sm font-semibold text-gray-600">Student ID</p>
                     </div>
+                    <p class="text-2xl font-bold text-gray-900">{{ student.student_id_number }}</p>
                 </div>
             </div>
-        </div>
-    </div>
+            
+            <!-- Summary Stats -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                <!-- Total Paid -->
+                <div class="bg-white rounded-2xl p-6 shadow-lg border-2 border-gray-200 hover:border-green-400 transition-all transform hover:scale-105">
+                    <div class="flex items-center justify-between mb-3">
+                        <p class="text-gray-600 text-sm font-semibold">Total Paid</p>
+                        <div class="w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center">
+                            <i data-lucide="check-circle-2" class="w-5 h-5 text-green-600"></i>
+                        </div>
+                    </div>
+                    <p class="text-3xl font-bold text-green-600">₱{{ total_paid|floatformat:2 }}</p>
+                </div>
 
-    <div class="col-xl-3 col-md-6">
-        <div class="card stat-card border-0 shadow">
-            <div class="card-body">
-                <div class="d-flex justify-content-between align-items-start">
-                    <div class="flex-grow-1">
-                        <p class="text-muted small text-uppercase fw-bold mb-2">Pending Requests</p>
-                        <h3 class="mb-0 fw-bold text-warning">{{ pending_payments.count }}</h3>
+                <!-- Payments Count -->
+                <div class="bg-white rounded-2xl p-6 shadow-lg border-2 border-gray-200 hover:border-blue-400 transition-all transform hover:scale-105">
+                    <div class="flex items-center justify-between mb-3">
+                        <p class="text-gray-600 text-sm font-semibold">Payments Made</p>
+                        <div class="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center">
+                            <i data-lucide="receipt" class="w-5 h-5 text-blue-600"></i>
+                        </div>
                     </div>
-                    <div class="bg-warning bg-opacity-10 rounded-circle p-3">
-                        <i class="fas fa-clock fa-2x text-warning"></i>
+                    <p class="text-3xl font-bold text-blue-600">{{ payments_count }}</p>
+                </div>
+
+                <!-- Pending -->
+                <div class="bg-white rounded-2xl p-6 shadow-lg border-2 border-gray-200 hover:border-yellow-400 transition-all transform hover:scale-105">
+                    <div class="flex items-center justify-between mb-3">
+                        <p class="text-gray-600 text-sm font-semibold">Pending</p>
+                        <div class="w-10 h-10 bg-yellow-100 rounded-lg flex items-center justify-center">
+                            <i data-lucide="clock" class="w-5 h-5 text-yellow-600"></i>
+                        </div>
                     </div>
+                    <p class="text-3xl font-bold text-yellow-600">{{ pending_payments.count }}</p>
+                </div>
+
+                <!-- Outstanding -->
+                <div class="bg-white rounded-2xl p-6 shadow-lg border-2 border-gray-200 hover:border-red-400 transition-all transform hover:scale-105">
+                    <div class="flex items-center justify-between mb-3">
+                        <p class="text-gray-600 text-sm font-semibold">Outstanding</p>
+                        <div class="w-10 h-10 bg-red-100 rounded-lg flex items-center justify-center">
+                            <i data-lucide="alert-circle" class="w-5 h-5 text-red-600"></i>
+                        </div>
+                    </div>
+                    <p class="text-3xl font-bold text-red-600">₱{{ total_outstanding|floatformat:2 }}</p>
                 </div>
             </div>
-        </div>
-    </div>
 
-    <div class="col-xl-3 col-md-6">
-        <div class="card stat-card border-0 shadow">
-            <div class="card-body">
-                <div class="d-flex justify-content-between align-items-start">
-                    <div class="flex-grow-1">
-                        <p class="text-muted small text-uppercase fw-bold mb-2">Outstanding Fees</p>
-                        <h3 class="mb-0 fw-bold text-danger">₱{{ total_outstanding|floatformat:2 }}</h3>
-                    </div>
-                    <div class="bg-danger bg-opacity-10 rounded-circle p-3">
-                        <i class="fas fa-exclamation-circle fa-2x text-danger"></i>
-                    </div>
+            <!-- All Fees Table -->
+            <div class="bg-white rounded-2xl shadow-xl border-2 border-gray-200 overflow-hidden">
+                <div class="bg-gradient-to-r from-green-500 to-emerald-600 px-6 py-5 border-b-2 border-green-600">
+                    <h3 class="text-xl font-bold text-white flex items-center gap-3">
+                        <i data-lucide="file-text" class="w-6 h-6"></i>
+                        Organization Fees
+                    </h3>
+                    <p class="text-green-50 text-sm mt-1">Manage your payment obligations</p>
                 </div>
-            </div>
-        </div>
-    </div>
-</div>
-
-<div class="row">
-    <!-- Quick Actions -->
-    <div class="col-lg-6 mb-4">
-        <div class="card border-0 shadow">
-            <div class="card-header bg-primary text-white">
-                <h5 class="mb-0 fw-bold"><i class="fas fa-bolt me-2"></i>Quick Actions</h5>
-            </div>
-            <div class="card-body">
-                <div class="d-grid gap-2">
-                    <a href="{% url 'generate_qr' %}" class="btn btn-success btn-lg">
-                        <i class="fas fa-qrcode me-2"></i>Generate QR Code
-                    </a>
-                    <a href="{% url 'payment_history' %}" class="btn btn-primary btn-lg">
-                        <i class="fas fa-history me-2"></i>View Payment History
-                    </a>
-                    <a href="{% url 'student_profile_update' %}" class="btn btn-outline-primary btn-lg">
-                        <i class="fas fa-user-edit me-2"></i>Update Profile
-                    </a>
-                </div>
-            </div>
-        </div>
-
-        <!-- Student Info -->
-        <div class="card border-0 shadow mt-4">
-            <div class="card-header bg-primary text-white">
-                <h5 class="mb-0 fw-bold"><i class="fas fa-user-graduate me-2"></i>Student Information</h5>
-            </div>
-            <div class="card-body">
-                <table class="table table-borderless">
-                    <tr>
-                        <td><strong>Name:</strong></td>
-                        <td>{{ student.get_full_name }}</td>
-                    </tr>
-                    <tr>
-                        <td><strong>Student ID:</strong></td>
-                        <td>{{ student.student_id_number }}</td>
-                    </tr>
-                    <tr>
-                        <td><strong>Email:</strong></td>
-                        <td>{{ student.email }}</td>
-                    </tr>
-                    <tr>
-                        <td><strong>Course/Program:</strong></td>
-                        <td>
-                            {{ student.course.name }}
-                            {% if student.course.program_type != 'OTHER' %}
-                                <span class="badge bg-primary ms-2">{{ student.course.get_program_type_display }}</span>
-                            {% endif %}
-                        </td>
-                    </tr>
-                    <tr>
-                        <td><strong>Year Level:</strong></td>
-                        <td>{{ student.year_level }}</td>
-                    </tr>
-                    <tr>
-                        <td><strong>College:</strong></td>
-                        <td>{{ student.college }}</td>
-                    </tr>
-                </table>
-            </div>
-        </div>
-    </div>
-
-    <!-- Pending Payments -->
-    <div class="col-lg-6 mb-4">
-        <div class="card border-0 shadow">
-            <div class="card-header bg-warning text-white">
-                <div class="d-flex justify-content-between align-items-center">
-                    <h5 class="mb-0 fw-bold"><i class="fas fa-clock me-2"></i>Pending Payment Requests</h5>
-                    <span class="badge bg-white text-dark fs-6 px-3 py-2">{{ pending_payments.count }}</span>
-                </div>
-            </div>
-            <div class="card-body">
-                {% if pending_payments %}
-                <div class="table-responsive">
-                    <table class="table table-hover align-middle mb-0">
-                        <thead>
+                
+                <div class="overflow-x-auto">
+                    <table class="w-full">
+                        <thead class="bg-gray-100 border-b-2 border-gray-200">
                             <tr>
-                                <th><i class="fas fa-building me-1"></i>Organization</th>
-                                <th><i class="fas fa-tag me-1"></i>Fee Type</th>
-                                <th><i class="fas fa-money-bill-wave me-1"></i>Amount</th>
-                                <th><i class="fas fa-info-circle me-1"></i>Status</th>
+                                <th class="px-6 py-4 text-left text-sm font-bold text-gray-700">
+                                    <i data-lucide="tag" class="w-4 h-4 inline mr-1"></i>
+                                    Fee Type
+                                </th>
+                                <th class="px-6 py-4 text-left text-sm font-bold text-gray-700">
+                                    <i data-lucide="building" class="w-4 h-4 inline mr-1"></i>
+                                    Organization
+                                </th>
+                                <th class="px-6 py-4 text-left text-sm font-bold text-gray-700">
+                                    <i data-lucide="dollar-sign" class="w-4 h-4 inline mr-1"></i>
+                                    Amount
+                                </th>
+                                <th class="px-6 py-4 text-left text-sm font-bold text-gray-700">
+                                    <i data-lucide="circle-dot" class="w-4 h-4 inline mr-1"></i>
+                                    Status
+                                </th>
+                                <th class="px-6 py-4 text-left text-sm font-bold text-gray-700">
+                                    <i data-lucide="zap" class="w-4 h-4 inline mr-1"></i>
+                                    Action
+                                </th>
                             </tr>
                         </thead>
                         <tbody>
                             {% for payment in pending_payments %}
-                            <tr class="clickable-row" style="cursor: pointer;" 
-                                onclick="window.location.href='{% url 'view_payment_request_qr' request_id=payment.request_id %}';">
-                                <td>
-                                    <div class="d-flex align-items-center gap-2">
+                            <!-- Unpaid Fee Row -->
+                            <tr class="bg-white hover:bg-green-50 transition-colors border-b border-gray-100">
+                                <td class="px-6 py-4">
+                                    <div>
+                                        <p class="font-bold text-gray-900">{{ payment.fee_type.name }}</p>
+                                        {% if payment.fee_type.due_date %}
+                                        <p class="text-sm text-gray-600 flex items-center gap-1 mt-1">
+                                            <i data-lucide="calendar" class="w-3 h-3"></i>
+                                            Due: {{ payment.fee_type.due_date|date:"M d, Y" }}
+                                        </p>
+                                        {% endif %}
+                                    </div>
+                                </td>
+                                <td class="px-6 py-4">
+                                    <div class="flex items-center gap-2">
                                         {% if payment.organization.get_logo_path %}
-                                            <img src="{{ payment.organization.get_logo_path }}" alt="{{ payment.organization.name }} Logo" 
-                                                 class="img-fluid" style="max-height: 30px; max-width: 80px; object-fit: contain;">
+                                            <img src="{{ payment.organization.get_logo_path }}" alt="{{ payment.organization.name }}" 
+                                                 class="h-6 w-14 object-contain">
                                         {% endif %}
                                         <div>
-                                            <strong>{{ payment.organization.code }}</strong>
-                                            <br>
-                                            <small class="text-muted">{{ payment.organization.name }}</small>
+                                            <p class="font-semibold text-gray-900">{{ payment.organization.name }}</p>
+                                            <p class="text-sm text-gray-600">{{ payment.organization.code }}</p>
                                         </div>
                                     </div>
                                 </td>
-                                <td><strong>{{ payment.fee_type.name }}</strong></td>
-                                <td>
-                                    <span class="fw-bold text-success fs-5">₱{{ payment.amount|floatformat:2 }}</span>
+                                <td class="px-6 py-4">
+                                    <p class="text-xl font-bold text-gray-900">₱{{ payment.amount|floatformat:2 }}</p>
                                 </td>
-                                <td>
-                                    <span class="badge bg-warning text-dark">
-                                        <i class="fas fa-clock me-1"></i>Pending
+                                <td class="px-6 py-4">
+                                    <span class="inline-flex items-center gap-2 bg-red-500 text-white px-4 py-2 rounded-full text-sm font-bold shadow-lg">
+                                        <i data-lucide="x-circle" class="w-4 h-4"></i>
+                                        Unpaid
                                     </span>
+                                </td>
+                                <td class="px-6 py-4">
+                                    <a href="{% url 'view_payment_request_qr' request_id=payment.request_id %}" 
+                                       class="inline-flex items-center gap-2 px-5 py-2.5 bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white rounded-lg font-bold transition-all transform hover:scale-105 shadow-lg">
+                                        <i data-lucide="qr-code" class="w-4 h-4"></i>
+                                        View QR
+                                    </a>
                                 </td>
                             </tr>
                             {% endfor %}
-                        </tbody>
-                    </table>
-                </div>
-                <div class="mt-3 text-center">
-                    <small class="text-muted"><i class="fas fa-info-circle me-1"></i>Click any payment to view its QR code</small>
-                </div>
-                {% else %}
-                <div class="text-center py-5">
-                    <i class="fas fa-check-circle fa-4x text-success mb-3"></i>
-                    <h5>All Clear!</h5>
-                    <p class="text-muted">You have no pending payments.</p>
-                    <a href="{% url 'generate_qr' %}" class="btn btn-primary">
-                        <i class="fas fa-qrcode me-2"></i>Generate New QR Code
-                    </a>
-                </div>
-                {% endif %}
-            </div>
-        </div>
-    </div>
-</div>
 
-<!-- Recent Payments -->
-<div class="row">
-    <div class="col-12">
-        <div class="card border-0 shadow">
-            <div class="card-header bg-primary text-white">
-                <h5 class="mb-0 fw-bold"><i class="fas fa-history me-2"></i>Recent Payment History</h5>
-            </div>
-            <div class="card-body">
-                {% if completed_payments %}
-                <div class="table-responsive">
-                    <table class="table table-striped">
-                        <thead>
-                            <tr>
-                                <th>Date</th>
-                                <th>OR Number</th>
-                                <th>Organization</th>
-                                <th>Fee Type</th>
-                                <th>Amount</th>
-                                <th>Action</th>
-                            </tr>
-                        </thead>
-                        <tbody>
                             {% for payment in completed_payments %}
-                            <tr>
-                                <td>{{ payment.created_at|date:"M d, Y H:i" }}</td>
-                                <td><strong>{{ payment.or_number }}</strong></td>
-                                <td>
-                                    <div class="d-flex align-items-center gap-2">
-                                        {% if payment.organization.get_logo_path %}
-                                            <img src="{{ payment.organization.get_logo_path }}" alt="{{ payment.organization.name }} Logo" 
-                                                 class="img-fluid" style="max-height: 25px; max-width: 70px; object-fit: contain;">
-                                        {% endif %}
-                                        <span>{{ payment.organization.name }}</span>
+                            <!-- Paid Fee Row -->
+                            <tr class="bg-gray-50 hover:bg-green-50 transition-colors border-b border-gray-100">
+                                <td class="px-6 py-4">
+                                    <div>
+                                        <p class="font-bold text-gray-900">{{ payment.fee_type.name }}</p>
+                                        <p class="text-sm text-gray-600 flex items-center gap-1 mt-1">
+                                            <i data-lucide="check" class="w-3 h-3"></i>
+                                            Paid: {{ payment.created_at|date:"M d, Y" }}
+                                        </p>
                                     </div>
                                 </td>
-                                <td>{{ payment.fee_type.name }}</td>
-                                <td class="fw-bold text-success">₱{{ payment.amount }}</td>
-                                <td>
-                                    <a href="{% url 'payment_detail' payment.id %}" class="btn btn-sm btn-outline-primary">
-                                        View
+                                <td class="px-6 py-4">
+                                    <div class="flex items-center gap-2">
+                                        {% if payment.organization.get_logo_path %}
+                                            <img src="{{ payment.organization.get_logo_path }}" alt="{{ payment.organization.name }}" 
+                                                 class="h-6 w-14 object-contain">
+                                        {% endif %}
+                                        <div>
+                                            <p class="font-semibold text-gray-900">{{ payment.organization.name }}</p>
+                                            <p class="text-sm text-gray-600">{{ payment.organization.code }}</p>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td class="px-6 py-4">
+                                    <p class="text-xl font-bold text-gray-900">₱{{ payment.amount }}</p>
+                                </td>
+                                <td class="px-6 py-4">
+                                    <span class="inline-flex items-center gap-2 bg-green-500 text-white px-4 py-2 rounded-full text-sm font-bold shadow-lg">
+                                        <i data-lucide="check-circle" class="w-4 h-4"></i>
+                                        Paid
+                                    </span>
+                                </td>
+                                <td class="px-6 py-4">
+                                    <a href="{% url 'payment_detail' payment.id %}" 
+                                       class="inline-flex items-center gap-2 px-5 py-2.5 bg-gray-300 hover:bg-gray-400 text-gray-700 rounded-lg font-bold transition-colors">
+                                        <i data-lucide="file-check" class="w-4 h-4"></i>
+                                        View Receipt
                                     </a>
                                 </td>
                             </tr>
@@ -278,24 +253,259 @@
                         </tbody>
                     </table>
                 </div>
-                <div class="text-center mt-3">
-                    <a href="{% url 'payment_history' %}" class="btn btn-outline-primary">
-                        View Full Payment History
-                    </a>
-                </div>
-                {% else %}
-                <div class="text-center py-5">
-                    <i class="fas fa-receipt fa-4x text-muted mb-3"></i>
-                    <h5>No Payment History</h5>
-                    <p class="text-muted">You haven't made any payments yet.</p>
-                    <a href="{% url 'generate_qr' %}" class="btn btn-primary">
-                        Make Your First Payment
-                    </a>
-                </div>
-                {% endif %}
             </div>
-        </div>
-    </div>
-</div>
-{% endblock %}
 
+            <!-- Pending Payments Section -->
+            <div class="bg-white rounded-2xl shadow-xl border-2 border-gray-200 overflow-hidden">
+                <div class="bg-gradient-to-r from-green-500 to-emerald-600 px-6 py-5 border-b-2 border-green-600">
+                    <div class="flex justify-between items-center">
+                        <div>
+                            <h3 class="text-xl font-bold text-white flex items-center gap-3">
+                                <i data-lucide="clock" class="w-6 h-6"></i>
+                                Pending Payment Requests
+                            </h3>
+                            <p class="text-green-50 text-sm mt-1">Click any row to view QR code</p>
+                        </div>
+                        <span class="bg-white text-gray-900 px-4 py-2 rounded-full text-lg font-bold">{{ pending_payments.count }}</span>
+                    </div>
+                </div>
+                
+                <div class="overflow-x-auto">
+                    {% if pending_payments %}
+                    <table class="w-full">
+                        <thead class="bg-gray-100 border-b-2 border-gray-200">
+                            <tr>
+                                <th class="px-6 py-4 text-left text-sm font-bold text-gray-700">
+                                    <i data-lucide="building" class="w-4 h-4 inline mr-1"></i>
+                                    Organization
+                                </th>
+                                <th class="px-6 py-4 text-left text-sm font-bold text-gray-700">
+                                    <i data-lucide="tag" class="w-4 h-4 inline mr-1"></i>
+                                    Fee Type
+                                </th>
+                                <th class="px-6 py-4 text-left text-sm font-bold text-gray-700">
+                                    <i data-lucide="dollar-sign" class="w-4 h-4 inline mr-1"></i>
+                                    Amount
+                                </th>
+                                <th class="px-6 py-4 text-left text-sm font-bold text-gray-700">
+                                    <i data-lucide="circle-dot" class="w-4 h-4 inline mr-1"></i>
+                                    Status
+                                </th>
+                                <th class="px-6 py-4 text-left text-sm font-bold text-gray-700">
+                                    <i data-lucide="zap" class="w-4 h-4 inline mr-1"></i>
+                                    Action
+                                </th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for payment in pending_payments %}
+                            <tr class="bg-white hover:bg-green-50 transition-colors border-b border-gray-100 cursor-pointer">
+                                <td class="px-6 py-4">
+                                    <div class="flex items-center gap-3">
+                                        {% if payment.organization.get_logo_path %}
+                                            <img src="{{ payment.organization.get_logo_path }}" alt="{{ payment.organization.name }}" 
+                                                 class="h-8 w-16 object-contain">
+                                        {% endif %}
+                                        <div>
+                                            <p class="font-semibold text-gray-900">{{ payment.organization.name }}</p>
+                                            <p class="text-sm text-gray-600">{{ payment.organization.code }}</p>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td class="px-6 py-4">
+                                    <p class="font-bold text-gray-900">{{ payment.fee_type.name }}</p>
+                                </td>
+                                <td class="px-6 py-4">
+                                    <p class="text-xl font-bold text-gray-900">₱{{ payment.amount|floatformat:2 }}</p>
+                                </td>
+                                <td class="px-6 py-4">
+                                    <span class="inline-flex items-center gap-2 bg-yellow-500 text-white px-4 py-2 rounded-full text-sm font-bold shadow-lg">
+                                        <i data-lucide="clock" class="w-4 h-4"></i>
+                                        Pending
+                                    </span>
+                                </td>
+                                <td class="px-6 py-4">
+                                    <a href="{% url 'view_payment_request_qr' request_id=payment.request_id %}" 
+                                       class="inline-flex items-center gap-2 px-5 py-2.5 bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white rounded-lg font-bold transition-all transform hover:scale-105 shadow-lg">
+                                        <i data-lucide="qr-code" class="w-4 h-4"></i>
+                                        View QR
+                                    </a>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                    {% else %}
+                    <div class="text-center py-12">
+                        <i data-lucide="check-circle" class="w-16 h-16 text-green-600 mx-auto mb-4"></i>
+                        <h5 class="text-xl font-bold text-gray-900 mb-2">All Clear!</h5>
+                        <p class="text-gray-600 mb-4">You have no pending payments.</p>
+                        <a href="{% url 'generate_qr' %}" class="inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white rounded-lg font-bold transition-all shadow-lg">
+                            <i data-lucide="qr-code" class="w-5 h-5"></i>
+                            Generate New QR Code
+                        </a>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+
+
+            <!-- Recent Payments -->
+            <div class="bg-white rounded-2xl shadow-xl border-2 border-gray-200 overflow-hidden">
+                <div class="bg-gradient-to-r from-green-500 to-emerald-600 px-6 py-5 border-b-2 border-green-600">
+                    <h3 class="text-xl font-bold text-white flex items-center gap-3">
+                        <i data-lucide="history" class="w-6 h-6"></i>
+                        Recent Payment History
+                    </h3>
+                    <p class="text-green-50 text-sm mt-1">Your completed transactions</p>
+                </div>
+                
+                <div class="overflow-x-auto">
+                    {% if completed_payments %}
+                    <table class="w-full">
+                        <thead class="bg-gray-100 border-b-2 border-gray-200">
+                            <tr>
+                                <th class="px-6 py-4 text-left text-sm font-bold text-gray-700">
+                                    <i data-lucide="calendar" class="w-4 h-4 inline mr-1"></i>
+                                    Date
+                                </th>
+                                <th class="px-6 py-4 text-left text-sm font-bold text-gray-700">
+                                    <i data-lucide="hash" class="w-4 h-4 inline mr-1"></i>
+                                    OR Number
+                                </th>
+                                <th class="px-6 py-4 text-left text-sm font-bold text-gray-700">
+                                    <i data-lucide="building" class="w-4 h-4 inline mr-1"></i>
+                                    Organization
+                                </th>
+                                <th class="px-6 py-4 text-left text-sm font-bold text-gray-700">
+                                    <i data-lucide="tag" class="w-4 h-4 inline mr-1"></i>
+                                    Fee Type
+                                </th>
+                                <th class="px-6 py-4 text-left text-sm font-bold text-gray-700">
+                                    <i data-lucide="dollar-sign" class="w-4 h-4 inline mr-1"></i>
+                                    Amount
+                                </th>
+                                <th class="px-6 py-4 text-left text-sm font-bold text-gray-700">
+                                    <i data-lucide="eye" class="w-4 h-4 inline mr-1"></i>
+                                    Action
+                                </th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for payment in completed_payments %}
+                            <tr class="bg-white hover:bg-green-50 transition-colors border-b border-gray-100">
+                                <td class="px-6 py-4">
+                                    <p class="text-gray-900">{{ payment.created_at|date:"M d, Y" }}</p>
+                                    <p class="text-sm text-gray-600">{{ payment.created_at|date:"H:i" }}</p>
+                                </td>
+                                <td class="px-6 py-4">
+                                    <p class="font-bold text-gray-900">{{ payment.or_number }}</p>
+                                </td>
+                                <td class="px-6 py-4">
+                                    <div class="flex items-center gap-2">
+                                        {% if payment.organization.get_logo_path %}
+                                            <img src="{{ payment.organization.get_logo_path }}" alt="{{ payment.organization.name }}" 
+                                                 class="h-6 w-14 object-contain">
+                                        {% endif %}
+                                        <span class="text-gray-900">{{ payment.organization.name }}</span>
+                                    </div>
+                                </td>
+                                <td class="px-6 py-4">
+                                    <p class="text-gray-900">{{ payment.fee_type.name }}</p>
+                                </td>
+                                <td class="px-6 py-4">
+                                    <p class="text-lg font-bold text-green-600">₱{{ payment.amount }}</p>
+                                </td>
+                                <td class="px-6 py-4">
+                                    <a href="{% url 'payment_detail' payment.id %}" 
+                                       class="inline-flex items-center gap-2 px-4 py-2 bg-gray-200 hover:bg-gray-300 text-gray-700 rounded-lg font-medium transition-colors">
+                                        <i data-lucide="eye" class="w-4 h-4"></i>
+                                        View
+                                    </a>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                    <div class="p-6 text-center bg-gray-50">
+                        <a href="{% url 'payment_history' %}" 
+                           class="inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white rounded-lg font-bold transition-all shadow-lg">
+                            <i data-lucide="list" class="w-5 h-5"></i>
+                            View Full Payment History
+                        </a>
+                    </div>
+                    {% else %}
+                    <div class="text-center py-12">
+                        <i data-lucide="receipt" class="w-16 h-16 text-gray-400 mx-auto mb-4"></i>
+                        <h5 class="text-xl font-bold text-gray-900 mb-2">No Payment History</h5>
+                        <p class="text-gray-600 mb-4">You haven't made any payments yet.</p>
+                        <a href="{% url 'generate_qr' %}" 
+                           class="inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white rounded-lg font-bold transition-all shadow-lg">
+                            <i data-lucide="qr-code" class="w-5 h-5"></i>
+                            Make Your First Payment
+                        </a>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Quick Actions -->
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <a href="{% url 'generate_qr' %}" class="bg-white hover:bg-green-50 rounded-2xl p-6 shadow-lg border-2 border-gray-200 hover:border-green-400 transition-all transform hover:scale-105">
+                    <div class="flex items-center gap-4">
+                        <div class="w-12 h-12 bg-green-100 rounded-xl flex items-center justify-center">
+                            <i data-lucide="qr-code" class="w-6 h-6 text-green-600"></i>
+                        </div>
+                        <div class="text-left">
+                            <p class="font-bold text-gray-900">Generate QR</p>
+                            <p class="text-sm text-gray-600">Create payment request</p>
+                        </div>
+                    </div>
+                </a>
+
+                <a href="{% url 'student_profile_update' %}" class="bg-white hover:bg-orange-50 rounded-2xl p-6 shadow-lg border-2 border-gray-200 hover:border-orange-400 transition-all transform hover:scale-105">
+                    <div class="flex items-center gap-4">
+                        <div class="w-12 h-12 bg-orange-100 rounded-xl flex items-center justify-center">
+                            <i data-lucide="user-cog" class="w-6 h-6 text-orange-600"></i>
+                        </div>
+                        <div class="text-left">
+                            <p class="font-bold text-gray-900">My Profile</p>
+                            <p class="text-sm text-gray-600">Update information</p>
+                        </div>
+                    </div>
+                </a>
+
+                <a href="{% url 'payment_history' %}" class="bg-white hover:bg-blue-50 rounded-2xl p-6 shadow-lg border-2 border-gray-200 hover:border-blue-400 transition-all transform hover:scale-105">
+                    <div class="flex items-center gap-4">
+                        <div class="w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center">
+                            <i data-lucide="history" class="w-6 h-6 text-blue-600"></i>
+                        </div>
+                        <div class="text-left">
+                            <p class="font-bold text-gray-900">History</p>
+                            <p class="text-sm text-gray-600">View all transactions</p>
+                        </div>
+                    </div>
+                </a>
+            </div>
+
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-white border-t-2 border-green-200 mt-12 py-6">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center text-gray-600 text-sm">
+            <p>{{ student.college }} • UniPay Payment System</p>
+            <p class="mt-1">© 2024 UniPay System. All rights reserved.</p>
+        </div>
+    </footer>
+
+    <script>
+        lucide.createIcons();
+        document.addEventListener('DOMContentLoaded', () => {
+            setTimeout(() => lucide.createIcons(), 100);
+        });
+    </script>
+</body>
+</html>
+
+{% endblock %}

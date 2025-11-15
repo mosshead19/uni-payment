@@ -1,0 +1,398 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Student Dashboard - OrgFee Payment System</title>
+    
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Lucide Icons CDN -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    
+    <style>
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateX(-20px); }
+            to { opacity: 1; transform: translateX(0); }
+        }
+        .animate-fadeIn {
+            animation: fadeIn 0.5s ease-out;
+        }
+        .animate-slideIn {
+            animation: slideIn 0.6s ease-out;
+        }
+        
+        /* Custom scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #f1f5f9;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #10b981;
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #059669;
+        }
+    </style>
+</head>
+<body class="bg-gradient-to-br from-green-50 via-emerald-50 to-green-100 min-h-screen">
+    
+    <!-- Navigation Bar -->
+    <nav class="bg-white shadow-lg border-b-4 border-green-500">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center h-16">
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 bg-gradient-to-br from-green-500 to-emerald-600 rounded-lg flex items-center justify-center">
+                        <i data-lucide="wallet" class="w-6 h-6 text-white"></i>
+                    </div>
+                    <div>
+                        <h1 class="text-xl font-bold text-gray-900">OrgFee System</h1>
+                        <p class="text-xs text-gray-600">Student Portal</p>
+                    </div>
+                </div>
+                <div class="flex items-center gap-4">
+                    <div class="hidden md:flex items-center gap-2 text-sm text-gray-700">
+                        <i data-lucide="user" class="w-4 h-4"></i>
+                        <span class="font-medium">Juan Dela Cruz</span>
+                    </div>
+                    <button class="px-4 py-2 bg-red-500 hover:bg-red-600 text-white rounded-lg font-medium transition-colors flex items-center gap-2">
+                        <i data-lucide="log-out" class="w-4 h-4"></i>
+                        <span>Logout</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <div class="space-y-6">
+            
+            <!-- Header Section -->
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-4 animate-fadeIn">
+                <div class="md:col-span-3 bg-gradient-to-r from-green-400 to-emerald-500 rounded-2xl p-6 shadow-xl border-l-8 border-green-600">
+                    <div class="flex items-center gap-3 mb-2">
+                        <div class="w-12 h-12 bg-white/20 backdrop-blur-sm rounded-xl flex items-center justify-center">
+                            <i data-lucide="layout-dashboard" class="w-7 h-7 text-white"></i>
+                        </div>
+                        <h2 class="text-3xl font-bold text-white drop-shadow-lg">Dashboard</h2>
+                    </div>
+                    <p class="text-green-50 text-lg">Welcome back, <span class="font-semibold">Juan Dela Cruz</span>!</p>
+                    <p class="text-green-100 text-sm mt-1">BS Biology - Year 3</p>
+                </div>
+                <div class="bg-white rounded-2xl p-6 shadow-lg border-2 border-green-200">
+                    <div class="flex items-center gap-2 mb-2">
+                        <i data-lucide="id-card" class="w-5 h-5 text-green-600"></i>
+                        <p class="text-sm font-semibold text-gray-600">Student ID</p>
+                    </div>
+                    <p class="text-2xl font-bold text-gray-900">2021-12345</p>
+                </div>
+            </div>
+            
+            <!-- Summary Stats -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 animate-fadeIn">
+                <!-- Total Fees -->
+                <div class="bg-white rounded-2xl p-6 shadow-lg border-2 border-gray-200 hover:border-green-400 transition-all transform hover:scale-105">
+                    <div class="flex items-center justify-between mb-3">
+                        <p class="text-gray-600 text-sm font-semibold">Total Fees</p>
+                        <div class="w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center">
+                            <i data-lucide="coins" class="w-5 h-5 text-green-600"></i>
+                        </div>
+                    </div>
+                    <p class="text-3xl font-bold text-gray-900">₱2,600.00</p>
+                </div>
+
+                <!-- Paid -->
+                <div class="bg-white rounded-2xl p-6 shadow-lg border-2 border-gray-200 hover:border-green-400 transition-all transform hover:scale-105">
+                    <div class="flex items-center justify-between mb-3">
+                        <p class="text-gray-600 text-sm font-semibold">Paid</p>
+                        <div class="w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center">
+                            <i data-lucide="check-circle-2" class="w-5 h-5 text-green-600"></i>
+                        </div>
+                    </div>
+                    <p class="text-3xl font-bold text-green-600">₱1,500.00</p>
+                </div>
+
+                <!-- Unpaid -->
+                <div class="bg-white rounded-2xl p-6 shadow-lg border-2 border-gray-200 hover:border-red-400 transition-all transform hover:scale-105">
+                    <div class="flex items-center justify-between mb-3">
+                        <p class="text-gray-600 text-sm font-semibold">Unpaid</p>
+                        <div class="w-10 h-10 bg-red-100 rounded-lg flex items-center justify-center">
+                            <i data-lucide="alert-circle" class="w-5 h-5 text-red-600"></i>
+                        </div>
+                    </div>
+                    <p class="text-3xl font-bold text-red-600">₱1,100.00</p>
+                </div>
+
+                <!-- Progress -->
+                <div class="bg-white rounded-2xl p-6 shadow-lg border-2 border-gray-200 hover:border-green-400 transition-all">
+                    <div class="flex items-center justify-between mb-3">
+                        <p class="text-gray-600 text-sm font-semibold">Progress</p>
+                        <div class="w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center">
+                            <i data-lucide="trending-up" class="w-5 h-5 text-green-600"></i>
+                        </div>
+                    </div>
+                    <div class="relative">
+                        <div class="w-full bg-gray-200 rounded-full h-10 overflow-hidden shadow-inner">
+                            <div class="bg-gradient-to-r from-green-500 to-emerald-600 h-full flex items-center justify-center text-white text-sm font-bold transition-all duration-500 shadow-lg"
+                                 style="width: 58%">
+                                58%
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Queue Status -->
+            <div class="bg-gradient-to-r from-green-50 to-emerald-50 border-3 border-green-500 rounded-2xl p-5 flex items-center justify-between shadow-lg animate-slideIn">
+                <div class="flex items-center gap-4">
+                    <div class="w-14 h-14 bg-green-500 rounded-xl flex items-center justify-center animate-pulse">
+                        <i data-lucide="ticket" class="w-8 h-8 text-white"></i>
+                    </div>
+                    <div>
+                        <p class="text-sm text-green-700 font-medium">Active Queue</p>
+                        <p class="text-2xl font-bold text-green-900">Queue #A-042</p>
+                        <p class="text-sm text-green-600">The Spectrum - Publication Fee</p>
+                    </div>
+                </div>
+                <button class="px-6 py-3 bg-green-600 hover:bg-green-700 text-white rounded-xl font-bold transition-all transform hover:scale-105 shadow-lg">
+                    <i data-lucide="qr-code" class="w-5 h-5 inline mr-2"></i>
+                    View QR Code
+                </button>
+            </div>
+
+            <!-- Fees Table -->
+            <div class="bg-white rounded-2xl shadow-xl border-2 border-gray-200 overflow-hidden animate-fadeIn">
+                <div class="bg-gradient-to-r from-green-500 to-emerald-600 px-6 py-5 border-b-2 border-green-600">
+                    <h3 class="text-xl font-bold text-white flex items-center gap-3">
+                        <i data-lucide="file-text" class="w-6 h-6"></i>
+                        Organization Fees
+                    </h3>
+                    <p class="text-green-50 text-sm mt-1">Manage your payment obligations</p>
+                </div>
+                
+                <div class="overflow-x-auto">
+                    <table class="w-full">
+                        <thead class="bg-gray-100 border-b-2 border-gray-200">
+                            <tr>
+                                <th class="px-6 py-4 text-left text-sm font-bold text-gray-700">
+                                    <i data-lucide="tag" class="w-4 h-4 inline mr-1"></i>
+                                    Fee Type
+                                </th>
+                                <th class="px-6 py-4 text-left text-sm font-bold text-gray-700">
+                                    <i data-lucide="building" class="w-4 h-4 inline mr-1"></i>
+                                    Organization
+                                </th>
+                                <th class="px-6 py-4 text-left text-sm font-bold text-gray-700">
+                                    <i data-lucide="dollar-sign" class="w-4 h-4 inline mr-1"></i>
+                                    Amount
+                                </th>
+                                <th class="px-6 py-4 text-left text-sm font-bold text-gray-700">
+                                    <i data-lucide="circle-dot" class="w-4 h-4 inline mr-1"></i>
+                                    Status
+                                </th>
+                                <th class="px-6 py-4 text-left text-sm font-bold text-gray-700">
+                                    <i data-lucide="zap" class="w-4 h-4 inline mr-1"></i>
+                                    Action
+                                </th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <!-- Fee Row 1 - Unpaid -->
+                            <tr class="bg-white hover:bg-green-50 transition-colors border-b border-gray-100">
+                                <td class="px-6 py-4">
+                                    <div>
+                                        <p class="font-bold text-gray-900">Publication Fee</p>
+                                        <p class="text-sm text-gray-600 flex items-center gap-1 mt-1">
+                                            <i data-lucide="calendar" class="w-3 h-3"></i>
+                                            Due: Nov 30, 2024
+                                        </p>
+                                    </div>
+                                </td>
+                                <td class="px-6 py-4">
+                                    <p class="font-semibold text-gray-900">The Spectrum</p>
+                                    <p class="text-sm text-gray-600">SPECTRUM</p>
+                                </td>
+                                <td class="px-6 py-4">
+                                    <p class="text-xl font-bold text-gray-900">₱300.00</p>
+                                </td>
+                                <td class="px-6 py-4">
+                                    <span class="inline-flex items-center gap-2 bg-red-500 text-white px-4 py-2 rounded-full text-sm font-bold shadow-lg">
+                                        <i data-lucide="x-circle" class="w-4 h-4"></i>
+                                        Unpaid
+                                    </span>
+                                </td>
+                                <td class="px-6 py-4">
+                                    <button class="inline-flex items-center gap-2 px-5 py-2.5 bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white rounded-lg font-bold transition-all transform hover:scale-105 shadow-lg">
+                                        <i data-lucide="qr-code" class="w-4 h-4"></i>
+                                        Generate QR
+                                    </button>
+                                </td>
+                            </tr>
+
+                            <!-- Fee Row 2 - Paid -->
+                            <tr class="bg-gray-50 hover:bg-green-50 transition-colors border-b border-gray-100">
+                                <td class="px-6 py-4">
+                                    <div>
+                                        <p class="font-bold text-gray-900">College Fee</p>
+                                        <p class="text-sm text-gray-600 flex items-center gap-1 mt-1">
+                                            <i data-lucide="calendar" class="w-3 h-3"></i>
+                                            Due: Oct 15, 2024
+                                        </p>
+                                    </div>
+                                </td>
+                                <td class="px-6 py-4">
+                                    <p class="font-semibold text-gray-900">College of Sciences</p>
+                                    <p class="text-sm text-gray-600">COS</p>
+                                </td>
+                                <td class="px-6 py-4">
+                                    <p class="text-xl font-bold text-gray-900">₱500.00</p>
+                                </td>
+                                <td class="px-6 py-4">
+                                    <span class="inline-flex items-center gap-2 bg-green-500 text-white px-4 py-2 rounded-full text-sm font-bold shadow-lg">
+                                        <i data-lucide="check-circle" class="w-4 h-4"></i>
+                                        Paid
+                                    </span>
+                                </td>
+                                <td class="px-6 py-4">
+                                    <button class="inline-flex items-center gap-2 px-5 py-2.5 bg-gray-300 hover:bg-gray-400 text-gray-700 rounded-lg font-bold transition-colors">
+                                        <i data-lucide="file-check" class="w-4 h-4"></i>
+                                        View Receipt
+                                    </button>
+                                </td>
+                            </tr>
+
+                            <!-- Fee Row 3 - Unpaid -->
+                            <tr class="bg-white hover:bg-green-50 transition-colors border-b border-gray-100">
+                                <td class="px-6 py-4">
+                                    <div>
+                                        <p class="font-bold text-gray-900">Laboratory Fee</p>
+                                        <p class="text-sm text-gray-600 flex items-center gap-1 mt-1">
+                                            <i data-lucide="calendar" class="w-3 h-3"></i>
+                                            Due: Dec 15, 2024
+                                        </p>
+                                    </div>
+                                </td>
+                                <td class="px-6 py-4">
+                                    <p class="font-semibold text-gray-900">College of Sciences</p>
+                                    <p class="text-sm text-gray-600">COS</p>
+                                </td>
+                                <td class="px-6 py-4">
+                                    <p class="text-xl font-bold text-gray-900">₱800.00</p>
+                                </td>
+                                <td class="px-6 py-4">
+                                    <span class="inline-flex items-center gap-2 bg-red-500 text-white px-4 py-2 rounded-full text-sm font-bold shadow-lg">
+                                        <i data-lucide="x-circle" class="w-4 h-4"></i>
+                                        Unpaid
+                                    </span>
+                                </td>
+                                <td class="px-6 py-4">
+                                    <button class="inline-flex items-center gap-2 px-5 py-2.5 bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white rounded-lg font-bold transition-all transform hover:scale-105 shadow-lg">
+                                        <i data-lucide="qr-code" class="w-4 h-4"></i>
+                                        Generate QR
+                                    </button>
+                                </td>
+                            </tr>
+
+                            <!-- Fee Row 4 - Paid -->
+                            <tr class="bg-gray-50 hover:bg-green-50 transition-colors border-b border-gray-100">
+                                <td class="px-6 py-4">
+                                    <div>
+                                        <p class="font-bold text-gray-900">Student Activities</p>
+                                        <p class="text-sm text-gray-600 flex items-center gap-1 mt-1">
+                                            <i data-lucide="calendar" class="w-3 h-3"></i>
+                                            Due: Sep 30, 2024
+                                        </p>
+                                    </div>
+                                </td>
+                                <td class="px-6 py-4">
+                                    <p class="font-semibold text-gray-900">Student Council</p>
+                                    <p class="text-sm text-gray-600">SC</p>
+                                </td>
+                                <td class="px-6 py-4">
+                                    <p class="text-xl font-bold text-gray-900">₱1,000.00</p>
+                                </td>
+                                <td class="px-6 py-4">
+                                    <span class="inline-flex items-center gap-2 bg-green-500 text-white px-4 py-2 rounded-full text-sm font-bold shadow-lg">
+                                        <i data-lucide="check-circle" class="w-4 h-4"></i>
+                                        Paid
+                                    </span>
+                                </td>
+                                <td class="px-6 py-4">
+                                    <button class="inline-flex items-center gap-2 px-5 py-2.5 bg-gray-300 hover:bg-gray-400 text-gray-700 rounded-lg font-bold transition-colors">
+                                        <i data-lucide="file-check" class="w-4 h-4"></i>
+                                        View Receipt
+                                    </button>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+
+            <!-- Quick Actions -->
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4 animate-slideIn">
+                <button class="bg-white hover:bg-green-50 rounded-2xl p-6 shadow-lg border-2 border-gray-200 hover:border-green-400 transition-all transform hover:scale-105">
+                    <div class="flex items-center gap-4">
+                        <div class="w-12 h-12 bg-green-100 rounded-xl flex items-center justify-center">
+                            <i data-lucide="history" class="w-6 h-6 text-green-600"></i>
+                        </div>
+                        <div class="text-left">
+                            <p class="font-bold text-gray-900">Payment History</p>
+                            <p class="text-sm text-gray-600">View all transactions</p>
+                        </div>
+                    </div>
+                </button>
+
+                <button class="bg-white hover:bg-orange-50 rounded-2xl p-6 shadow-lg border-2 border-gray-200 hover:border-orange-400 transition-all transform hover:scale-105">
+                    <div class="flex items-center gap-4">
+                        <div class="w-12 h-12 bg-orange-100 rounded-xl flex items-center justify-center">
+                            <i data-lucide="user-cog" class="w-6 h-6 text-orange-600"></i>
+                        </div>
+                        <div class="text-left">
+                            <p class="font-bold text-gray-900">My Profile</p>
+                            <p class="text-sm text-gray-600">Update your information</p>
+                        </div>
+                    </div>
+                </button>
+
+                <button class="bg-white hover:bg-blue-50 rounded-2xl p-6 shadow-lg border-2 border-gray-200 hover:border-blue-400 transition-all transform hover:scale-105">
+                    <div class="flex items-center gap-4">
+                        <div class="w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center">
+                            <i data-lucide="help-circle" class="w-6 h-6 text-blue-600"></i>
+                        </div>
+                        <div class="text-left">
+                            <p class="font-bold text-gray-900">Help & Support</p>
+                            <p class="text-sm text-gray-600">Get assistance</p>
+                        </div>
+                    </div>
+                </button>
+            </div>
+
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-white border-t-2 border-green-200 mt-12 py-6">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center text-gray-600 text-sm">
+            <p>College of Sciences • University Payment System</p>
+            <p class="mt-1">© 2024 OrgFee Payment System. All rights reserved.</p>
+        </div>
+    </footer>
+
+    <script>
+        // Initialize Lucide icons
+        lucide.createIcons();
+    </script>
+</body>
+</html>

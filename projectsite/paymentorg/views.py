@@ -699,16 +699,28 @@ class PostBulkPaymentView(OfficerRequiredMixin, View):
                 fee_type.amount = fee_amount
                 fee_type.save()
             
-            # get all students belonging to this organization by matching course/college
-            students = Student.objects.filter(
-                Q(course__code__iexact=organization.code) |
-                Q(course__name__iexact=organization.name) |
-                Q(college__name__iexact=organization.department) |
-                Q(college__code__iexact=organization.code)
-            ).filter(
-                academic_year=academic_year,
-                semester=semester
-            ).distinct()
+            # Get all students belonging to this organization
+            # For TIER_2 organizations with program_affiliation='ALL', include all students in the college
+            if organization.fee_tier == 'TIER_2' and organization.program_affiliation == 'ALL':
+                # Include all students in the college/department
+                students = Student.objects.filter(
+                    Q(college__name__iexact=organization.department) |
+                    Q(college__code__iexact=organization.code)
+                ).filter(
+                    academic_year=academic_year,
+                    semester=semester
+                ).distinct()
+            else:
+                # TIER_1 or specific program affiliation - match by course/program
+                students = Student.objects.filter(
+                    Q(course__code__iexact=organization.code) |
+                    Q(course__name__iexact=organization.name) |
+                    Q(college__name__iexact=organization.department) |
+                    Q(college__code__iexact=organization.code)
+                ).filter(
+                    academic_year=academic_year,
+                    semester=semester
+                ).distinct()
             
             # exclude students who already paid this fee
             paid_students = Payment.objects.filter(

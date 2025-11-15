@@ -64,11 +64,15 @@ class Command(BaseCommand):
 
         organizations = []
         for code, name, tier, program in selected_orgs:
+            # For TIER_2 organizations, set department to "College of Sciences"
+            # so it matches student.college.name for filtering
+            department_name = "College of Sciences" if tier == "TIER_2" else name
+            
             org, _ = Organization.objects.get_or_create(
                 code=code,
                 defaults={
                     "name": name,
-                    "department": name,
+                    "department": department_name,
                     "fee_tier": tier,
                     "program_affiliation": program,
                     "description": "Seeded organization",
@@ -78,6 +82,9 @@ class Command(BaseCommand):
                 },
             )
             updated_fields = []
+            if org.department != department_name:
+                org.department = department_name
+                updated_fields.append("department")
             if org.fee_tier != tier:
                 org.fee_tier = tier
                 updated_fields.append("fee_tier")

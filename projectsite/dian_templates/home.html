@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+
+{% block title %}UniPay {% endblock %}
+
+{% block content %}
+<div class="row mb-5">
+    <div class="col-12 text-center py-5">
+        <h1 class="display-4 fw-bold mb-3">Welcome to UniPay</h1>
+        <p class="lead text-muted mb-4">Modern QR Payment System for Educational Institutions</p>
+        {% if not user.is_authenticated %}
+            <a href="{% url 'login' %}" class="btn btn-primary btn-lg me-2">
+                <i class="fas fa-sign-in-alt me-2"></i>Login
+            </a>
+            <a href="{% url 'select_profile' %}" class="btn btn-outline-primary btn-lg">
+                <i class="fas fa-user-plus me-2"></i>Register
+            </a>
+        {% else %}
+            {% if user.student_profile %}
+                <a href="{% url 'student_dashboard' %}" class="btn btn-primary btn-lg">
+                    <i class="fas fa-tachometer-alt me-2"></i>Go to Dashboard
+                </a>
+            {% elif user.officer_profile or user.is_superuser %}
+                <a href="{% url 'officer_dashboard' %}" class="btn btn-success btn-lg">
+                    <i class="fas fa-cash-register me-2"></i>Officer Panel
+                </a>
+            {% endif %}
+        {% endif %}
+    </div>
+</div>
+
+{% endblock %}

@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en" data-bs-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}UniPay - Fee Payment System{% endblock %}</title>
+    
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <!-- Bootstrap 5 -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+    
+    <!-- Custom Styles -->
+    {% load static %}
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+    
+    {% block extra_head %}{% endblock %}
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-light bg-light shadow-sm">
+        <div class="container">
+            <a class="navbar-brand fw-bold d-flex align-items-center" href="{% url 'home' %}">
+                <i class="fas fa-qrcode text-primary me-2"></i>
+                <span>UniPay</span>
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    {% if user.is_authenticated %}
+                        {% if user.student_profile %}
+                            <li class="nav-item"><a class="nav-link" href="{% url 'student_dashboard' %}"><i class="fas fa-chart-line me-1"></i> Dashboard</a></li>
+                            <li class="nav-item"><a class="nav-link" href="{% url 'student_profile_update' %}"><i class="fas fa-user-circle me-1"></i> Profile</a></li>
+                        {% elif user.officer_profile or user.is_superuser %}
+                            <li class="nav-item"><a class="nav-link" href="{% url 'officer_dashboard' %}"><i class="fas fa-cash-register me-1"></i> Officer Panel</a></li>
+                            {% if user.officer_profile %}
+                                <li class="nav-item"><a class="nav-link" href="{% url 'officer_profile_update' %}"><i class="fas fa-user-cog me-1"></i> Profile</a></li>
+                            {% endif %}
+                            {% if user.is_staff %}
+                                <li class="nav-item"><a class="nav-link btn btn-sm btn-outline-primary ms-2" href="/admin/"><i class="fas fa-cog"></i> Admin</a></li>
+                            {% endif %}
+                        {% endif %}
+                        
+                        <li class="nav-item">
+                            <form method="post" action="{% url 'logout' %}" style="display: inline;">
+                                {% csrf_token %}
+                                <button type="submit" class="nav-link btn btn-sm btn-outline-secondary ms-2 border-0" style="background: transparent;">
+                                    <i class="fas fa-sign-out-alt me-1"></i>Logout ({{ user.username }})
+                                </button>
+                            </form>
+                        </li>
+                    {% else %}
+                        <li class="nav-item"><a class="nav-link" href="{% url 'login' %}"><i class="fas fa-sign-in-alt me-1"></i> Login</a></li>
+                        <li class="nav-item"><a class="nav-link btn btn-sm btn-primary ms-2" href="{% url 'select_profile' %}"><i class="fas fa-user-plus me-1"></i> Register</a></li>
+                    {% endif %}
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container mt-4">
+        {% if messages %}
+            {% for message in messages %}
+                <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                    <i class="fas fa-{% if message.tags == 'success' %}check-circle{% elif message.tags == 'error' or message.tags == 'danger' %}exclamation-circle{% elif message.tags == 'warning' %}exclamation-triangle{% else %}info-circle{% endif %} me-2"></i>
+                    {{ message }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+            {% endfor %}
+        {% endif %}
+
+        {% block content %}{% endblock %}
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    {% block extra_js %}{% endblock %}
+</body>
+</html>
