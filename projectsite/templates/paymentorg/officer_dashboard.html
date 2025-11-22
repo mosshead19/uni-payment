@@ -63,67 +63,49 @@
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
             <!-- Payments Today -->
             <div class="bg-gradient-to-br from-blue-50 to-blue-100 rounded-xl p-6 border border-white/50 shadow-sm hover:shadow-md transition-shadow">
-                <div class="flex items-start justify-between mb-4">
+                <div class="flex items-start justify-between">
                     <div>
-                        <p class="text-xs font-semibold text-gray-600 uppercase tracking-wide">Payments Today</p>
-                        <p class="text-2xl font-bold text-blue-700 mt-1">{{ pending_requests|length }}</p>
+                        <p class="text-xs font-semibold text-gray-600 uppercase tracking-wide">Pending Requests</p>
+                        <p class="text-3xl font-bold text-blue-700 mt-2">{{ pending_requests|length }}</p>
                     </div>
                     <div class="p-3 bg-white rounded-lg text-blue-600">
-                        <i data-lucide="trending-up" class="w-5 h-5"></i>
+                        <i data-lucide="clock" class="w-5 h-5"></i>
                     </div>
-                </div>
-                <div class="flex items-center gap-2">
-                    <span class="text-xs font-semibold px-2 py-1 rounded-full bg-green-200/50 text-green-700">
-                        +{{ pending_requests|length }}
-                    </span>
-                    <p class="text-xs text-gray-600">pending requests</p>
                 </div>
             </div>
 
             <!-- Total Collected -->
             <div class="bg-gradient-to-br from-emerald-50 to-emerald-100 rounded-xl p-6 border border-white/50 shadow-sm hover:shadow-md transition-shadow">
-                <div class="flex items-start justify-between mb-4">
+                <div class="flex items-start justify-between">
                     <div>
                         <p class="text-xs font-semibold text-gray-600 uppercase tracking-wide">Total Collected</p>
-                        <p class="text-2xl font-bold text-emerald-700 mt-1">₱{{ total_collected_system|floatformat:0 }}</p>
+                        <p class="text-3xl font-bold text-emerald-700 mt-2">₱{{ total_collected_system|floatformat:0 }}</p>
                     </div>
                     <div class="p-3 bg-white rounded-lg text-emerald-600">
                         <i data-lucide="bar-chart-3" class="w-5 h-5"></i>
                     </div>
                 </div>
-                <div class="flex items-center gap-2">
-                    <span class="text-xs font-semibold px-2 py-1 rounded-full bg-green-200/50 text-green-700">
-                        +15%
-                    </span>
-                    <p class="text-xs text-gray-600">vs last week</p>
-                </div>
             </div>
 
             <!-- Today's Collection -->
             <div class="bg-gradient-to-br from-amber-50 to-amber-100 rounded-xl p-6 border border-white/50 shadow-sm hover:shadow-md transition-shadow">
-                <div class="flex items-start justify-between mb-4">
+                <div class="flex items-start justify-between">
                     <div>
                         <p class="text-xs font-semibold text-gray-600 uppercase tracking-wide">Today's Collection</p>
-                        <p class="text-2xl font-bold text-amber-700 mt-1">₱{{ today_collections|floatformat:0 }}</p>
+                        <p class="text-3xl font-bold text-amber-700 mt-2">₱{{ today_collections|floatformat:0 }}</p>
                     </div>
                     <div class="p-3 bg-white rounded-lg text-amber-600">
-                        <i data-lucide="clock" class="w-5 h-5"></i>
+                        <i data-lucide="trending-up" class="w-5 h-5"></i>
                     </div>
-                </div>
-                <div class="flex items-center gap-2">
-                    <span class="text-xs font-semibold px-2 py-1 rounded-full bg-yellow-200/50 text-yellow-700">
-                        Live
-                    </span>
-                    <p class="text-xs text-gray-600">collecting now</p>
                 </div>
             </div>
 
-            <!-- Permissions -->
-            <div class="bg-gradient-to-br from-rose-50 to-rose-100 rounded-xl p-6 border border-white/50 shadow-sm hover:shadow-md transition-shadow">
-                <div class="flex items-start justify-between mb-4">
+            <!-- Access Level -->
+            <div class="bg-gradient-to-br from-purple-50 to-purple-100 rounded-xl p-6 border border-white/50 shadow-sm hover:shadow-md transition-shadow">
+                <div class="flex items-start justify-between">
                     <div>
                         <p class="text-xs font-semibold text-gray-600 uppercase tracking-wide">Access Level</p>
-                        <p class="text-2xl font-bold text-rose-700 mt-1">
+                        <p class="text-3xl font-bold text-purple-700 mt-2">
                             {% if officer and officer.can_void_payments %}
                                 Full
                             {% elif officer and officer.can_process_payments %}
@@ -133,21 +115,9 @@
                             {% endif %}
                         </p>
                     </div>
-                    <div class="p-3 bg-white rounded-lg text-rose-600">
-                        <i data-lucide="alert-circle" class="w-5 h-5"></i>
+                    <div class="p-3 bg-white rounded-lg text-purple-600">
+                        <i data-lucide="shield" class="w-5 h-5"></i>
                     </div>
-                </div>
-                <div class="flex items-center gap-2">
-                    {% if officer and officer.can_process_payments %}
-                        <span class="text-xs font-semibold px-2 py-1 rounded-full bg-green-200/50 text-green-700">
-                            ✓ Process
-                        </span>
-                    {% endif %}
-                    {% if officer and officer.can_void_payments %}
-                        <span class="text-xs font-semibold px-2 py-1 rounded-full bg-red-200/50 text-red-700">
-                            ✓ Void
-                        </span>
-                    {% endif %}
                 </div>
             </div>
         </div>
