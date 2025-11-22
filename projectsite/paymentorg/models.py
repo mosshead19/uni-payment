@@ -691,6 +691,25 @@ class PaymentRequest(BaseModel):
         help_text="HMAC signature for validation"
     )
     
+    # Track who posted this request (for bulk postings)
+    created_by = models.ForeignKey(
+        User,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='posted_payment_requests',
+        verbose_name="Posted By",
+        help_text="Officer who posted this bulk payment request"
+    )
+    
+    # Notes from bulk posting
+    notes = models.TextField(
+        blank=True,
+        null=True,
+        verbose_name="Notes",
+        help_text="Notes from bulk payment posting"
+    )
+    
     # Timestamps
     expires_at = models.DateTimeField(verbose_name="Expires At")
     paid_at = models.DateTimeField(
@@ -1065,3 +1084,59 @@ class AcademicYearConfig(BaseModel):
             # Prevents race conditions by excluding the current object (self.pk)
             AcademicYearConfig.objects.filter(is_current=True).exclude(pk=self.pk).update(is_current=False) 
         super().save(*args, **kwargs)
+
+
+# ============================================
+# BULK PAYMENT POSTING
+# ============================================
+
+class BulkPaymentPosting(BaseModel):
+    """
+    Tracks bulk payment fee postings by officers
+    """
+    organization = models.ForeignKey(
+        Organization,
+        on_delete=models.CASCADE,
+        related_name='bulk_postings',
+        verbose_name="Organization"
+    )
+    
+    fee_type = models.ForeignKey(
+        FeeType,
+        on_delete=models.CASCADE,
+        related_name='bulk_postings',
+        verbose_name="Fee Type"
+    )
+    
+    amount = models.DecimalField(
+        max_digits=10,
+        decimal_places=2,
+        verbose_name="Amount (₱)"
+    )
+    
+    posted_by = models.ForeignKey(
+        User,
+        on_delete=models.SET_NULL,
+        null=True,
+        related_name='posted_fees',
+        verbose_name="Posted By"
+    )
+    
+    student_count = models.IntegerField(
+        default=0,
+        verbose_name="Number of Students"
+    )
+    
+    notes = models.TextField(
+        blank=True,
+        null=True,
+        verbose_name="Notes"
+    )
+    
+    class Meta:
+        verbose_name = "Bulk Payment Posting"
+        verbose_name_plural = "Bulk Payment Postings"
+        ordering = ['-created_at']
+    
+    def __str__(self):
+        return f"{self.organization.name} - {self.fee_type.name} - ₱{self.amount}"

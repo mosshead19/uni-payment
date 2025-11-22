@@ -22,7 +22,7 @@ logger = logging.getLogger(__name__)
 from .models import (
     Student, Officer, Organization, FeeType,
     PaymentRequest, Payment, Receipt, ActivityLog, AcademicYearConfig,
-    Course, College, UserProfile
+    Course, College, UserProfile, BulkPaymentPosting
 )
 from .forms import (
     StudentPaymentRequestForm, OfficerPaymentProcessForm, OrganizationForm, 
@@ -513,7 +513,7 @@ class ShowPaymentQRView(StudentRequiredMixin, TemplateView):
 
 # officer views
 class OfficerDashboardView(OfficerRequiredMixin, TemplateView):
-    template_name = 'officer_dashboard.html'
+    template_name = 'paymentorg/officer_dashboard.html'
     
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -528,6 +528,7 @@ class OfficerDashboardView(OfficerRequiredMixin, TemplateView):
                 'organization': None,
                 'total_collected_system': Payment.objects.filter(status='COMPLETED', is_void=False).aggregate(total=Sum('amount'))['total'] or Decimal('0.00'),
                 'pending_requests': PaymentRequest.objects.filter(status='PENDING', expires_at__gt=timezone.now()).order_by('created_at')[:5],
+                'posted_requests': BulkPaymentPosting.objects.all().order_by('-created_at')[:20],
                 'recent_payments': Payment.objects.filter(status='COMPLETED', is_void=False).order_by('-created_at')[:5],
             })
         
@@ -542,11 +543,19 @@ class OfficerDashboardView(OfficerRequiredMixin, TemplateView):
                 expires_at__gt=timezone.now()
             ).order_by('created_at')[:10]
             
+            # Get posted payment postings (bulk fees posted by this officer or organization)
+            posted_requests = BulkPaymentPosting.objects.filter(
+                organization=organization
+            ).order_by('-created_at')[:20]
+            
+            logger.info(f"Officer Dashboard - Organization: {organization.name}, Posted Requests Count: {posted_requests.count()}, Records: {list(posted_requests.values('fee_type__name', 'amount', 'student_count'))}")
+            
             context.update({
                 'is_superuser_only': False,
                 'officer': officer,
                 'organization': organization,
                 'pending_requests': pending_requests,
+                'posted_requests': posted_requests,
                 'today_collections': organization.get_today_collection(),
                 'recent_payments': Payment.objects.filter(
                     organization=organization,
@@ -787,27 +796,12 @@ class PostBulkPaymentView(OfficerRequiredMixin, View):
                 fee_type.save()
             
             # Get all students belonging to this organization
-            # For TIER_2 organizations with program_affiliation='ALL', include all students in the college
-            if organization.fee_tier == 'TIER_2' and organization.program_affiliation == 'ALL':
-                # Include all students in the college/department
-                students = Student.objects.filter(
-                    Q(college__name__iexact=organization.department) |
-                    Q(college__code__iexact=organization.code)
-                ).filter(
-                    academic_year=academic_year,
-                    semester=semester
-                ).distinct()
-            else:
-                # TIER_1 or specific program affiliation - match by course/program
-                students = Student.objects.filter(
-                    Q(course__code__iexact=organization.code) |
-                    Q(course__name__iexact=organization.name) |
-                    Q(college__name__iexact=organization.department) |
-                    Q(college__code__iexact=organization.code)
-                ).filter(
-                    academic_year=academic_year,
-                    semester=semester
-                ).distinct()
+            # Simply get all active students (they belong to the organization implicitly)
+            students = Student.objects.filter(
+                academic_year=academic_year,
+                semester=semester,
+                is_active=True
+            ).distinct()
             
             # exclude students who already paid this fee
             paid_students = Payment.objects.filter(
@@ -824,6 +818,8 @@ class PostBulkPaymentView(OfficerRequiredMixin, View):
             
             students = students.exclude(id__in=list(paid_students) + list(pending_requests))
             
+            logger.info(f"Found {students.count()} eligible students for bulk payment in {organization.name}")
+            
             if not students.exists():
                 messages.warning(request, "No eligible students found in your organization for this fee type.")
                 context = {'form': form, 'organization': organization}
@@ -832,9 +828,12 @@ class PostBulkPaymentView(OfficerRequiredMixin, View):
             created_count = 0
             failed_count = 0
             
+            logger.info(f"Starting bulk payment posting: {len(list(students))} eligible students found")
+            
             # create paymentrequest objects for each student
             for student in students:
                 try:
+                    logger.debug(f"Creating payment request for student {student.student_id_number}")
                     # create paymentrequest with unique request_id
                     payment_request = PaymentRequest.objects.create(
                         student=student,
@@ -845,17 +844,19 @@ class PostBulkPaymentView(OfficerRequiredMixin, View):
                         status='PENDING',
                         expires_at=timezone.now() + timedelta(days=30),  # Give students 30 days to pay
                         qr_signature='',  # Will be generated when student creates QR
+                        created_by=request.user,  # Track who posted this bulk payment
                         notes=notes
                     )
                     
                     # generate qr signature for the request_id
-                    payment_request.qr_signature = create_signature(payment_request.request_id)
+                    payment_request.qr_signature = create_signature(str(payment_request.request_id))
                     payment_request.save(update_fields=['qr_signature'])
                     
                     created_count += 1
+                    logger.debug(f"Successfully created payment request {payment_request.request_id}")
                     
                 except Exception as e:
-                    logger.error(f'Error creating payment request for {student.student_id_number}: {str(e)}')
+                    logger.error(f'Error creating payment request for {student.student_id_number}: {str(e)}', exc_info=True)
                     failed_count += 1
                     continue
             
@@ -865,6 +866,17 @@ class PostBulkPaymentView(OfficerRequiredMixin, View):
                 description=f'Posted bulk payment request for {fee_type_name} to {created_count} students in {organization.name}.',
                 ip_address=request.META.get('REMOTE_ADDR')
             )
+            
+            # Track the bulk posting
+            if created_count > 0:
+                BulkPaymentPosting.objects.create(
+                    organization=organization,
+                    fee_type=fee_type,
+                    amount=fee_amount,
+                    posted_by=request.user,
+                    student_count=created_count,
+                    notes=notes
+                )
             
             messages.success(
                 request,

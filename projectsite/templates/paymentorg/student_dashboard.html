@@ -18,38 +18,8 @@
         ::-webkit-scrollbar-thumb:hover{background:#059669}
     </style>
 </head>
-<body class="bg-gradient-to-br from-green-50 via-emerald-50 to-green-100 min-h-screen">
+<body style="background: linear-gradient(to bottom right, rgba(240,253,250), rgba(240,253,250), rgba(240,253,250));">
     
-    <!-- Navigation Bar -->
-    <nav class="bg-white shadow-lg border-b-4 border-green-500">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="flex justify-between items-center h-16">
-                <div class="flex items-center gap-3">
-                    <div class="w-10 h-10 bg-gradient-to-br from-green-500 to-emerald-600 rounded-lg flex items-center justify-center">
-                        <i data-lucide="wallet" class="w-6 h-6 text-white"></i>
-                    </div>
-                    <div>
-                        <h1 class="text-xl font-bold text-gray-900">UniPay</h1>
-                        <p class="text-xs text-gray-600">Student Portal</p>
-                    </div>
-                </div>
-                <div class="flex items-center gap-4">
-                    <div class="hidden md:flex items-center gap-2 text-sm text-gray-700">
-                        <i data-lucide="user" class="w-4 h-4"></i>
-                        <span class="font-medium">{{ student.get_full_name }}</span>
-                    </div>
-                    <form method="post" action="{% url 'logout' %}" class="inline">
-                        {% csrf_token %}
-                        <button type="submit" class="px-4 py-2 bg-red-500 hover:bg-red-600 text-white rounded-lg font-medium transition-colors flex items-center gap-2">
-                            <i data-lucide="log-out" class="w-4 h-4"></i>
-                            <span>Logout</span>
-                        </button>
-                    </form>
-                </div>
-            </div>
-        </div>
-    </nav>
-
     <!-- Main Content -->
     <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div class="space-y-6">
@@ -408,14 +378,6 @@
         </div>
     </main>
 
-    <!-- Footer -->
-    <footer class="bg-white border-t-2 border-green-200 mt-12 py-6">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center text-gray-600 text-sm">
-            <p>{{ student.college }} • UniPay Payment System</p>
-            <p class="mt-1">© 2024 UniPay System. All rights reserved.</p>
-        </div>
-    </footer>
-
     <script>
         lucide.createIcons();
         document.addEventListener('DOMContentLoaded', () => {
@@ -436,8 +398,8 @@
                 const earliestExpiration = Math.min(...expirationTimes);
                 const timeUntilExpiration = earliestExpiration - Date.now();
                 
-                // Refresh the page 2 seconds after expiration
-                if (timeUntilExpiration > 0) {
+                // Refresh the page 2 seconds after expiration (only if time is positive and reasonable)
+                if (timeUntilExpiration > 0 && timeUntilExpiration < 86400000) { // 24 hours max
                     setTimeout(() => {
                         console.log('QR code expired, refreshing page...');
                         window.location.reload();
@@ -449,7 +411,5 @@
             {% endif %}
         });
     </script>
-</body>
-</html>
 
 {% endblock %}
