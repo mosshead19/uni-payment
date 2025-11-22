@@ -290,22 +290,28 @@ class PromoteStudentToOfficerForm(forms.Form):
         widget=forms.CheckboxInput(attrs={'class': 'form-check-input'}),
         help_text="Allow this officer to void/cancel payments?"
     )
-    can_promote_officers = forms.BooleanField(
-        label="Can Promote Officers",
+    can_generate_reports = forms.BooleanField(
+        label="Can Generate Reports",
         required=False,
         initial=False,
         widget=forms.CheckboxInput(attrs={'class': 'form-check-input'}),
-        help_text="Allow this officer to promote other students and manage officers in their organization?"
+        help_text="Allow this officer to generate financial reports?"
+    )
+    can_promote_officers = forms.BooleanField(
+        label="Can Promote & Demote Officers",
+        required=False,
+        initial=False,
+        widget=forms.CheckboxInput(attrs={'class': 'form-check-input'}),
+        help_text="Grant this officer FULL promotion authority to promote/demote students and other officers in their organization?"
     )
     
     def clean_student(self):
         student = self.cleaned_data['student']
         user = student.user
         
-        # Check if already promoted to officer
+        # Check if the student's is_officer flag is True (primary check)
+        # This is the most reliable indicator since it's set/unset during promotion/demotion
         if hasattr(user, 'user_profile') and user.user_profile.is_officer:
-            raise ValidationError("This student is already an officer.")
-        elif hasattr(user, 'officer_profile'):
             raise ValidationError("This student is already an officer.")
         
         return student

@@ -62,16 +62,91 @@ Students only see and are charged for fees based on their program affiliation an
    - `--fees N`: Fee types per organization (default: 3)
    - `--requests N`: Payment requests per student (default: 1)
 
-5. **Run the development server:**
+5. **Create promotion authority test accounts:**
+   ```bash
+   python manage.py create_promotion_officers
+   ```
+
+6. **Run the development server:**
    ```bash
    python manage.py runserver
    ```
 
-6. **Access the app:**
+7. **Access the app:**
    - Home: `http://127.0.0.1:8000/`
    - Student dashboard: `http://127.0.0.1:8000/student/dashboard/`
    - Officer dashboard: `http://127.0.0.1:8000/officer/dashboard/`
    - Admin panel: `http://127.0.0.1:8000/admin/`
+
+## Deployment Instructions
+
+### Initial Setup (First Time)
+```bash
+# 1. Activate virtual environment
+.\.venv\Scripts\activate
+
+# 2. Install/update dependencies
+pip install -r requirements.txt
+
+# 3. Apply database migrations
+python manage.py migrate
+
+# 4. Create sample data (optional)
+python manage.py create_initial_data --reset --students 10
+
+# 5. Create promotion authority officers
+python manage.py create_promotion_officers
+
+# 6. Collect static files (for production)
+python manage.py collectstatic --noinput
+
+# 7. Start the server
+python manage.py runserver 0.0.0.0:8000
+```
+
+**📖 See [DEPLOYMENT_FLOW.md](DEPLOYMENT_FLOW.md) for:**
+- Complete user registration & promotion flow
+- PythonAnywhere specific setup steps
+- Detailed timeline of who can login when
+- Real-world usage scenarios
+- Troubleshooting guide
+
+### Updating Existing Installation
+```bash
+# 1. Pull latest code
+git pull origin main
+
+# 2. Install new dependencies
+pip install -r requirements.txt
+
+# 3. Apply new migrations
+python manage.py migrate
+
+# 4. Create any missing accounts (idempotent - safe to run anytime)
+python manage.py create_promotion_officers
+
+# 5. Restart the application
+```
+
+### Creating Officers in Production
+The **Django management command** is the recommended approach for production:
+
+```bash
+# Create all 5 promotion authority officers in one command
+python manage.py create_promotion_officers
+
+# Show help for advanced options
+python manage.py create_promotion_officers --help
+
+# Skip updating affiliations if you've already done it
+python manage.py create_promotion_officers --skip-update-affiliations
+```
+
+This command is:
+- ✅ **Idempotent** - Safe to run multiple times without creating duplicates
+- ✅ **Non-destructive** - Won't affect existing data
+- ✅ **Part of the codebase** - No need for external scripts
+- ✅ **Django-native** - Works with your deployment system
 
 ## Test Accounts
 
@@ -297,6 +372,14 @@ python manage.py create_initial_data --reset --students 10 --fees 3
 ```
 
 ### Create Test Promotion Authority Accounts
+
+**Option 1: Django Management Command** (Recommended for Production)
+```bash
+# Create 5 promotion authority officers and update affiliations
+python manage.py create_promotion_officers
+```
+
+**Option 2: Standalone Script** (For Development)
 ```bash
 # Create 5 promotion authority officers (college-level + 4 program-level)
 python create_promotion_officers.py

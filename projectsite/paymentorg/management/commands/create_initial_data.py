@@ -361,12 +361,29 @@ class Command(BaseCommand):
         # Delete fee types
         FeeType.objects.filter(organization__code__in=org_codes).delete()
 
-        # Delete students BEFORE courses (courses have PROTECT constraint)
-        seeded_students = Student.objects.filter(user__username__startswith=student_prefix)
-        student_user_ids = list(seeded_students.values_list("user_id", flat=True))
-        seeded_students.delete()
-        UserProfile.objects.filter(user_id__in=student_user_ids).delete()
-        User.objects.filter(id__in=student_user_ids).delete()
+        # Delete ALL students that reference the colleges/courses we're about to delete
+        # This is necessary because Student has PROTECT ForeignKey constraints
+        college_codes = ["COS"]
+        course_codes = {
+            "BSBIO",
+            "BSMBIO",
+            "BSCS",
+            "BSES",
+            "BSIT",
+        }
+        
+        # Delete students by college and course (handles both FK constraints)
+        all_students_to_delete = Student.objects.filter(
+            college__code__in=college_codes
+        ) | Student.objects.filter(
+            course__code__in=course_codes
+        )
+        
+        # Collect user IDs before deleting students
+        all_student_user_ids = list(all_students_to_delete.values_list("user_id", flat=True))
+        all_students_to_delete.delete()
+        UserProfile.objects.filter(user_id__in=all_student_user_ids).delete()
+        User.objects.filter(id__in=all_student_user_ids).delete()
 
         # Delete officers (including super users)
         officer_users = User.objects.filter(username__startswith=officer_prefix) | User.objects.filter(
@@ -380,34 +397,10 @@ class Command(BaseCommand):
         # Remove organizations
         Organization.objects.filter(code__in=org_codes).delete()
 
-        # Delete courses AFTER students (students reference courses with PROTECT)
-        # Only delete courses that aren't referenced by any remaining students
-        # Only the 5 specified programs
-        course_codes = {
-            "BSBIO",
-            "BSMBIO",
-            "BSCS",
-            "BSES",
-            "BSIT",
-        }
-        # Get courses that have no students referencing them
-        # Exclude courses that are referenced by any students
-        courses_with_students = Student.objects.values_list('course_id', flat=True).distinct()
-        courses_to_delete = Course.objects.filter(code__in=course_codes).exclude(
-            id__in=courses_with_students
-        )
-        deleted_count = courses_to_delete.count()
-        courses_to_delete.delete()
-        remaining = Course.objects.filter(code__in=course_codes).count()
-        if remaining > 0:
-            self.stdout.write(
-                self.style.WARNING(
-                    f"Could not delete {remaining} course(s) - they are still referenced by students."
-                )
-            )
+        # Now delete courses (should have no student references)
+        Course.objects.filter(code__in=course_codes).delete()
 
-        # Delete colleges AFTER courses (courses reference colleges)
-        # Only College of Sciences
-        College.objects.filter(code="COS").delete()
+        # Finally delete colleges (should have no student references)
+        College.objects.filter(code__in=college_codes).delete()
 
         self.stdout.write(self.style.SUCCESS("Previous fake data cleared."))

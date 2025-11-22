@@ -1,6 +1,8 @@
 from django.shortcuts import get_object_or_404, redirect, render
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 from django.contrib.auth.views import LoginView
+from django.contrib.auth import update_session_auth_hash
+from django.contrib.auth.models import User
 from django.contrib import messages
 from django.utils import timezone
 from django.db import transaction
@@ -55,6 +57,26 @@ def validate_signature(message_string, provided_signature):
 # authentication views
 class CustomLoginView(LoginView):
     template_name = 'registration/login.html'
+    
+    def form_valid(self, form):
+        # Call parent to authenticate and set user in session
+        result = super().form_valid(form)
+        
+        # Refresh user with related objects after authentication
+        user = self.request.user
+        user_refreshed = User.objects.select_related(
+            'officer_profile',
+            'student_profile',
+            'user_profile'
+        ).get(pk=user.pk)
+        
+        # Update the request.user
+        self.request.user = user_refreshed
+        
+        # Update the session to persist the refreshed user
+        update_session_auth_hash(self.request, user_refreshed)
+        
+        return result
     
     def get_success_url(self):
         user = self.request.user
@@ -278,6 +300,7 @@ class PromoteStudentToOfficerView(LoginRequiredMixin, UserPassesTestMixin, View)
             role = form.cleaned_data['role']
             can_process_payments = form.cleaned_data['can_process_payments']
             can_void_payments = form.cleaned_data['can_void_payments']
+            can_generate_reports = form.cleaned_data.get('can_generate_reports', False)
             can_promote_officers = form.cleaned_data.get('can_promote_officers', False)
             
             # Verify user can promote to this organization
@@ -288,9 +311,9 @@ class PromoteStudentToOfficerView(LoginRequiredMixin, UserPassesTestMixin, View)
                         messages.error(request, "You don't have permission to add officers to that organization.")
                         return render(request, self.template_name, {'form': form})
                     
-                    # Non-admin officers can't grant promotion authority
-                    if can_promote_officers:
-                        messages.warning(request, "Only administrators can grant promotion authority.")
+                    # Only officers with can_promote_officers permission can grant promotion authority
+                    if can_promote_officers and not request.user.officer_profile.can_promote_officers:
+                        messages.warning(request, "Only administrators and officers with promotion authority can grant promotion to others.")
                         can_promote_officers = False
             
             user = student.user
@@ -308,6 +331,7 @@ class PromoteStudentToOfficerView(LoginRequiredMixin, UserPassesTestMixin, View)
                     'role': role,
                     'can_process_payments': can_process_payments,
                     'can_void_payments': can_void_payments,
+                    'can_generate_reports': can_generate_reports,
                     'can_promote_officers': can_promote_officers,
                 }
             )
@@ -317,6 +341,12 @@ class PromoteStudentToOfficerView(LoginRequiredMixin, UserPassesTestMixin, View)
                 user=user,
                 defaults={'is_officer': True}
             )
+            
+            # If promoting the current user, refresh their session to pick up new permissions
+            if request.user.id == user.id:
+                # Refresh the user object to get updated officer_profile
+                request.user = user.__class__.objects.get(pk=request.user.id)
+                update_session_auth_hash(request, request.user)
             
             # Log the action
             ActivityLog.objects.create(
@@ -427,6 +457,12 @@ class DemoteOfficerToStudentView(LoginRequiredMixin, UserPassesTestMixin, View):
                 user=user,
                 defaults={'is_officer': False}
             )
+            
+            # If demoting the current user, refresh their session to remove permissions
+            if request.user.id == user.id:
+                # Refresh the user object to get updated officer_profile
+                request.user = user.__class__.objects.get(pk=request.user.id)
+                update_session_auth_hash(request, request.user)
             
             # Log the action
             ActivityLog.objects.create(
@@ -973,7 +1009,9 @@ class ProcessPaymentRequestView(OfficerRequiredMixin, View):
         
         if not user.is_superuser:
             officer = user.officer_profile
-            if payment_request.organization != officer.organization:
+            # Check if officer has access to this payment request's organization
+            accessible_org_ids = officer.organization.get_accessible_organization_ids()
+            if payment_request.organization_id not in accessible_org_ids:
                 messages.error(self.request, "This request is for a different organization.")
                 return None
         
@@ -1300,11 +1338,11 @@ class VoidPaymentView(OfficerRequiredMixin, UpdateView):
         if user.is_superuser:
             payment = get_object_or_404(Payment, pk=self.kwargs['pk'])
         else:
-            payment = get_object_or_404(
-                Payment, 
-                pk=self.kwargs['pk'],
-                organization=user.officer_profile.organization
-            )
+            # Get payment and verify officer has access to the payment's organization
+            payment = get_object_or_404(Payment, pk=self.kwargs['pk'])
+            accessible_org_ids = user.officer_profile.organization.get_accessible_organization_ids()
+            if payment.organization_id not in accessible_org_ids:
+                raise Http404("Payment not found in your organization")
             
         if payment.status != 'COMPLETED' or payment.is_void:
             messages.error(self.request, "Only COMPLETED, non-voided payments can be voided.")
@@ -1754,10 +1792,12 @@ class PaymentRequestDetailView(SuperOfficerOrStaffMixin, DetailView):
     
     def get_object(self, queryset=None):
         payment_request = super().get_object(queryset)
-        # Check if super officer has access to this payment request
-        org = self.get_user_organization()
-        if org and payment_request.organization != org:
-            raise Http404("Payment request not found in your organization")
+        # Check if officer has access to this payment request
+        if not self.request.user.is_staff:
+            if hasattr(self.request.user, 'officer_profile'):
+                accessible_org_ids = self.request.user.officer_profile.organization.get_accessible_organization_ids()
+                if payment_request.organization_id not in accessible_org_ids:
+                    raise Http404("Payment request not found in your organization")
         return payment_request
 
 # payment management
@@ -1772,10 +1812,12 @@ class PaymentListView(SuperOfficerOrStaffMixin, ListView):
             'student', 'organization', 'fee_type', 'processed_by'
         ).all()
         
-        # Filter by organization if super officer
-        org = self.get_user_organization()
-        if org:
-            queryset = queryset.filter(organization=org)
+        # Filter by organization if officer (using organization hierarchy)
+        if not self.request.user.is_staff:
+            if hasattr(self.request.user, 'officer_profile'):
+                # Get all accessible organizations (including child orgs)
+                accessible_org_ids = self.request.user.officer_profile.organization.get_accessible_organization_ids()
+                queryset = queryset.filter(organization_id__in=accessible_org_ids)
         
         status_filter = self.request.GET.get('status')
         if status_filter:
@@ -1788,7 +1830,7 @@ class PaymentListView(SuperOfficerOrStaffMixin, ListView):
             queryset = queryset.filter(is_void=False)
         
         org_filter = self.request.GET.get('organization')
-        if org_filter and not org:  # Only allow filtering if staff
+        if org_filter and self.request.user.is_staff:  # Only allow filtering if staff
             queryset = queryset.filter(organization_id=org_filter)
         
         date_from = self.request.GET.get('date_from')

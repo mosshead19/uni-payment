@@ -69,6 +69,7 @@
                         <div class="col-md-12">
                             <div class="card bg-light mb-3">
                                 <div class="card-body">
+                                    <h6 class="mb-3 text-secondary"><i class="fas fa-coins me-1"></i>Payment Processing</h6>
                                     <div class="form-check mb-3">
                                         <input 
                                             class="form-check-input" 
@@ -85,7 +86,7 @@
                                         </small>
                                     </div>
                                     
-                                    <div class="form-check">
+                                    <div class="form-check mb-3">
                                         <input 
                                             class="form-check-input" 
                                             type="checkbox" 
@@ -98,6 +99,41 @@
                                         </label>
                                         <small class="form-text text-muted d-block mt-1">
                                             Allow this officer to void/refund processed payments
+                                        </small>
+                                    </div>
+
+                                    <h6 class="mb-3 mt-4 text-secondary"><i class="fas fa-chart-bar me-1"></i>Reports & Analytics</h6>
+                                    <div class="form-check mb-3">
+                                        <input 
+                                            class="form-check-input" 
+                                            type="checkbox" 
+                                            id="{{ form.can_generate_reports.id_for_label }}" 
+                                            name="can_generate_reports"
+                                            {% if form.can_generate_reports.value %}checked{% endif %}
+                                        >
+                                        <label class="form-check-label fw-bold" for="{{ form.can_generate_reports.id_for_label }}">
+                                            {{ form.can_generate_reports.label }}
+                                        </label>
+                                        <small class="form-text text-muted d-block mt-1">
+                                            Allow this officer to generate financial reports and analytics
+                                        </small>
+                                    </div>
+
+                                    <h6 class="mb-3 mt-4 text-secondary text-danger"><i class="fas fa-user-tie me-1"></i>Leadership Authority</h6>
+                                    <div class="form-check">
+                                        <input 
+                                            class="form-check-input" 
+                                            type="checkbox" 
+                                            id="{{ form.can_promote_officers.id_for_label }}" 
+                                            name="can_promote_officers"
+                                            {% if form.can_promote_officers.value %}checked{% endif %}
+                                        >
+                                        <label class="form-check-label fw-bold text-danger" for="{{ form.can_promote_officers.id_for_label }}">
+                                            {{ form.can_promote_officers.label }}
+                                        </label>
+                                        <small class="form-text text-danger d-block mt-1">
+                                            <i class="fas fa-warning me-1"></i>Grant this officer FULL authority to promote and demote other officers/students in their organization. 
+                                            This should only be given to trusted leaders!
                                         </small>
                                     </div>
                                 </div>
