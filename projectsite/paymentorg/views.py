@@ -769,7 +769,7 @@ class GenerateQRPaymentView(StudentRequiredMixin, CreateView):
         payment_request.amount = fee_type.amount
         payment_request.payment_method = 'CASH'  # default payment method(for now)
         payment_request.expires_at = timezone.now() + timedelta(minutes=15)
-        payment_request.qr_signature = create_signature(payment_request.request_id)
+        payment_request.qr_signature = create_signature(str(payment_request.request_id))
         payment_request.save()
         
         ActivityLog.objects.create(
@@ -868,7 +868,7 @@ class PaymentRequestDetailView(StudentRequiredMixin, TemplateView):
         
         # if qr signature is empty, generate it
         if not payment_request.qr_signature:
-            payment_request.qr_signature = create_signature(payment_request.request_id)
+            payment_request.qr_signature = create_signature(str(payment_request.request_id))
             payment_request.save(update_fields=['qr_signature'])
         
         context['payment_request'] = payment_request
@@ -899,7 +899,7 @@ class ViewPaymentRequestQRView(StudentRequiredMixin, View):
         
         # if qr signature is empty, generate it
         if not payment_request.qr_signature:
-            payment_request.qr_signature = create_signature(payment_request.request_id)
+            payment_request.qr_signature = create_signature(str(payment_request.request_id))
             payment_request.save(update_fields=['qr_signature'])
         
         context = {
@@ -1001,7 +1001,13 @@ class ProcessPaymentRequestView(OfficerRequiredMixin, View):
             raise Http404("Invalid Payment Request ID format.")
 
         # Validate signature - it's created from just the request_id
-        if not validate_signature(str(payment_request.request_id), signature):
+        request_id_str = str(payment_request.request_id)
+        expected_signature = create_signature(request_id_str)
+        
+        logger.info(f"QR Validation - Request ID: {request_id_str}, Provided signature: {signature}, Expected: {expected_signature}")
+        
+        if not validate_signature(request_id_str, signature):
+            logger.warning(f"Signature mismatch for request {request_id_str}")
             messages.error(self.request, "QR Code signature failed verification.")
             return None
             
