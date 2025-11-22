@@ -1000,8 +1000,8 @@ class ProcessPaymentRequestView(OfficerRequiredMixin, View):
         except ValueError:
             raise Http404("Invalid Payment Request ID format.")
 
-        message_string = f"PAYMENT_REQUEST|{payment_request.request_id}"
-        if not validate_signature(message_string, signature):
+        # Validate signature - it's created from just the request_id
+        if not validate_signature(str(payment_request.request_id), signature):
             messages.error(self.request, "QR Code signature failed verification.")
             return None
             
