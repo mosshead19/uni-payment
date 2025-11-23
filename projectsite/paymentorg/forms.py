@@ -256,18 +256,6 @@ class OfficerRegistrationForm(UserCreationForm):
 
 class PromoteStudentToOfficerForm(forms.Form):
     """Form for admins to promote existing students to officer access"""
-    student = forms.ModelChoiceField(
-        queryset=Student.objects.filter(is_active=True),
-        label="Select Student to Promote",
-        widget=forms.Select(attrs={'class': 'form-select form-select-lg'}),
-        help_text="Choose an active student to promote to officer"
-    )
-    organization = forms.ModelChoiceField(
-        queryset=Organization.objects.filter(is_active=True),
-        label="Assign to Organization",
-        widget=forms.Select(attrs={'class': 'form-select'}),
-        help_text="Which organization will this officer work for?"
-    )
     role = forms.CharField(
         max_length=50,
         label="Role/Position",
@@ -307,11 +295,38 @@ class PromoteStudentToOfficerForm(forms.Form):
     
     def __init__(self, *args, student_queryset=None, organization_queryset=None, **kwargs):
         super().__init__(*args, **kwargs)
-        # Set the querysets if provided, otherwise use defaults
+        
+        # Set student field with filtered queryset
         if student_queryset is not None:
-            self.fields['student'].queryset = student_queryset
+            self.fields['student'] = forms.ModelChoiceField(
+                queryset=student_queryset,
+                label="Select Student to Promote",
+                widget=forms.Select(attrs={'class': 'form-select form-select-lg'}),
+                help_text="Choose an active student to promote to officer"
+            )
+        else:
+            self.fields['student'] = forms.ModelChoiceField(
+                queryset=Student.objects.filter(is_active=True),
+                label="Select Student to Promote",
+                widget=forms.Select(attrs={'class': 'form-select form-select-lg'}),
+                help_text="Choose an active student to promote to officer"
+            )
+        
+        # Set organization field with filtered queryset
         if organization_queryset is not None:
-            self.fields['organization'].queryset = organization_queryset
+            self.fields['organization'] = forms.ModelChoiceField(
+                queryset=organization_queryset,
+                label="Assign to Organization",
+                widget=forms.Select(attrs={'class': 'form-select'}),
+                help_text="Which organization will this officer work for?"
+            )
+        else:
+            self.fields['organization'] = forms.ModelChoiceField(
+                queryset=Organization.objects.filter(is_active=True),
+                label="Assign to Organization",
+                widget=forms.Select(attrs={'class': 'form-select'}),
+                help_text="Which organization will this officer work for?"
+            )
     
     def clean_student(self):
         student = self.cleaned_data['student']
@@ -327,12 +342,6 @@ class PromoteStudentToOfficerForm(forms.Form):
 
 class DemoteOfficerToStudentForm(forms.Form):
     """Form for admins/officers to demote officers back to student status"""
-    officer = forms.ModelChoiceField(
-        queryset=Officer.objects.filter(is_active=True),
-        label="Select Officer to Demote",
-        widget=forms.Select(attrs={'class': 'form-select form-select-lg'}),
-        help_text="Choose an active officer to demote to student-only status"
-    )
     reason = forms.CharField(
         max_length=500,
         label="Reason for Demotion",
@@ -346,9 +355,21 @@ class DemoteOfficerToStudentForm(forms.Form):
     
     def __init__(self, *args, officer_queryset=None, **kwargs):
         super().__init__(*args, **kwargs)
-        # Set the queryset if provided, otherwise use default
+        # Set officer field with filtered queryset
         if officer_queryset is not None:
-            self.fields['officer'].queryset = officer_queryset
+            self.fields['officer'] = forms.ModelChoiceField(
+                queryset=officer_queryset,
+                label="Select Officer to Demote",
+                widget=forms.Select(attrs={'class': 'form-select form-select-lg'}),
+                help_text="Choose an active officer to demote to student-only status"
+            )
+        else:
+            self.fields['officer'] = forms.ModelChoiceField(
+                queryset=Officer.objects.filter(is_active=True),
+                label="Select Officer to Demote",
+                widget=forms.Select(attrs={'class': 'form-select form-select-lg'}),
+                help_text="Choose an active officer to demote to student-only status"
+            )
     
     def clean_officer(self):
         officer = self.cleaned_data['officer']

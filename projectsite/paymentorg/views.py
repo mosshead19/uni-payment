@@ -222,19 +222,19 @@ class PromoteStudentToOfficerView(LoginRequiredMixin, UserPassesTestMixin, View)
             # Filter based on org hierarchy - ONLY immediate org, no children
             if org.hierarchy_level == 'COLLEGE':
                 # College-level org: see all students (they represent the whole college)
-                return students_qs.order_by('last_name', 'first_name')
+                return students_qs.order_by('last_name', 'first_name').distinct()
             elif org.hierarchy_level == 'PROGRAM':
                 # Program-level org: see ONLY students in that program
                 # Must filter by the program affiliation this org serves
                 if org.program_affiliation and org.program_affiliation != 'ALL':
                     filtered = students_qs.filter(course__program_type=org.program_affiliation)
-                    return filtered.order_by('last_name', 'first_name')
+                    return filtered.order_by('last_name', 'first_name').distinct()
                 else:
                     # Program org with ALL affiliation - shouldn't happen, but allow all
-                    return students_qs.order_by('last_name', 'first_name')
+                    return students_qs.order_by('last_name', 'first_name').distinct()
             else:
                 # CLUB or other level - see all students (fallback)
-                return students_qs.order_by('last_name', 'first_name')
+                return students_qs.order_by('last_name', 'first_name').distinct()
         
         return Student.objects.none()
     
