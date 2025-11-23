@@ -313,10 +313,6 @@ class PromoteStudentToOfficerForm(forms.Form):
             widget=forms.Select(attrs={'class': 'form-select'}),
             help_text="Which organization will this officer work for?"
         )
-        
-        # Reorder fields to put student and organization first
-        self.fields.move_to_end('student', last=False)
-        self.fields.move_to_end('organization', last=False)
     
     def clean_student(self):
         student = self.cleaned_data['student']
@@ -354,9 +350,6 @@ class DemoteOfficerToStudentForm(forms.Form):
             widget=forms.Select(attrs={'class': 'form-select form-select-lg'}),
             help_text="Choose an active officer to demote to student-only status"
         )
-        
-        # Move officer field to the beginning
-        self.fields.move_to_end('officer', last=False)
     
     def clean_officer(self):
         officer = self.cleaned_data['officer']
