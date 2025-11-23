@@ -296,22 +296,37 @@ class PromoteStudentToOfficerForm(forms.Form):
     def __init__(self, *args, student_queryset=None, organization_queryset=None, **kwargs):
         super().__init__(*args, **kwargs)
         
-        # Use provided querysets or default to all active
-        student_qs = student_queryset if student_queryset is not None else Student.objects.filter(is_active=True)
-        org_qs = organization_queryset if organization_queryset is not None else Organization.objects.filter(is_active=True)
+        # Force queryset evaluation to prevent caching
+        if student_queryset is not None:
+            # Force evaluation by converting to list then back to queryset
+            student_qs = student_queryset.all()  # Create a fresh queryset
+            student_count = student_qs.count()
+        else:
+            student_qs = Student.objects.filter(is_active=True)
+            student_count = student_qs.count()
         
+        if organization_queryset is not None:
+            org_qs = organization_queryset.all()  # Create a fresh queryset
+            org_count = org_qs.count()
+        else:
+            org_qs = Organization.objects.filter(is_active=True)
+            org_count = org_qs.count()
+        
+        # Create fields with fresh querysets
         self.fields['student'] = forms.ModelChoiceField(
             queryset=student_qs,
             label="Select Student to Promote",
+            empty_label="-- Select a student --",
             widget=forms.Select(attrs={'class': 'form-select form-select-lg'}),
-            help_text="Choose an active student to promote to officer"
+            help_text=f"Choose an active student to promote to officer ({student_count} available)"
         )
         
         self.fields['organization'] = forms.ModelChoiceField(
             queryset=org_qs,
             label="Assign to Organization",
+            empty_label="-- Select an organization --",
             widget=forms.Select(attrs={'class': 'form-select'}),
-            help_text="Which organization will this officer work for?"
+            help_text=f"Which organization will this officer work for? ({org_count} available)"
         )
     
     def clean_student(self):
@@ -342,14 +357,22 @@ class DemoteOfficerToStudentForm(forms.Form):
     def __init__(self, *args, officer_queryset=None, **kwargs):
         super().__init__(*args, **kwargs)
         
-        # Use provided queryset or default to all active
-        officer_qs = officer_queryset if officer_queryset is not None else Officer.objects.filter(is_active=True)
+        # Force queryset evaluation to prevent caching
+        if officer_queryset is not None:
+            # Force evaluation by creating a fresh queryset
+            officer_qs = officer_queryset.all()  # Create a fresh queryset
+            officer_count = officer_qs.count()
+        else:
+            officer_qs = Officer.objects.filter(is_active=True)
+            officer_count = officer_qs.count()
         
+        # Create field with fresh queryset
         self.fields['officer'] = forms.ModelChoiceField(
             queryset=officer_qs,
             label="Select Officer to Demote",
+            empty_label="-- Select an officer --",
             widget=forms.Select(attrs={'class': 'form-select form-select-lg'}),
-            help_text="Choose an active officer to demote to student-only status"
+            help_text=f"Choose an active officer to demote to student-only status ({officer_count} available)"
         )
     
     def clean_officer(self):
