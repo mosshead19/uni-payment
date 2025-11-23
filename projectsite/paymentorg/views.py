@@ -256,6 +256,10 @@ class PromoteStudentToOfficerView(LoginRequiredMixin, UserPassesTestMixin, View)
         # Get accessible students and organizations
         accessible_students = self.get_accessible_students()
         
+        # Debug: ensure we have a queryset
+        if accessible_students is None:
+            accessible_students = Student.objects.none()
+        
         # For program-level officers, restrict organization to only their own
         if hasattr(request.user, 'officer_profile'):
             officer = request.user.officer_profile

@@ -296,8 +296,14 @@ class PromoteStudentToOfficerForm(forms.Form):
     def __init__(self, *args, student_queryset=None, organization_queryset=None, **kwargs):
         super().__init__(*args, **kwargs)
         
-        # Build student field
+        # Build student field with filtered queryset
         student_qs = student_queryset if student_queryset is not None else Student.objects.filter(is_active=True)
+        
+        # Debug: Print queryset info
+        import sys
+        student_count = student_qs.count() if student_queryset is not None else "default"
+        print(f"DEBUG: PromoteForm student_queryset count = {student_count}", file=sys.stderr)
+        
         self.fields['student'] = forms.ModelChoiceField(
             queryset=student_qs,
             label="Select Student to Promote",
@@ -307,6 +313,9 @@ class PromoteStudentToOfficerForm(forms.Form):
         
         # Build organization field
         org_qs = organization_queryset if organization_queryset is not None else Organization.objects.filter(is_active=True)
+        org_count = org_qs.count() if organization_queryset is not None else "default"
+        print(f"DEBUG: PromoteForm organization_queryset count = {org_count}", file=sys.stderr)
+        
         self.fields['organization'] = forms.ModelChoiceField(
             queryset=org_qs,
             label="Assign to Organization",
@@ -342,8 +351,14 @@ class DemoteOfficerToStudentForm(forms.Form):
     def __init__(self, *args, officer_queryset=None, **kwargs):
         super().__init__(*args, **kwargs)
         
-        # Build officer field
+        # Build officer field with filtered queryset
         officer_qs = officer_queryset if officer_queryset is not None else Officer.objects.filter(is_active=True)
+        
+        # Debug: Print queryset info
+        import sys
+        officer_count = officer_qs.count() if officer_queryset is not None else "default"
+        print(f"DEBUG: DemoteForm officer_queryset count = {officer_count}", file=sys.stderr)
+        
         self.fields['officer'] = forms.ModelChoiceField(
             queryset=officer_qs,
             label="Select Officer to Demote",
