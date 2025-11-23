@@ -205,12 +205,12 @@ class PromoteStudentToOfficerView(LoginRequiredMixin, UserPassesTestMixin, View)
         return redirect('login')
     
     def get_accessible_students(self):
-        """Get students accessible to this user based on their organization"""
+        """Get students accessible to this user based on their organization - EXCLUDING already promoted students"""
         user = self.request.user
         
         if user.is_staff:
-            # Staff can see all students
-            return Student.objects.filter(is_active=True)
+            # Staff can see all non-promoted students
+            return Student.objects.filter(is_active=True).exclude(user__officer_profile__isnull=False)
         
         if hasattr(user, 'officer_profile'):
             # Officer can only see students from their organization(s)
@@ -218,7 +218,8 @@ class PromoteStudentToOfficerView(LoginRequiredMixin, UserPassesTestMixin, View)
             accessible_orgs = officer.organization.get_accessible_organizations()
             
             # Build a query for students based on accessible organizations
-            students_query = Student.objects.filter(is_active=True)
+            # EXCLUDING students who are already officers
+            students_query = Student.objects.filter(is_active=True).exclude(user__officer_profile__isnull=False)
             
             # Filter by program affiliation matching organization's affiliation
             q_filter = Q()
@@ -227,8 +228,7 @@ class PromoteStudentToOfficerView(LoginRequiredMixin, UserPassesTestMixin, View)
                     # Organization serves all programs
                     # Check if it's a college-level org or program under a college
                     if org.hierarchy_level == 'COLLEGE':
-                        # Top-level college org - can access all students
-                        # No filter needed, return all
+                        # Top-level college org - can access all non-promoted students
                         return students_query
                     else:
                         # Program-level org under college with 'ALL' affiliation - shouldn't happen
@@ -418,7 +418,7 @@ class DemoteOfficerToStudentView(LoginRequiredMixin, UserPassesTestMixin, View):
         return redirect('login')
     
     def get_accessible_officers(self):
-        """Get officers accessible to this user based on their organization"""
+        """Get officers accessible to this user - ONLY from immediate organization"""
         user = self.request.user
         
         if user.is_staff:
@@ -426,12 +426,11 @@ class DemoteOfficerToStudentView(LoginRequiredMixin, UserPassesTestMixin, View):
             return Officer.objects.filter(is_active=True)
         
         if hasattr(user, 'officer_profile'):
-            # Officer can only see officers from their organization(s)
+            # Officer can ONLY see officers from their immediate organization (not child orgs)
             officer = user.officer_profile
-            org_ids = officer.organization.get_accessible_organization_ids()
             return Officer.objects.filter(
                 is_active=True,
-                organization_id__in=org_ids
+                organization_id=officer.organization.id
             )
         
         return Officer.objects.none()
