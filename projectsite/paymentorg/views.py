@@ -253,6 +253,9 @@ class PromoteStudentToOfficerView(LoginRequiredMixin, UserPassesTestMixin, View)
         return []
     
     def get(self, request):
+        import sys
+        print(f"\n=== PromoteStudentToOfficerView.get() START ===", file=sys.stderr)
+        
         # Get accessible students and organizations
         accessible_students = self.get_accessible_students()
         
@@ -261,16 +264,23 @@ class PromoteStudentToOfficerView(LoginRequiredMixin, UserPassesTestMixin, View)
             accessible_students = Student.objects.none()
         
         # Debug logging
-        import sys
         student_count = accessible_students.count() if accessible_students else 0
-        print(f"DEBUG PromoteStudentToOfficerView.get(): accessible_students count = {student_count}", file=sys.stderr)
+        print(f"DEBUG: get_accessible_students() returned queryset with count = {student_count}", file=sys.stderr)
+        
+        # Check user info
+        if hasattr(request.user, 'officer_profile'):
+            officer = request.user.officer_profile
+            print(f"DEBUG: Officer {officer.user.username} in org {officer.organization.name} ({officer.organization.hierarchy_level})", file=sys.stderr)
+            if hasattr(officer.organization, 'program_affiliation'):
+                print(f"DEBUG: Organization program_affiliation = {officer.organization.program_affiliation}", file=sys.stderr)
+        else:
+            print(f"DEBUG: Staff/Superuser accessing form", file=sys.stderr)
         
         # For program-level officers, restrict organization to only their own
         if hasattr(request.user, 'officer_profile'):
             officer = request.user.officer_profile
             # Only allow assigning to their own organization
             accessible_orgs = Organization.objects.filter(id=officer.organization.id)
-            print(f"DEBUG: Officer {officer.user.username} in org {officer.organization.name} ({officer.organization.hierarchy_level})", file=sys.stderr)
         else:
             # For superusers/staff, allow all organizations
             accessible_orgs_list = self.get_accessible_organizations()
@@ -279,16 +289,18 @@ class PromoteStudentToOfficerView(LoginRequiredMixin, UserPassesTestMixin, View)
                 accessible_orgs = Organization.objects.filter(id__in=org_ids)
             else:
                 accessible_orgs = accessible_orgs_list
-            print(f"DEBUG: Staff/Superuser accessing form", file=sys.stderr)
         
         org_count = accessible_orgs.count() if accessible_orgs else 0
         print(f"DEBUG: accessible_orgs count = {org_count}", file=sys.stderr)
         
         # Create form with filtered querysets
+        print(f"DEBUG: Creating form with student_queryset={accessible_students} and organization_queryset={accessible_orgs}", file=sys.stderr)
         form = PromoteStudentToOfficerForm(
             student_queryset=accessible_students,
             organization_queryset=accessible_orgs
         )
+        print(f"DEBUG: Form created successfully", file=sys.stderr)
+        print(f"=== PromoteStudentToOfficerView.get() END ===\n", file=sys.stderr)
         
         context = {
             'form': form,
@@ -456,20 +468,27 @@ class DemoteOfficerToStudentView(LoginRequiredMixin, UserPassesTestMixin, View):
         return Officer.objects.none()
     
     def get(self, request):
+        import sys
+        print(f"\n=== DemoteOfficerToStudentView.get() START ===", file=sys.stderr)
+        
         # Get accessible officers
         accessible_officers = self.get_accessible_officers()
         
         # Debug logging
-        import sys
         officer_count = accessible_officers.count() if accessible_officers else 0
-        print(f"DEBUG DemoteOfficerToStudentView.get(): accessible_officers count = {officer_count}", file=sys.stderr)
+        print(f"DEBUG: get_accessible_officers() returned queryset with count = {officer_count}", file=sys.stderr)
         
         if hasattr(request.user, 'officer_profile'):
             officer = request.user.officer_profile
             print(f"DEBUG: Officer {officer.user.username} in org {officer.organization.name} ({officer.organization.hierarchy_level})", file=sys.stderr)
+        else:
+            print(f"DEBUG: Staff/Superuser accessing demote form", file=sys.stderr)
         
         # Create form with filtered queryset
+        print(f"DEBUG: Creating form with officer_queryset={accessible_officers}", file=sys.stderr)
         form = DemoteOfficerToStudentForm(officer_queryset=accessible_officers)
+        print(f"DEBUG: Form created successfully", file=sys.stderr)
+        print(f"=== DemoteOfficerToStudentView.get() END ===\n", file=sys.stderr)
         
         context = {
             'form': form,
