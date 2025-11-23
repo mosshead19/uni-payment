@@ -264,14 +264,22 @@ class PromoteStudentToOfficerView(LoginRequiredMixin, UserPassesTestMixin, View)
         form = PromoteStudentToOfficerForm()
         # Filter form choices based on user's accessible organizations
         accessible_students = self.get_accessible_students()
-        accessible_orgs = self.get_accessible_organizations()
+        
+        # For program-level officers, restrict organization to only their own
+        if hasattr(request.user, 'officer_profile'):
+            officer = request.user.officer_profile
+            # Only allow assigning to their own organization
+            form.fields['organization'].queryset = Organization.objects.filter(id=officer.organization.id)
+        else:
+            # For superusers/staff, allow all organizations
+            accessible_orgs = self.get_accessible_organizations()
+            if isinstance(accessible_orgs, list):
+                org_ids = [org.id for org in accessible_orgs]
+                form.fields['organization'].queryset = Organization.objects.filter(id__in=org_ids)
+            else:
+                form.fields['organization'].queryset = accessible_orgs
         
         form.fields['student'].queryset = accessible_students
-        if isinstance(accessible_orgs, list):
-            org_ids = [org.id for org in accessible_orgs]
-            form.fields['organization'].queryset = Organization.objects.filter(id__in=org_ids)
-        else:
-            form.fields['organization'].queryset = accessible_orgs
         
         context = {
             'form': form,
@@ -284,16 +292,24 @@ class PromoteStudentToOfficerView(LoginRequiredMixin, UserPassesTestMixin, View)
     def post(self, request):
         form = PromoteStudentToOfficerForm(request.POST)
         
-        # Filter form choices based on user's accessible organizations
+        # Filter form choices based on user's accessible students
         accessible_students = self.get_accessible_students()
-        accessible_orgs = self.get_accessible_organizations()
+        
+        # For program-level officers, restrict organization to only their own
+        if hasattr(request.user, 'officer_profile'):
+            officer = request.user.officer_profile
+            # Only allow assigning to their own organization
+            form.fields['organization'].queryset = Organization.objects.filter(id=officer.organization.id)
+        else:
+            # For superusers/staff, allow all organizations
+            accessible_orgs = self.get_accessible_organizations()
+            if isinstance(accessible_orgs, list):
+                org_ids = [org.id for org in accessible_orgs]
+                form.fields['organization'].queryset = Organization.objects.filter(id__in=org_ids)
+            else:
+                form.fields['organization'].queryset = accessible_orgs
         
         form.fields['student'].queryset = accessible_students
-        if isinstance(accessible_orgs, list):
-            org_ids = [org.id for org in accessible_orgs]
-            form.fields['organization'].queryset = Organization.objects.filter(id__in=org_ids)
-        else:
-            form.fields['organization'].queryset = accessible_orgs
         
         if form.is_valid():
             student = form.cleaned_data['student']
@@ -305,11 +321,13 @@ class PromoteStudentToOfficerView(LoginRequiredMixin, UserPassesTestMixin, View)
             can_promote_officers = form.cleaned_data.get('can_promote_officers', False)
             
             # Verify user can promote to this organization
+            # For program-level officers, ensure they're only assigning to their own org
             if not request.user.is_staff:
                 if hasattr(request.user, 'officer_profile'):
-                    accessible_org_ids = request.user.officer_profile.organization.get_accessible_organization_ids()
-                    if organization.id not in accessible_org_ids:
-                        messages.error(request, "You don't have permission to add officers to that organization.")
+                    officer = request.user.officer_profile
+                    # Program-level officers can ONLY assign to their own organization
+                    if organization.id != officer.organization.id:
+                        messages.error(request, "You can only promote students to your own organization.")
                         return render(request, self.template_name, {'form': form})
                     
                     # Only officers with can_promote_officers permission can grant promotion authority
