@@ -260,11 +260,17 @@ class PromoteStudentToOfficerView(LoginRequiredMixin, UserPassesTestMixin, View)
         if accessible_students is None:
             accessible_students = Student.objects.none()
         
+        # Debug logging
+        import sys
+        student_count = accessible_students.count() if accessible_students else 0
+        print(f"DEBUG PromoteStudentToOfficerView.get(): accessible_students count = {student_count}", file=sys.stderr)
+        
         # For program-level officers, restrict organization to only their own
         if hasattr(request.user, 'officer_profile'):
             officer = request.user.officer_profile
             # Only allow assigning to their own organization
             accessible_orgs = Organization.objects.filter(id=officer.organization.id)
+            print(f"DEBUG: Officer {officer.user.username} in org {officer.organization.name} ({officer.organization.hierarchy_level})", file=sys.stderr)
         else:
             # For superusers/staff, allow all organizations
             accessible_orgs_list = self.get_accessible_organizations()
@@ -273,6 +279,10 @@ class PromoteStudentToOfficerView(LoginRequiredMixin, UserPassesTestMixin, View)
                 accessible_orgs = Organization.objects.filter(id__in=org_ids)
             else:
                 accessible_orgs = accessible_orgs_list
+            print(f"DEBUG: Staff/Superuser accessing form", file=sys.stderr)
+        
+        org_count = accessible_orgs.count() if accessible_orgs else 0
+        print(f"DEBUG: accessible_orgs count = {org_count}", file=sys.stderr)
         
         # Create form with filtered querysets
         form = PromoteStudentToOfficerForm(
@@ -448,6 +458,15 @@ class DemoteOfficerToStudentView(LoginRequiredMixin, UserPassesTestMixin, View):
     def get(self, request):
         # Get accessible officers
         accessible_officers = self.get_accessible_officers()
+        
+        # Debug logging
+        import sys
+        officer_count = accessible_officers.count() if accessible_officers else 0
+        print(f"DEBUG DemoteOfficerToStudentView.get(): accessible_officers count = {officer_count}", file=sys.stderr)
+        
+        if hasattr(request.user, 'officer_profile'):
+            officer = request.user.officer_profile
+            print(f"DEBUG: Officer {officer.user.username} in org {officer.organization.name} ({officer.organization.hierarchy_level})", file=sys.stderr)
         
         # Create form with filtered queryset
         form = DemoteOfficerToStudentForm(officer_queryset=accessible_officers)
