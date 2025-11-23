@@ -305,6 +305,14 @@ class PromoteStudentToOfficerForm(forms.Form):
         help_text="Grant this officer FULL promotion authority to promote/demote students and other officers in their organization?"
     )
     
+    def __init__(self, *args, student_queryset=None, organization_queryset=None, **kwargs):
+        super().__init__(*args, **kwargs)
+        # Set the querysets if provided, otherwise use defaults
+        if student_queryset is not None:
+            self.fields['student'].queryset = student_queryset
+        if organization_queryset is not None:
+            self.fields['organization'].queryset = organization_queryset
+    
     def clean_student(self):
         student = self.cleaned_data['student']
         user = student.user
@@ -335,6 +343,12 @@ class DemoteOfficerToStudentForm(forms.Form):
         }),
         help_text="Why is this officer being demoted?"
     )
+    
+    def __init__(self, *args, officer_queryset=None, **kwargs):
+        super().__init__(*args, **kwargs)
+        # Set the queryset if provided, otherwise use default
+        if officer_queryset is not None:
+            self.fields['officer'].queryset = officer_queryset
     
     def clean_officer(self):
         officer = self.cleaned_data['officer']

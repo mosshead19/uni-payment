@@ -253,25 +253,28 @@ class PromoteStudentToOfficerView(LoginRequiredMixin, UserPassesTestMixin, View)
         return []
     
     def get(self, request):
-        form = PromoteStudentToOfficerForm()
-        # Filter form choices based on user's accessible organizations
+        # Get accessible students and organizations
         accessible_students = self.get_accessible_students()
         
         # For program-level officers, restrict organization to only their own
         if hasattr(request.user, 'officer_profile'):
             officer = request.user.officer_profile
             # Only allow assigning to their own organization
-            form.fields['organization'].queryset = Organization.objects.filter(id=officer.organization.id)
+            accessible_orgs = Organization.objects.filter(id=officer.organization.id)
         else:
             # For superusers/staff, allow all organizations
-            accessible_orgs = self.get_accessible_organizations()
-            if isinstance(accessible_orgs, list):
-                org_ids = [org.id for org in accessible_orgs]
-                form.fields['organization'].queryset = Organization.objects.filter(id__in=org_ids)
+            accessible_orgs_list = self.get_accessible_organizations()
+            if isinstance(accessible_orgs_list, list):
+                org_ids = [org.id for org in accessible_orgs_list]
+                accessible_orgs = Organization.objects.filter(id__in=org_ids)
             else:
-                form.fields['organization'].queryset = accessible_orgs
+                accessible_orgs = accessible_orgs_list
         
-        form.fields['student'].queryset = accessible_students
+        # Create form with filtered querysets
+        form = PromoteStudentToOfficerForm(
+            student_queryset=accessible_students,
+            organization_queryset=accessible_orgs
+        )
         
         context = {
             'form': form,
@@ -282,8 +285,6 @@ class PromoteStudentToOfficerView(LoginRequiredMixin, UserPassesTestMixin, View)
     
     @transaction.atomic
     def post(self, request):
-        form = PromoteStudentToOfficerForm(request.POST)
-        
         # Filter form choices based on user's accessible students
         accessible_students = self.get_accessible_students()
         
@@ -291,17 +292,22 @@ class PromoteStudentToOfficerView(LoginRequiredMixin, UserPassesTestMixin, View)
         if hasattr(request.user, 'officer_profile'):
             officer = request.user.officer_profile
             # Only allow assigning to their own organization
-            form.fields['organization'].queryset = Organization.objects.filter(id=officer.organization.id)
+            accessible_orgs = Organization.objects.filter(id=officer.organization.id)
         else:
             # For superusers/staff, allow all organizations
-            accessible_orgs = self.get_accessible_organizations()
-            if isinstance(accessible_orgs, list):
-                org_ids = [org.id for org in accessible_orgs]
-                form.fields['organization'].queryset = Organization.objects.filter(id__in=org_ids)
+            accessible_orgs_list = self.get_accessible_organizations()
+            if isinstance(accessible_orgs_list, list):
+                org_ids = [org.id for org in accessible_orgs_list]
+                accessible_orgs = Organization.objects.filter(id__in=org_ids)
             else:
-                form.fields['organization'].queryset = accessible_orgs
+                accessible_orgs = accessible_orgs_list
         
-        form.fields['student'].queryset = accessible_students
+        # Create form with filtered querysets
+        form = PromoteStudentToOfficerForm(
+            request.POST,
+            student_queryset=accessible_students,
+            organization_queryset=accessible_orgs
+        )
         
         if form.is_valid():
             student = form.cleaned_data['student']
@@ -436,10 +442,11 @@ class DemoteOfficerToStudentView(LoginRequiredMixin, UserPassesTestMixin, View):
         return Officer.objects.none()
     
     def get(self, request):
-        form = DemoteOfficerToStudentForm()
-        # Filter form choices based on user's accessible organizations
+        # Get accessible officers
         accessible_officers = self.get_accessible_officers()
-        form.fields['officer'].queryset = accessible_officers
+        
+        # Create form with filtered queryset
+        form = DemoteOfficerToStudentForm(officer_queryset=accessible_officers)
         
         context = {
             'form': form,
@@ -450,11 +457,11 @@ class DemoteOfficerToStudentView(LoginRequiredMixin, UserPassesTestMixin, View):
     
     @transaction.atomic
     def post(self, request):
-        form = DemoteOfficerToStudentForm(request.POST)
-        
-        # Filter form choices based on user's accessible organizations
+        # Get accessible officers
         accessible_officers = self.get_accessible_officers()
-        form.fields['officer'].queryset = accessible_officers
+        
+        # Create form with filtered queryset
+        form = DemoteOfficerToStudentForm(request.POST, officer_queryset=accessible_officers)
         
         if form.is_valid():
             officer = form.cleaned_data['officer']
