@@ -365,6 +365,9 @@ class PromoteStudentToOfficerView(LoginRequiredMixin, UserPassesTestMixin, View)
             if request.user.id == user.id:
                 # Refresh the user object to get updated officer_profile
                 request.user = user.__class__.objects.get(pk=request.user.id)
+                # Clear the officer_profile cache by using select_related
+                from django.db.models import prefetch_related_objects
+                prefetch_related_objects([request.user], 'officer_profile')
                 update_session_auth_hash(request, request.user)
             
             # Log the action
@@ -379,9 +382,14 @@ class PromoteStudentToOfficerView(LoginRequiredMixin, UserPassesTestMixin, View)
             messages.success(
                 request,
                 f'Officer profile {status_text} for {user.get_full_name()}! '
-                f'They can now access the officer dashboard while keeping their student account.'
+                f'You can now access the officer dashboard with promotion authority in {organization.name}.'
             )
-            return redirect('login')
+            
+            # If promoting the current user, redirect to officer dashboard so they see the new nav
+            if request.user.id == user.id:
+                return redirect('officer_dashboard')
+            else:
+                return redirect('promote_student_to_officer')
         else:
             context = {
                 'form': form,
