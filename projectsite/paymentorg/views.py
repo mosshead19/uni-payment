@@ -562,6 +562,75 @@ class CreateOfficerView(LoginRequiredMixin, UserPassesTestMixin, View):
             return render(request, self.template_name, context)
 
 
+class ListOfficersInOrgView(LoginRequiredMixin, UserPassesTestMixin, ListView):
+    """List officers in the user's organization with promote/demote actions"""
+    model = Officer
+    template_name = 'paymentorg/list_officers_in_org.html'
+    context_object_name = 'officers'
+    paginate_by = 20
+    
+    def test_func(self):
+        user = self.request.user
+        # Only officers with promote/demote ability can view this
+        if hasattr(user, 'officer_profile'):
+            return user.officer_profile.is_super_officer or user.officer_profile.can_promote_officers
+        return False
+    
+    def handle_no_permission(self):
+        messages.error(self.request, "You don't have permission to view this page.")
+        return redirect('officer_dashboard')
+    
+    def get_queryset(self):
+        user = self.request.user
+        # Show only officers from the user's immediate organization
+        if hasattr(user, 'officer_profile'):
+            return Officer.objects.filter(
+                is_active=True,
+                organization_id=user.officer_profile.organization.id
+            ).select_related('user', 'organization')
+        return Officer.objects.none()
+    
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['user_organization'] = self.request.user.officer_profile.organization if hasattr(self.request.user, 'officer_profile') else None
+        return context
+
+
+class ListStudentsInOrgView(LoginRequiredMixin, UserPassesTestMixin, ListView):
+    """List students in the user's organization with promote actions"""
+    model = Student
+    template_name = 'paymentorg/list_students_in_org.html'
+    context_object_name = 'students'
+    paginate_by = 20
+    
+    def test_func(self):
+        user = self.request.user
+        # Only officers with promote/demote ability can view this
+        if hasattr(user, 'officer_profile'):
+            return user.officer_profile.is_super_officer or user.officer_profile.can_promote_officers
+        return False
+    
+    def handle_no_permission(self):
+        messages.error(self.request, "You don't have permission to view this page.")
+        return redirect('officer_dashboard')
+    
+    def get_queryset(self):
+        user = self.request.user
+        # Show all active students, excluding those already promoted
+        if hasattr(user, 'officer_profile'):
+            return Student.objects.filter(
+                is_active=True
+            ).exclude(
+                user__officer_profile__isnull=False
+            ).select_related('user', 'course', 'course__college').order_by('last_name', 'first_name')
+        return Student.objects.none()
+    
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['user_organization'] = self.request.user.officer_profile.organization if hasattr(self.request.user, 'officer_profile') else None
+        return context
+
+
 class StudentRequiredMixin(LoginRequiredMixin, UserPassesTestMixin):
     def test_func(self):
         user = self.request.user

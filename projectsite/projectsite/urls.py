@@ -86,6 +86,8 @@ urlpatterns = [
     path('staff/officers/<int:pk>/update/', views.OfficerUpdateView.as_view(), name='officer_update'),
     path('staff/officers/<int:pk>/delete/', views.OfficerDeleteView.as_view(), name='officer_delete'),
     path('staff/officers/create/', views.CreateOfficerView.as_view(), name='create_officer'),
+    path('staff/officers/list-in-org/', views.ListOfficersInOrgView.as_view(), name='list_officers_in_org'),
+    path('staff/students/list-in-org/', views.ListStudentsInOrgView.as_view(), name='list_students_in_org'),
     path('staff/officers/promote/', views.PromoteStudentToOfficerView.as_view(), name='promote_student_to_officer'),
     path('staff/officers/demote/', views.DemoteOfficerToStudentView.as_view(), name='demote_officer_to_student'),
     
