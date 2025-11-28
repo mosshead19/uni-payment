@@ -1584,10 +1584,14 @@ class ProcessPaymentRequestView(OfficerRequiredMixin, View):
             
             # send receipt via email
             try:
-                if send_receipt_email(receipt, payment.student):
-                    messages.info(request, f"Receipt email sent to {payment.student.email}")
+                from django.conf import settings
+                if getattr(settings, 'SENDGRID_API_KEY', ''):
+                    if send_receipt_email(receipt, payment.student):
+                        messages.info(request, f"✓ Receipt email sent to {payment.student.email}")
+                    else:
+                        messages.warning(request, f"Failed to send receipt email to {payment.student.email}")
                 else:
-                    messages.warning(request, "Failed to send receipt email.")
+                    messages.info(request, "Email service not configured - receipt email not sent")
             except Exception as e:
                 messages.warning(request, f"Error sending email: {str(e)}")
             
