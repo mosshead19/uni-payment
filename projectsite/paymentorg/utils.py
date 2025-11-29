@@ -6,9 +6,24 @@ import logging
 logger = logging.getLogger(__name__)
 
 
+def get_officer_info(payment):
+    """Safely get officer name and role"""
+    officer_name = 'System'
+    officer_role = 'Officer'
+    if payment.processed_by:
+        officer_name = payment.processed_by.get_full_name()
+        try:
+            if payment.processed_by.officer_profile and payment.processed_by.officer_profile.role:
+                officer_role = payment.processed_by.officer_profile.role
+        except Exception:
+            officer_role = 'Officer'
+    return officer_name, officer_role
+
+
 def get_receipt_html_template(receipt, student):
     """Generate beautiful HTML email template for receipt"""
     payment = receipt.payment
+    officer_name, officer_role = get_officer_info(payment)
     
     return f'''
 <!DOCTYPE html>
@@ -103,8 +118,8 @@ def get_receipt_html_template(receipt, student):
                                         <span style="color: #6b7280; font-size: 12px; text-transform: uppercase;">Processed By</span>
                                     </td>
                                     <td style="padding: 12px 0; border-bottom: 1px solid #f3f4f6; text-align: right;">
-                                        <span style="color: #111827; font-weight: 500;">{payment.processed_by.get_full_name() if payment.processed_by else 'System'}</span><br>
-                                        <span style="color: #6b7280; font-size: 13px;">{payment.processed_by.officer_profile.role if payment.processed_by and hasattr(payment.processed_by, 'officer_profile') else ''}</span>
+                                        <span style="color: #111827; font-weight: 500;">{officer_name}</span><br>
+                                        <span style="color: #059669; font-size: 13px; font-weight: 500;">{officer_role}</span>
                                     </td>
                                 </tr>
                                 <tr>
@@ -156,8 +171,7 @@ def send_receipt_email(receipt, student):
         
         # Plain text version
         payment = receipt.payment
-        officer_name = payment.processed_by.get_full_name() if payment.processed_by else 'System'
-        officer_role = payment.processed_by.officer_profile.role if payment.processed_by and hasattr(payment.processed_by, 'officer_profile') else ''
+        officer_name, officer_role = get_officer_info(payment)
         
         text_content = f'''
 Dear {student.get_full_name()},
@@ -180,7 +194,7 @@ Details:
 - Fee Type: {payment.fee_type.name}
 - Semester: {payment.fee_type.semester} • {payment.fee_type.academic_year}
 - Payment Method: {payment.get_payment_method_display()}
-- Processed By: {officer_name}{f' ({officer_role})' if officer_role else ''}
+- Processed By: {officer_name} ({officer_role})
 - Status: COMPLETED
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━

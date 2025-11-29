@@ -6,13 +6,13 @@
 <div class="space-y-6">
     
     <!-- Officer Info Card -->
-    <div class="bg-green-50 rounded-lg border border-green-200 p-6 md:p-8">
+    <div class="bg-green-200 rounded-lg border border-green-400 p-6 md:p-8 shadow-md">
         <div class="flex flex-col md:flex-row md:items-start md:justify-between gap-4 mb-6">
             <div>
                 <h2 class="text-2xl font-semibold text-gray-900 mb-2">{{ officer.get_full_name|default:user.get_full_name }}</h2>
-                <div class="space-y-1 text-gray-600">
-                    <p><span class="font-medium text-gray-700">Role:</span> {{ officer.role|default:"Officer" }}</p>
-                    <p><span class="font-medium text-gray-700">Organization:</span> {{ officer.organization.name }}</p>
+                <div class="space-y-1 text-gray-700">
+                    <p><span class="font-medium text-gray-900">Role:</span> {{ officer.role|default:"Officer" }}</p>
+                    <p><span class="font-medium text-gray-900">Organization:</span> {{ officer.organization.name }}</p>
                 </div>
                 {% if officer.is_super_officer %}
                 <span class="inline-flex items-center gap-1 mt-2 px-2 py-1 bg-amber-100 text-amber-700 rounded-full text-xs font-medium">
@@ -23,7 +23,7 @@
             </div>
             <div class="flex flex-col sm:flex-row gap-2">
                 <a href="{% url 'student_dashboard' %}" 
-                   class="inline-flex items-center justify-center gap-2 px-4 py-2 bg-gray-100 text-gray-900 rounded-lg hover:bg-gray-200 transition-colors font-medium">
+                   class="inline-flex items-center justify-center gap-2 px-4 py-2 bg-gray-100 text-gray-900 rounded-lg hover:bg-green-500 hover:text-white active:bg-green-600 active:text-white transition-colors font-medium">
                     <i data-lucide="repeat" class="w-4 h-4"></i>
                     Switch to Student View
                 </a>
@@ -40,7 +40,7 @@
         <!-- System Status -->
         <div class="flex items-center gap-2 mb-6">
             <div class="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
-            <span class="text-gray-600 text-sm">System Status: <span class="font-medium text-gray-900">Online & Active</span></span>
+            <span class="text-gray-700 text-sm">System Status: <span class="font-medium text-gray-900">Online & Active</span></span>
         </div>
     </div>
 
@@ -98,19 +98,19 @@
     <div class="bg-white rounded-lg border border-gray-200 p-4 md:p-6">
         <h3 class="text-lg font-semibold text-gray-900 mb-3 md:mb-4">Features</h3>
         <div class="grid grid-cols-2 md:flex md:flex-wrap gap-2">
-            <button id="qr-tab-btn" onclick="showFeature('qr')" class="feature-tab flex items-center justify-center gap-1.5 px-3 md:px-4 py-2.5 md:py-2 btn-gradient rounded-lg font-medium transition-colors text-sm md:text-base">
+            <button id="qr-tab-btn" onclick="showFeature('qr')" class="feature-tab active flex items-center justify-center gap-1.5 px-3 md:px-4 py-2.5 md:py-2 bg-green-600 text-white rounded-lg font-medium transition-all duration-200 text-sm md:text-base shadow-sm hover:bg-green-400 hover:text-white border border-transparent">
                 <i data-lucide="camera" class="w-4 h-4"></i>
                 <span>QR Scanner</span>
             </button>
-            <button id="post-tab-btn" onclick="showFeature('post')" class="feature-tab flex items-center justify-center gap-1.5 px-3 md:px-4 py-2.5 md:py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 font-medium transition-colors text-sm md:text-base">
+            <button id="post-tab-btn" onclick="showFeature('post')" class="feature-tab flex items-center justify-center gap-1.5 px-3 md:px-4 py-2.5 md:py-2 bg-gray-100 text-gray-700 rounded-lg font-medium transition-all duration-200 text-sm md:text-base hover:bg-green-400 hover:text-white border border-transparent">
                 <i data-lucide="send" class="w-4 h-4"></i>
                 <span>Post Payment</span>
             </button>
-            <button id="posted-tab-btn" onclick="showFeature('posted')" class="feature-tab flex items-center justify-center gap-1.5 px-3 md:px-4 py-2.5 md:py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 font-medium transition-colors text-sm md:text-base">
+            <button id="posted-tab-btn" onclick="showFeature('posted')" class="feature-tab flex items-center justify-center gap-1.5 px-3 md:px-4 py-2.5 md:py-2 bg-gray-100 text-gray-700 rounded-lg font-medium transition-all duration-200 text-sm md:text-base hover:bg-green-400 hover:text-white border border-transparent">
                 <i data-lucide="file-check" class="w-4 h-4"></i>
                 <span>Posted</span>
             </button>
-            <button id="transactions-tab-btn" onclick="showFeature('transactions')" class="feature-tab flex items-center justify-center gap-1.5 px-3 md:px-4 py-2.5 md:py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 font-medium transition-colors text-sm md:text-base">
+            <button id="transactions-tab-btn" onclick="showFeature('transactions')" class="feature-tab flex items-center justify-center gap-1.5 px-3 md:px-4 py-2.5 md:py-2 bg-gray-100 text-gray-700 rounded-lg font-medium transition-all duration-200 text-sm md:text-base hover:bg-green-400 hover:text-white border border-transparent">
                 <i data-lucide="list" class="w-4 h-4"></i>
                 <span>Transactions</span>
             </button>
@@ -315,7 +315,7 @@
                                 <td class="px-6 py-4">
                                     {% if payment.processed_by %}
                                         <p class="text-gray-900 text-sm font-medium">{{ payment.processed_by.get_full_name }}</p>
-                                        <p class="text-gray-600 text-xs">{{ payment.processed_by.role|default:"Officer" }}</p>
+                                        <p class="text-green-600 text-xs font-medium">{{ payment.processed_by.officer_profile.role|default:"Officer" }}</p>
                                         <p class="text-gray-400 text-xs">{{ payment.created_at|date:"M d, g:i A" }}</p>
                                     {% else %}
                                         <span class="text-gray-400 text-sm">N/A</span>
@@ -469,9 +469,9 @@
         // Hide all feature content
         document.querySelectorAll('.feature-content').forEach(el => el.classList.add('hidden'));
         
-        // Reset all tab buttons
+        // Reset all tab buttons to inactive state
         document.querySelectorAll('.feature-tab').forEach(btn => {
-            btn.classList.remove('btn-gradient');
+            btn.classList.remove('bg-green-600', 'text-white', 'shadow-sm', 'active');
             btn.classList.add('bg-gray-100', 'text-gray-700');
         });
         
@@ -481,7 +481,7 @@
         // Activate selected tab button
         const activeBtn = document.getElementById(feature + '-tab-btn');
         activeBtn.classList.remove('bg-gray-100', 'text-gray-700');
-        activeBtn.classList.add('btn-gradient');
+        activeBtn.classList.add('bg-green-600', 'text-white', 'shadow-sm', 'active');
         
         // Re-initialize icons
         setTimeout(() => lucide.createIcons(), 50);

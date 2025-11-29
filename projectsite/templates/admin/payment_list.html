@@ -5,7 +5,7 @@
 
 {% block content %}
 <div class="py-6 md:py-8">
-    <div class="max-w-7xl mx-auto px-4 md:px-0">
+    <div class="w-full px-4 md:px-6 lg:max-w-7xl lg:mx-auto lg:px-0">
         <!-- Gradient Header Card -->
         <div class="page-header-gradient rounded-xl p-5 md:p-6 mb-6 shadow-lg relative overflow-hidden">
             <!-- Decorative Elements -->
@@ -158,11 +158,11 @@
             </div>
         </div>
 
-        <!-- Payments Table -->
+        <!-- Payments Table - Desktop -->
         {% if payments %}
-            <div class="bg-white rounded-xl border border-gray-200 overflow-hidden shadow-sm">
+            <div class="bg-white rounded-xl border border-gray-200 overflow-hidden shadow-sm hidden md:block">
                 <div class="overflow-x-auto">
-                    <table class="w-full up-table-responsive" id="payments-table">
+                    <table class="w-full" id="payments-table">
                         <thead class="bg-gradient-to-r from-gray-50 to-gray-100 border-b border-gray-200">
                             <tr>
                                 <th class="px-4 md:px-6 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">OR Number</th>
@@ -249,6 +249,78 @@
                         </tbody>
                     </table>
                 </div>
+            </div>
+
+            <!-- Payments Cards - Mobile -->
+            <div class="md:hidden space-y-3">
+                {% for payment in payments %}
+                <div class="bg-white rounded-xl border border-gray-200 p-4 shadow-sm payment-row {% if payment.is_void %}opacity-75{% endif %}">
+                    <div class="flex items-start justify-between mb-3">
+                        <div class="flex items-center gap-3">
+                            <div class="w-10 h-10 rounded-full flex items-center justify-center text-white font-semibold text-sm overflow-hidden {% if not payment.student.user.user_profile.profile_picture %}page-header-gradient{% endif %}">
+                                {% if payment.student.user.user_profile.profile_picture %}
+                                    <img src="{{ payment.student.user.user_profile.profile_picture }}" alt="{{ payment.student.get_full_name }}" class="w-full h-full object-cover">
+                                {% else %}
+                                    {{ payment.student.first_name|slice:":1"|upper }}{{ payment.student.last_name|slice:":1"|upper }}
+                                {% endif %}
+                            </div>
+                            <div>
+                                <p class="text-gray-900 font-semibold text-sm">{{ payment.student.get_full_name }}</p>
+                                <p class="text-gray-500 text-xs">{{ payment.student.student_id_number }}</p>
+                            </div>
+                        </div>
+                        <div class="relative">
+                            <button type="button" data-dropdown-toggle class="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-full transition-colors">
+                                <i data-lucide="more-vertical" class="w-5 h-5"></i>
+                            </button>
+                            <div data-dropdown-menu class="hidden absolute right-0 mt-1 w-48 bg-white rounded-lg shadow-lg border border-gray-200 z-50 py-1">
+                                <a href="{% url 'payment_detail' payment.pk %}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50">
+                                    <i data-lucide="eye" class="w-4 h-4 inline mr-2"></i>View Details
+                                </a>
+                                {% if not payment.is_void %}
+                                    {% if user.is_superuser or officer.is_super_officer or officer.can_void_payments %}
+                                    <a href="{% url 'officer_void_payment' payment.pk %}" class="block px-4 py-2 text-sm text-red-600 hover:bg-red-50">
+                                        <i data-lucide="ban" class="w-4 h-4 inline mr-2"></i>Void Payment
+                                    </a>
+                                    {% endif %}
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                    <div class="grid grid-cols-2 gap-2 text-sm mb-2">
+                        <div>
+                            <p class="text-gray-500 text-xs">OR Number</p>
+                            <p class="text-gray-900 font-semibold text-sm">{{ payment.or_number }}</p>
+                        </div>
+                        <div>
+                            <p class="text-gray-500 text-xs">Amount</p>
+                            <p class="text-gray-900 font-bold">₱{{ payment.amount|floatformat:2 }}</p>
+                        </div>
+                    </div>
+                    <div class="grid grid-cols-2 gap-2 text-sm mb-3">
+                        <div>
+                            <p class="text-gray-500 text-xs">Fee</p>
+                            <p class="text-gray-700 text-xs">{{ payment.fee_type.name }}</p>
+                            <p class="text-gray-400 text-xs">{{ payment.organization.code }}</p>
+                        </div>
+                        <div>
+                            <p class="text-gray-500 text-xs">Date</p>
+                            <p class="text-gray-700 text-xs">{{ payment.created_at|date:"M d, Y" }}</p>
+                        </div>
+                    </div>
+                    <div class="flex items-center">
+                        {% if payment.is_void %}
+                        <span class="inline-flex items-center gap-1 px-2 py-1 bg-red-100 text-red-700 rounded-full text-xs font-medium">
+                            <i data-lucide="x-circle" class="w-3 h-3"></i>Voided
+                        </span>
+                        {% else %}
+                        <span class="inline-flex items-center gap-1 px-2 py-1 bg-green-100 text-green-700 rounded-full text-xs font-medium">
+                            <i data-lucide="check-circle" class="w-3 h-3"></i>{{ payment.status }}
+                        </span>
+                        {% endif %}
+                    </div>
+                </div>
+                {% endfor %}
             </div>
 
             <!-- Pagination -->

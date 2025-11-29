@@ -1,153 +1,226 @@
 {% extends "base.html" %}
+{% load static %}
 
 {% block title %}Update Profile - UniPay{% endblock %}
 
 {% block content %}
-<div class="row justify-content-center py-5">
-    <div class="col-md-8 col-lg-6">
-        <div class="card shadow-lg border-0 fade-in">
-            <div class="card-header bg-primary text-white py-4">
-                <div class="d-flex align-items-center justify-content-between">
-                    <div class="d-flex align-items-center">
-                        <div class="bg-white bg-opacity-20 rounded-circle d-inline-flex align-items-center justify-content-center me-3" style="width: 50px; height: 50px;">
-                            <i class="fas fa-user-edit fa-lg"></i>
-                        </div>
-                        <div>
-                            <h3 class="mb-0 fw-bold">My Profile</h3>
-                            <small class="opacity-75">View and manage your information</small>
+<div class="py-6 md:py-8">
+    <div class="w-full px-4 md:px-6 lg:px-8 max-w-4xl mx-auto">
+        <!-- Gradient Header Card -->
+        <div class="page-header-gradient rounded-xl p-5 md:p-6 mb-6 shadow-lg relative overflow-hidden">
+            <!-- Decorative Elements -->
+            <div class="absolute top-0 right-0 w-32 h-32 bg-white/5 rounded-full -translate-y-1/2 translate-x-1/2"></div>
+            <div class="absolute bottom-0 left-0 w-24 h-24 bg-white/5 rounded-full translate-y-1/2 -translate-x-1/2"></div>
+            
+            <div class="relative z-10">
+                <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+                    <div>
+                        <div class="flex items-center gap-3 mb-2">
+                            <div class="w-12 h-12 bg-white/20 backdrop-blur-sm rounded-xl flex items-center justify-center">
+                                <i data-lucide="user-circle" class="w-6 h-6 text-white"></i>
+                            </div>
+                            <div>
+                                <h1 class="text-xl md:text-2xl font-bold text-white">My Profile</h1>
+                                <p class="text-white/80 text-sm">View and manage your information</p>
+                            </div>
                         </div>
                     </div>
-                    <div class="position-relative">
-                        <button type="button" class="btn btn-light btn-sm rounded-circle p-2" id="profileActionBtn" title="More options">
-                            <i class="fas fa-ellipsis-v"></i>
+                    <div class="flex flex-wrap gap-2 md:gap-3">
+                        <button type="button" id="edit-toggle-btn"
+                           class="px-3 md:px-4 py-2 bg-white text-gray-800 rounded-lg hover:bg-gray-50 transition-colors font-medium inline-flex items-center gap-2 text-sm shadow-md">
+                            <i data-lucide="edit-3" class="w-4 h-4"></i>
+                            <span>Edit Profile</span>
                         </button>
-                        <div class="dropdown-menu shadow-lg rounded-lg border-0" id="profileActionMenu" style="min-width: 180px; display: none; position: absolute; right: 0; top: 100%; margin-top: 5px; z-index: 1000;">
-                            <a href="#" class="dropdown-item px-4 py-2 text-primary fw-semibold" onclick="toggleEditMode(event)">
-                                <i class="fas fa-edit me-2"></i>Edit Profile
-                            </a>
-                            <a href="{% if user.student_profile %}{% url 'student_dashboard' %}{% else %}{% url 'officer_dashboard' %}{% endif %}" class="dropdown-item px-4 py-2 text-secondary">
-                                <i class="fas fa-arrow-left me-2"></i>Back to Dashboard
-                            </a>
+                        <a href="{% if user.student_profile %}{% url 'student_dashboard' %}{% elif user.officer_profile %}{% url 'officer_dashboard' %}{% else %}{% url 'home' %}{% endif %}" 
+                           class="px-3 md:px-4 py-2 bg-white/20 backdrop-blur-sm text-white rounded-lg hover:bg-white/30 transition-colors font-medium inline-flex items-center gap-2 text-sm border border-white/30">
+                            <i data-lucide="arrow-left" class="w-4 h-4"></i>
+                            <span class="hidden sm:inline">Back</span>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Profile Content -->
+        <div class="space-y-6">
+            <!-- User Information Card -->
+            <div class="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
+                <div class="px-5 py-4 border-b border-gray-100 bg-gray-50/50">
+                    <div class="flex items-center gap-2">
+                        <div class="w-8 h-8 bg-green-100 rounded-lg flex items-center justify-center">
+                            <i data-lucide="user" class="w-4 h-4 text-green-600"></i>
+                        </div>
+                        <h3 class="font-semibold text-gray-900">User Information</h3>
+                    </div>
+                </div>
+                <div class="p-5">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div class="space-y-1">
+                            <p class="text-xs text-gray-500 uppercase tracking-wide font-medium">Full Name</p>
+                            <p class="text-gray-900 font-medium">{{ user.get_full_name|default:"Not set" }}</p>
+                        </div>
+                        <div class="space-y-1">
+                            <p class="text-xs text-gray-500 uppercase tracking-wide font-medium">Email</p>
+                            <p class="text-gray-900 font-medium">{{ user.email }}</p>
+                        </div>
+                        <div class="space-y-1">
+                            <p class="text-xs text-gray-500 uppercase tracking-wide font-medium">Username</p>
+                            <p class="text-gray-900 font-medium">{{ user.username }}</p>
+                        </div>
+                        <div class="space-y-1">
+                            <p class="text-xs text-gray-500 uppercase tracking-wide font-medium">Date Joined</p>
+                            <p class="text-gray-900 font-medium">{{ user.date_joined|date:"M d, Y" }}</p>
                         </div>
                     </div>
                 </div>
             </div>
-            <div class="card-body p-4">
-                <!-- Display user info (read-only) -->
-                <!-- Common user info -->
-                <div class="mb-4 pb-4 border-bottom">
-                    <h5 class="fw-bold mb-3">User Information</h5>
-                    <div class="row">
-                        <div class="col-md-6 mb-3">
-                            <label class="form-label text-muted small">Full Name</label>
-                            <p class="fw-semibold">{{ user.get_full_name }}</p>
+
+            <!-- Officer Information Card -->
+            {% if user.officer_profile %}
+            <div class="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
+                <div class="px-5 py-4 border-b border-gray-100 bg-gray-50/50">
+                    <div class="flex items-center gap-2">
+                        <div class="w-8 h-8 bg-amber-100 rounded-lg flex items-center justify-center">
+                            <i data-lucide="shield" class="w-4 h-4 text-amber-600"></i>
                         </div>
-                        <div class="col-md-6 mb-3">
-                            <label class="form-label text-muted small">Email</label>
-                            <p class="fw-semibold">{{ user.email }}</p>
+                        <h3 class="font-semibold text-gray-900">Officer Information</h3>
+                    </div>
+                </div>
+                <div class="p-5">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                        <div class="space-y-1">
+                            <p class="text-xs text-gray-500 uppercase tracking-wide font-medium">Organization</p>
+                            <p class="text-gray-900 font-medium">{{ user.officer_profile.organization.name }}</p>
                         </div>
-                        <div class="col-md-6 mb-3">
-                            <label class="form-label text-muted small">Username</label>
-                            <p class="fw-semibold">{{ user.username }}</p>
+                        <div class="space-y-1">
+                            <p class="text-xs text-gray-500 uppercase tracking-wide font-medium">Role/Position</p>
+                            <p class="text-gray-900 font-medium">{{ user.officer_profile.role|default:"Not set" }}</p>
+                        </div>
+                    </div>
+                    <div class="pt-4 border-t border-gray-100">
+                        <p class="text-xs text-gray-500 uppercase tracking-wide font-medium mb-3">Status & Permissions</p>
+                        <div class="flex flex-wrap gap-2">
+                            {% if user.is_superuser %}
+                            <span class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-red-100 text-red-700 rounded-full text-xs font-semibold">
+                                <i data-lucide="crown" class="w-3 h-3"></i>
+                                Superuser
+                            </span>
+                            {% endif %}
+                            {% if user.officer_profile.is_super_officer %}
+                            <span class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-amber-100 text-amber-700 rounded-full text-xs font-semibold">
+                                <i data-lucide="star" class="w-3 h-3"></i>
+                                Super Officer
+                            </span>
+                            {% endif %}
+                            {% if user.officer_profile.can_process_payments %}
+                            <span class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-green-100 text-green-700 rounded-full text-xs font-semibold">
+                                <i data-lucide="check-circle" class="w-3 h-3"></i>
+                                Can Process Payments
+                            </span>
+                            {% endif %}
+                            {% if user.officer_profile.can_void_payments %}
+                            <span class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-green-100 text-green-700 rounded-full text-xs font-semibold">
+                                <i data-lucide="x-circle" class="w-3 h-3"></i>
+                                Can Void Payments
+                            </span>
+                            {% endif %}
+                            {% if user.officer_profile.can_generate_reports %}
+                            <span class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-green-100 text-green-700 rounded-full text-xs font-semibold">
+                                <i data-lucide="file-text" class="w-3 h-3"></i>
+                                Can Generate Reports
+                            </span>
+                            {% endif %}
                         </div>
                     </div>
                 </div>
+            </div>
+            {% endif %}
 
-                <!-- Officer profile info (if exists) -->
-                {% if user.officer_profile %}
-                    <div class="mb-4 pb-4 border-bottom">
-                        <h5 class="fw-bold mb-3">Officer Information</h5>
-                        <div class="row">
-                            <div class="col-md-6 mb-3">
-                                <label class="form-label text-muted small">Organization</label>
-                                <p class="fw-semibold">{{ user.officer_profile.organization.name }}</p>
-                            </div>
-                            <div class="col-md-6 mb-3">
-                                <label class="form-label text-muted small">Role/Position</label>
-                                <p class="fw-semibold">{{ user.officer_profile.role|default:"Not set" }}</p>
-                            </div>
-                            <div class="col-md-12 mb-2">
-                                <label class="form-label text-muted small">Status & Permissions</label>
-                                <div>
-                                    {% if user.is_superuser %}
-                                        <span class="badge bg-danger me-2"><i class="fas fa-crown me-1"></i>Superuser</span>
-                                    {% endif %}
-                                    {% if user.officer_profile.is_super_officer %}
-                                        <span class="badge bg-warning me-2"><i class="fas fa-star me-1"></i>Super Officer</span>
-                                    {% endif %}
-                                    {% if user.officer_profile.can_process_payments %}
-                                        <span class="badge bg-success me-2">Can Process Payments</span>
-                                    {% endif %}
-                                    {% if user.officer_profile.can_void_payments %}
-                                        <span class="badge bg-success me-2">Can Void Payments</span>
-                                    {% endif %}
-                                    {% if user.officer_profile.can_generate_reports %}
-                                        <span class="badge bg-success me-2">Can Generate Reports</span>
-                                    {% endif %}
+            <!-- Student Information Card -->
+            {% if user.student_profile %}
+            <div class="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
+                <div class="px-5 py-4 border-b border-gray-100 bg-gray-50/50">
+                    <div class="flex items-center gap-2">
+                        <div class="w-8 h-8 bg-blue-100 rounded-lg flex items-center justify-center">
+                            <i data-lucide="graduation-cap" class="w-4 h-4 text-blue-600"></i>
+                        </div>
+                        <h3 class="font-semibold text-gray-900">Student Information</h3>
+                    </div>
+                </div>
+                <div class="p-5">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div class="space-y-1">
+                            <p class="text-xs text-gray-500 uppercase tracking-wide font-medium">Student ID</p>
+                            <p class="text-gray-900 font-medium">{{ user.student_profile.student_id_number }}</p>
+                        </div>
+                        <div class="space-y-1">
+                            <p class="text-xs text-gray-500 uppercase tracking-wide font-medium">Program</p>
+                            <p class="text-gray-900 font-medium">{{ user.student_profile.course.program_type }}</p>
+                        </div>
+                        {% if user.student_profile.year_level %}
+                        <div class="space-y-1">
+                            <p class="text-xs text-gray-500 uppercase tracking-wide font-medium">Year Level</p>
+                            <p class="text-gray-900 font-medium">Year {{ user.student_profile.year_level }}</p>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+
+            <!-- Edit Profile Form (Hidden by default) -->
+            <div id="edit-form-section" class="hidden">
+                <div class="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
+                    <div class="px-5 py-4 border-b border-gray-100 bg-gradient-to-r from-green-50 to-emerald-50">
+                        <div class="flex items-center justify-between">
+                            <div class="flex items-center gap-2">
+                                <div class="w-8 h-8 bg-green-100 rounded-lg flex items-center justify-center">
+                                    <i data-lucide="edit-3" class="w-4 h-4 text-green-600"></i>
                                 </div>
+                                <h3 class="font-semibold text-gray-900">Edit Profile</h3>
                             </div>
+                            <button type="button" id="close-edit-btn" class="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg transition-colors">
+                                <i data-lucide="x" class="w-5 h-5"></i>
+                            </button>
                         </div>
                     </div>
-                {% endif %}
-
-                <!-- Student profile info (if exists) -->
-                {% if user.student_profile %}
-                    <div class="mb-4 pb-4 border-bottom">
-                        <h5 class="fw-bold mb-3">Student Information</h5>
-                        <div class="row">
-                            <div class="col-md-6 mb-3">
-                                <label class="form-label text-muted small">Student ID</label>
-                                <p class="fw-semibold">{{ user.student_profile.student_id_number }}</p>
-                            </div>
-                            <div class="col-md-6 mb-3">
-                                <label class="form-label text-muted small">Program</label>
-                                <p class="fw-semibold">{{ user.student_profile.course.program_type }}</p>
-                            </div>
-                        </div>
-                    </div>
-                {% endif %}
-                
-                <!-- Edit Form (Hidden by default) -->
-                <div id="editFormSection" style="display: none;">
-                    <div class="mt-4 pt-4 border-top">
-                        <div class="d-flex align-items-center justify-content-between mb-3">
-                            <h5 class="fw-bold mb-0">
-                                <i class="fas fa-pencil-alt me-2 text-primary"></i>Edit Profile
-                            </h5>
-                            <button type="button" class="btn-close" onclick="toggleEditMode(event)" title="Cancel editing"></button>
-                        </div>
-                        
-                        <form method="post" id="profileForm">
+                    <div class="p-5">
+                        <form method="post" id="profileForm" class="space-y-4">
                             {% csrf_token %}
                             {% for field in form %}
-                                <div class="mb-3">
-                                    <label for="{{ field.id_for_label }}" class="form-label fw-semibold">
-                                        {{ field.label }}
-                                        {% if field.field.required %}
-                                            <span class="text-danger">*</span>
-                                        {% endif %}
-                                    </label>
-                                    {{ field }}
-                                    {% if field.help_text %}
-                                        <div class="form-text small">
-                                            <i class="fas fa-info-circle me-1 text-info"></i>
-                                            {{ field.help_text }}
-                                        </div>
+                            <div>
+                                <label for="{{ field.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-1.5">
+                                    {{ field.label }}
+                                    {% if field.field.required %}
+                                    <span class="text-red-500">*</span>
                                     {% endif %}
-                                    {% for error in field.errors %}
-                                        <div class="text-danger small mt-1">
-                                            <i class="fas fa-exclamation-circle me-1"></i>{{ error }}
-                                        </div>
-                                    {% endfor %}
+                                </label>
+                                <div class="relative">
+                                    {{ field }}
                                 </div>
+                                {% if field.help_text %}
+                                <p class="mt-1.5 text-xs text-gray-500 flex items-center gap-1">
+                                    <i data-lucide="info" class="w-3 h-3"></i>
+                                    {{ field.help_text }}
+                                </p>
+                                {% endif %}
+                                {% for error in field.errors %}
+                                <p class="mt-1.5 text-xs text-red-600 flex items-center gap-1">
+                                    <i data-lucide="alert-circle" class="w-3 h-3"></i>
+                                    {{ error }}
+                                </p>
+                                {% endfor %}
+                            </div>
                             {% endfor %}
                             
-                            <div class="d-grid gap-2 d-md-flex justify-content-md-end mt-4">
-                                <button type="button" class="btn btn-outline-secondary" onclick="toggleEditMode(event)">
-                                    <i class="fas fa-times me-2"></i>Cancel
+                            <div class="flex flex-col sm:flex-row gap-3 pt-4 border-t border-gray-100">
+                                <button type="submit" class="flex-1 sm:flex-none px-6 py-2.5 btn-gradient text-white rounded-lg transition-all font-medium text-sm shadow-sm inline-flex items-center justify-center gap-2">
+                                    <i data-lucide="save" class="w-4 h-4"></i>
+                                    Save Changes
                                 </button>
-                                <button type="submit" class="btn btn-primary">
-                                    <i class="fas fa-save me-2"></i>Save Changes
+                                <button type="button" id="cancel-edit-btn" class="flex-1 sm:flex-none px-6 py-2.5 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors font-medium text-sm inline-flex items-center justify-center gap-2">
+                                    <i data-lucide="x" class="w-4 h-4"></i>
+                                    Cancel
                                 </button>
                             </div>
                         </form>
@@ -159,44 +232,45 @@
 </div>
 
 <style>
-    .dropdown-menu {
-        background: white;
-        border: 1px solid #dee2e6;
-    }
-    
-    .dropdown-item {
-        display: block;
+    /* Style form inputs to match theme */
+    #profileForm input[type="text"],
+    #profileForm input[type="email"],
+    #profileForm input[type="password"],
+    #profileForm select,
+    #profileForm textarea {
         width: 100%;
-        padding: 0.5rem 1rem;
-        clear: both;
-        color: #212529;
-        text-align: inherit;
-        white-space: nowrap;
-        background-color: transparent;
-        border: 0;
-        text-decoration: none;
-        cursor: pointer;
-        transition: all 0.2s ease;
+        padding: 0.625rem 0.875rem;
+        border: 1px solid #e5e7eb;
+        border-radius: 0.5rem;
+        font-size: 0.875rem;
+        transition: all 0.2s;
+        background-color: #fff;
     }
     
-    .dropdown-item:hover {
-        background-color: #f8f9fa;
-        color: #0d6efd;
+    #profileForm input[type="text"]:focus,
+    #profileForm input[type="email"]:focus,
+    #profileForm input[type="password"]:focus,
+    #profileForm select:focus,
+    #profileForm textarea:focus {
+        outline: none;
+        border-color: #22c55e;
+        box-shadow: 0 0 0 3px rgba(34, 197, 94, 0.1);
     }
     
-    .dropdown-item.text-primary {
-        color: #0d6efd !important;
+    #profileForm input[type="checkbox"] {
+        width: 1rem;
+        height: 1rem;
+        border-radius: 0.25rem;
+        border: 1px solid #d1d5db;
+        accent-color: #16a34a;
     }
     
-    .dropdown-item.text-secondary {
-        color: #6c757d !important;
+    /* Animation for edit form */
+    #edit-form-section {
+        animation: slideDown 0.3s ease-out;
     }
     
-    .fade-in {
-        animation: fadeIn 0.3s ease-in;
-    }
-    
-    @keyframes fadeIn {
+    @keyframes slideDown {
         from {
             opacity: 0;
             transform: translateY(-10px);
@@ -206,45 +280,50 @@
             transform: translateY(0);
         }
     }
-    
-    #editFormSection {
-        transition: all 0.3s ease;
-    }
 </style>
 
+{% block extra_js %}
 <script>
     document.addEventListener('DOMContentLoaded', function() {
-        const profileActionBtn = document.getElementById('profileActionBtn');
-        const profileActionMenu = document.getElementById('profileActionMenu');
+        const editToggleBtn = document.getElementById('edit-toggle-btn');
+        const closeEditBtn = document.getElementById('close-edit-btn');
+        const cancelEditBtn = document.getElementById('cancel-edit-btn');
+        const editFormSection = document.getElementById('edit-form-section');
         
-        // Toggle dropdown menu
-        profileActionBtn.addEventListener('click', function(e) {
-            e.stopPropagation();
-            profileActionMenu.style.display = profileActionMenu.style.display === 'none' ? 'block' : 'none';
-        });
-        
-        // Close menu when clicking outside
-        document.addEventListener('click', function() {
-            profileActionMenu.style.display = 'none';
-        });
-    });
-    
-    function toggleEditMode(event) {
-        event.preventDefault();
-        const editFormSection = document.getElementById('editFormSection');
-        const profileActionMenu = document.getElementById('profileActionMenu');
-        
-        if (editFormSection.style.display === 'none') {
-            editFormSection.style.display = 'block';
-            profileActionMenu.style.display = 'none';
-            // Focus on first form field
-            const firstField = document.querySelector('#profileForm input, #profileForm select, #profileForm textarea');
-            if (firstField) {
-                setTimeout(() => firstField.focus(), 100);
+        function toggleEditMode() {
+            editFormSection.classList.toggle('hidden');
+            
+            if (!editFormSection.classList.contains('hidden')) {
+                // Scroll to form
+                editFormSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                
+                // Focus first field
+                const firstField = document.querySelector('#profileForm input, #profileForm select, #profileForm textarea');
+                if (firstField) {
+                    setTimeout(() => firstField.focus(), 300);
+                }
+                
+                // Update button text
+                editToggleBtn.innerHTML = '<i data-lucide="eye" class="w-4 h-4"></i><span>View Only</span>';
+            } else {
+                editToggleBtn.innerHTML = '<i data-lucide="edit-3" class="w-4 h-4"></i><span>Edit Profile</span>';
             }
-        } else {
-            editFormSection.style.display = 'none';
+            
+            // Reinitialize Lucide icons
+            if (typeof lucide !== 'undefined') {
+                lucide.createIcons();
+            }
         }
-    }
+        
+        editToggleBtn.addEventListener('click', toggleEditMode);
+        closeEditBtn.addEventListener('click', toggleEditMode);
+        cancelEditBtn.addEventListener('click', toggleEditMode);
+        
+        // Initialize icons
+        if (typeof lucide !== 'undefined') {
+            lucide.createIcons();
+        }
+    });
 </script>
+{% endblock %}
 {% endblock %}

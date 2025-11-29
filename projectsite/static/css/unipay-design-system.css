@@ -58,11 +58,12 @@
   --color-student: #3b82f6;
   --color-student-light: #dbeafe;
   
-  /* Brand Gradient */
-  --gradient-brand: linear-gradient(0deg, rgba(34, 195, 112, 1) 0%, rgba(60, 194, 104, 1) 39%, rgba(253, 187, 45, 1) 100%);
-  --gradient-brand-hover: linear-gradient(0deg, rgba(29, 169, 96, 1) 0%, rgba(47, 176, 90, 1) 39%, rgba(229, 168, 32, 1) 100%);
-  --gradient-brand-horizontal: linear-gradient(90deg, rgba(34, 195, 112, 1) 0%, rgba(60, 194, 104, 1) 50%, rgba(253, 187, 45, 1) 100%);
-  --gradient-brand-diagonal: linear-gradient(135deg, rgba(34, 195, 112, 1) 0%, rgba(60, 194, 104, 1) 50%, rgba(253, 187, 45, 1) 100%);
+  /* Brand Gradient - More green, less yellow */
+  --gradient-brand: linear-gradient(0deg, rgba(34, 195, 112, 1) 0%, rgba(45, 180, 95, 1) 60%, rgba(80, 200, 120, 1) 85%, rgba(180, 210, 80, 1) 100%);
+  --gradient-brand-hover: linear-gradient(0deg, rgba(29, 169, 96, 1) 0%, rgba(40, 160, 85, 1) 60%, rgba(70, 180, 100, 1) 85%, rgba(160, 190, 70, 1) 100%);
+  --gradient-brand-horizontal: linear-gradient(90deg, rgba(34, 195, 112, 1) 0%, rgba(45, 180, 95, 1) 60%, rgba(80, 200, 120, 1) 85%, rgba(180, 210, 80, 1) 100%);
+  --gradient-brand-diagonal: linear-gradient(135deg, rgba(34, 195, 112, 1) 0%, rgba(45, 180, 95, 1) 60%, rgba(80, 200, 120, 1) 85%, rgba(180, 210, 80, 1) 100%);
+  --gradient-brand-active: linear-gradient(0deg, rgba(21, 128, 61, 1) 0%, rgba(22, 101, 52, 1) 100%);
   
   /* Shadows */
   --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
@@ -259,64 +260,110 @@ h6 { font-size: 0.875rem; }
 
 /* Button Variants */
 .up-btn-primary {
-  background: var(--color-primary);
+  background: #16a34a;
   color: white;
 }
 
 .up-btn-primary:hover:not(:disabled) {
-  background: var(--color-primary-hover);
+  background: #4ade80;
+  color: white;
   transform: translateY(-1px);
   box-shadow: var(--shadow-md);
 }
 
+.up-btn-primary:active:not(:disabled) {
+  background: #15803d;
+  color: white;
+  transform: translateY(0);
+  box-shadow: var(--shadow-sm);
+}
+
 .up-btn-secondary {
-  background: var(--color-secondary);
+  background: #16a34a;
   color: white;
 }
 
 .up-btn-secondary:hover:not(:disabled) {
-  background: var(--color-secondary-hover);
+  background: #4ade80;
+  color: white;
   transform: translateY(-1px);
   box-shadow: var(--shadow-md);
 }
 
+.up-btn-secondary:active:not(:disabled) {
+  background: #15803d;
+  color: white;
+  transform: translateY(0);
+  box-shadow: var(--shadow-sm);
+}
+
 .up-btn-accent {
-  background: var(--color-accent);
+  background: #16a34a;
   color: white;
 }
 
 .up-btn-accent:hover:not(:disabled) {
-  background: var(--color-accent-hover);
+  background: #4ade80;
+  color: white;
+}
+
+.up-btn-accent:active:not(:disabled) {
+  background: #15803d;
+  color: white;
+  transform: translateY(0);
+  box-shadow: var(--shadow-sm);
 }
 
 .up-btn-dark {
-  background: var(--color-foreground);
+  background: #16a34a;
   color: white;
 }
 
 .up-btn-dark:hover:not(:disabled) {
-  background: #1e293b;
+  background: #4ade80;
+  color: white;
+}
+
+.up-btn-dark:active:not(:disabled) {
+  background: #15803d;
+  color: white;
+  transform: translateY(0);
 }
 
 .up-btn-outline {
   background: transparent;
-  color: var(--color-foreground);
-  border: 1px solid var(--color-border);
+  color: #16a34a;
+  border: 1px solid #16a34a;
 }
 
 .up-btn-outline:hover:not(:disabled) {
-  background: var(--color-muted);
-  border-color: var(--color-muted-foreground);
+  background: #4ade80;
+  color: white;
+  border-color: #4ade80;
+}
+
+.up-btn-outline:active:not(:disabled) {
+  background: #15803d;
+  color: white;
+  border-color: #15803d;
 }
 
 .up-btn-outline-primary {
   background: transparent;
-  color: var(--color-primary);
-  border: 1px solid var(--color-primary);
+  color: #16a34a;
+  border: 1px solid #16a34a;
 }
 
 .up-btn-outline-primary:hover:not(:disabled) {
-  background: var(--color-primary-light);
+  background: #4ade80;
+  color: white;
+  border-color: #4ade80;
+}
+
+.up-btn-outline-primary:active:not(:disabled) {
+  background: #15803d;
+  color: white;
+  border-color: #15803d;
 }
 
 .up-btn-ghost {
@@ -325,8 +372,13 @@ h6 { font-size: 0.875rem; }
 }
 
 .up-btn-ghost:hover:not(:disabled) {
-  background: var(--color-muted);
-  color: var(--color-foreground);
+  background: #4ade80;
+  color: white;
+}
+
+.up-btn-ghost:active:not(:disabled) {
+  background: #15803d;
+  color: white;
 }
 
 .up-btn-danger {
@@ -335,7 +387,14 @@ h6 { font-size: 0.875rem; }
 }
 
 .up-btn-danger:hover:not(:disabled) {
-  background: var(--color-error-dark);
+  background: #fecaca;
+  color: #991b1b;
+}
+
+.up-btn-danger:active:not(:disabled) {
+  background: #dc2626;
+  color: white;
+  transform: translateY(0);
 }
 
 .up-btn-success {
@@ -644,22 +703,22 @@ h6 { font-size: 0.875rem; }
 }
 
 .up-nav-link:hover {
-  color: var(--color-primary);
-  background: var(--color-primary-light);
-  border-color: var(--color-primary);
+  color: white;
+  background: #4ade80;
+  border-color: #4ade80;
   text-decoration: none !important;
 }
 
 .up-nav-link.active {
   color: white !important;
-  background: var(--gradient-brand-horizontal);
+  background: #16a34a;
   text-decoration: none !important;
   border-color: transparent;
   box-shadow: var(--shadow-sm);
 }
 
 .up-nav-link.active:hover {
-  background: var(--gradient-brand-hover);
+  background: #15803d;
   color: white !important;
   border-color: transparent;
 }
@@ -2137,7 +2196,7 @@ h6 { font-size: 0.875rem; }
 
 /* Primary Button */
 .btn-primary {
-  background: var(--color-primary);
+  background: #16a34a;
   color: white;
   font-weight: var(--font-weight-medium);
   border-radius: var(--radius-lg);
@@ -2145,43 +2204,65 @@ h6 { font-size: 0.875rem; }
 }
 
 .btn-primary:hover {
-  background: var(--color-primary-hover);
+  background: #4ade80;
+  color: white;
   transform: translateY(-1px);
   box-shadow: var(--shadow-md);
 }
 
+.btn-primary:active {
+  background: #15803d;
+  color: white;
+  transform: translateY(0);
+  box-shadow: var(--shadow-sm);
+}
+
 /* Secondary/Accent Button */
 .btn-accent {
-  background: var(--color-secondary);
-  color: var(--color-foreground);
+  background: #16a34a;
+  color: white;
   font-weight: var(--font-weight-medium);
   border-radius: var(--radius-lg);
   transition: all var(--transition-normal);
 }
 
 .btn-accent:hover {
-  background: var(--color-secondary-hover);
+  background: #4ade80;
+  color: white;
   transform: translateY(-1px);
   box-shadow: var(--shadow-md);
 }
 
-/* Gradient Button */
+.btn-accent:active {
+  background: #15803d;
+  color: white;
+  transform: translateY(0);
+  box-shadow: var(--shadow-sm);
+}
+
+/* Gradient Button - Now solid dark green */
 .btn-gradient {
-  background: var(--gradient-brand-horizontal);
+  background: #16a34a;
   color: white !important;
   font-weight: var(--font-weight-semibold);
   border-radius: var(--radius-lg);
   transition: all var(--transition-normal);
-  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
   text-decoration: none !important;
 }
 
 .btn-gradient:hover {
-  background: var(--gradient-brand-hover);
+  background: #4ade80;
+  color: white !important;
   transform: translateY(-1px);
   box-shadow: var(--shadow-lg);
-  color: white !important;
   text-decoration: none !important;
+}
+
+.btn-gradient:active {
+  background: #15803d;
+  color: white !important;
+  transform: translateY(0);
+  box-shadow: var(--shadow-sm);
 }
 
 /* Status Badges */

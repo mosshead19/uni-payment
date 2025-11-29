@@ -5,11 +5,11 @@
 <div class="space-y-6">
     
     <!-- Hero Section - Student Info -->
-    <div class="bg-green-50 rounded-lg border border-green-200 p-6 md:p-8">
+    <div class="bg-green-200 rounded-lg border border-green-400 p-6 md:p-8 shadow-md">
         <div class="flex flex-col md:flex-row md:items-start md:justify-between gap-4">
             <div>
                 <h2 class="text-2xl font-semibold text-gray-900 mb-2">Welcome back, {{ student.get_full_name }}</h2>
-                <div class="space-y-1 text-gray-600">
+                <div class="space-y-1 text-gray-700">
                     <p>Student ID: <span class="font-medium text-gray-900">{{ student.student_id_number }}</span></p>
                     <p>{{ student.course.name }} • Year {{ student.year_level }}</p>
                     <p>{{ user.email }}</p>
@@ -86,86 +86,159 @@
     <!-- Organization Fees Tab -->
     <div id="fees-tab" class="tab-content">
         <div class="bg-white rounded-lg border border-gray-200 overflow-hidden">
+            <!-- Header with Filter & Search -->
+            <div class="p-3 sm:p-4 border-b border-gray-200">
+                <div class="flex items-center justify-between gap-2">
+                    <h3 class="text-base sm:text-lg font-semibold text-gray-900">Organization Fees</h3>
+                    <div class="flex items-center gap-1.5 sm:gap-2 flex-shrink-0">
+                        <!-- Search Toggle Button -->
+                        <button type="button" id="fees-search-toggle"
+                                class="p-2 sm:px-3 sm:py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors inline-flex items-center gap-1.5 text-sm">
+                            <i data-lucide="search" class="w-4 h-4"></i>
+                            <span class="hidden sm:inline">Search</span>
+                        </button>
+                        <!-- Filter Button -->
+                        <button type="button" id="fees-filter-toggle"
+                                class="p-2 sm:px-3 sm:py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors inline-flex items-center gap-1.5 text-sm">
+                            <i data-lucide="filter" class="w-4 h-4"></i>
+                            <span class="hidden sm:inline">Filters</span>
+                            <span id="fees-filter-indicator" class="hidden w-2 h-2 bg-orange-500 rounded-full"></span>
+                        </button>
+                    </div>
+                </div>
+                
+                <!-- Search Bar (Hidden by default) -->
+                <div id="fees-search-bar" class="hidden mt-3">
+                    <div class="relative">
+                        <i data-lucide="search" class="w-5 h-5 text-gray-400 absolute left-3 top-1/2 -translate-y-1/2"></i>
+                        <input type="text" 
+                               id="fees-search-input"
+                               placeholder="Search fees by name, organization..." 
+                               class="w-full pl-10 pr-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent text-sm">
+                    </div>
+                </div>
+                
+                <!-- Collapsible Filter Panel -->
+                <div id="fees-filter-panel" class="hidden mt-3 pt-3 border-t border-gray-100">
+                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Status</label>
+                            <select id="fees-filter-status" class="w-full px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent text-sm">
+                                <option value="">All Statuses</option>
+                                <option value="paid">Paid</option>
+                                <option value="pending">Pending</option>
+                                <option value="unpaid">Unpaid</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Organization</label>
+                            <select id="fees-filter-org" class="w-full px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent text-sm">
+                                <option value="">All Organizations</option>
+                                {% for org in student_organizations %}
+                                <option value="{{ org.name }}">{{ org.name }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Semester</label>
+                            <select id="fees-filter-semester" class="w-full px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent text-sm">
+                                <option value="">All Semesters</option>
+                                <option value="1st Semester">1st Semester</option>
+                                <option value="2nd Semester">2nd Semester</option>
+                                <option value="Summer">Summer</option>
+                            </select>
+                        </div>
+                        <div class="flex items-end gap-2">
+                            <button type="button" onclick="applyFeesFilter()" class="flex-1 px-4 py-2 btn-gradient text-white rounded-lg transition-all font-medium text-sm shadow-sm">
+                                Apply
+                            </button>
+                            <button type="button" onclick="clearFeesFilter()" class="px-4 py-2 bg-gray-100 text-gray-600 rounded-lg hover:bg-gray-200 transition-colors text-sm">
+                                Clear
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
             <!-- Desktop Table View -->
             <div class="hidden md:block overflow-x-auto">
-                <table class="w-full">
+                <table class="w-full table-fixed" id="fees-table">
                     <thead class="bg-gray-50 border-b border-gray-200">
                         <tr>
-                            <th class="px-6 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Fee Type</th>
-                            <th class="px-6 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Organization</th>
-                            <th class="px-6 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Period</th>
-                            <th class="px-6 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Amount</th>
-                            <th class="px-6 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Status</th>
-                            <th class="px-6 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Action</th>
+                            <th class="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider w-[22%]">Fee Type</th>
+                            <th class="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider w-[18%]">Organization</th>
+                            <th class="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider w-[15%]">Period</th>
+                            <th class="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider w-[12%]">Amount</th>
+                            <th class="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider w-[13%]">Status</th>
+                            <th class="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider w-[20%]">Action</th>
                         </tr>
                     </thead>
-                    <tbody class="divide-y divide-gray-200">
+                    <tbody class="divide-y divide-gray-200" id="fees-table-body">
                         {% for fee_info in all_fees_with_status %}
-                        <tr class="hover:bg-gray-50 transition-colors">
-                            <td class="px-6 py-4">
-                                <p class="text-gray-900 font-medium">{{ fee_info.fee_type.name }}</p>
+                        <tr class="hover:bg-gray-50 transition-colors fee-row" 
+                            data-status="{% if fee_info.is_paid %}paid{% elif fee_info.has_pending_request %}pending{% else %}unpaid{% endif %}"
+                            data-org="{{ fee_info.organization.name }}"
+                            data-semester="{{ fee_info.fee_type.semester }}">
+                            <td class="px-4 py-4">
+                                <p class="text-gray-900 font-medium fee-name truncate" title="{{ fee_info.fee_type.name }}">{{ fee_info.fee_type.name }}</p>
                                 {% if fee_info.fee_type.due_date %}
                                 <p class="text-gray-500 text-sm">Due: {{ fee_info.fee_type.due_date|date:"M d, Y" }}</p>
                                 {% endif %}
                             </td>
-                            <td class="px-6 py-4 text-gray-700">{{ fee_info.organization.name }}</td>
-                            <td class="px-6 py-4">
-                                <div class="flex flex-col gap-1">
-                                    <span class="inline-flex items-center px-2.5 py-1 bg-gradient-to-r from-purple-50 to-purple-100 text-purple-700 rounded-lg text-xs font-semibold border border-purple-200">
-                                        {{ fee_info.fee_type.semester }}
-                                    </span>
-                                    <span class="text-gray-500 text-xs">{{ fee_info.fee_type.academic_year }}</span>
-                                </div>
+                            <td class="px-4 py-4 text-gray-700 fee-org truncate" title="{{ fee_info.organization.name }}">{{ fee_info.organization.name }}</td>
+                            <td class="px-4 py-4">
+                                <p class="text-gray-700 text-sm whitespace-nowrap">{{ fee_info.fee_type.academic_year }}</p>
+                                <p class="text-gray-500 text-xs fee-semester whitespace-nowrap">{{ fee_info.fee_type.semester }}</p>
                             </td>
-                            <td class="px-6 py-4 text-gray-900 font-medium">₱{{ fee_info.amount|floatformat:2 }}</td>
-                            <td class="px-6 py-4">
+                            <td class="px-4 py-4 text-gray-900 font-medium whitespace-nowrap">₱{{ fee_info.amount|floatformat:2 }}</td>
+                            <td class="px-4 py-4">
                                 {% if fee_info.is_paid %}
-                                    <span class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-gradient-to-r from-green-50 to-green-100 text-green-700 rounded-full text-xs font-semibold border border-green-200 shadow-sm">
-                                        <i data-lucide="check-circle" class="w-3.5 h-3.5"></i>
+                                    <span class="inline-flex items-center gap-1 px-2.5 py-1 bg-gradient-to-r from-green-50 to-green-100 text-green-700 rounded-full text-xs font-semibold border border-green-200 shadow-sm whitespace-nowrap">
+                                        <i data-lucide="check-circle" class="w-3 h-3"></i>
                                         Paid
                                     </span>
                                 {% elif fee_info.has_pending_request and fee_info.has_qr_generated %}
-                                    <span class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-gradient-to-r from-blue-50 to-blue-100 text-blue-700 rounded-full text-xs font-semibold border border-blue-200 shadow-sm">
-                                        <i data-lucide="clock" class="w-3.5 h-3.5"></i>
+                                    <span class="inline-flex items-center gap-1 px-2.5 py-1 bg-gradient-to-r from-blue-50 to-blue-100 text-blue-700 rounded-full text-xs font-semibold border border-blue-200 shadow-sm whitespace-nowrap">
+                                        <i data-lucide="clock" class="w-3 h-3"></i>
                                         Pending
                                     </span>
                                 {% elif fee_info.has_pending_request %}
-                                    <span class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-gradient-to-r from-orange-50 to-orange-100 text-orange-700 rounded-full text-xs font-semibold border border-orange-200 shadow-sm">
-                                        <i data-lucide="circle-dollar-sign" class="w-3.5 h-3.5"></i>
+                                    <span class="inline-flex items-center gap-1 px-2.5 py-1 bg-gradient-to-r from-orange-50 to-orange-100 text-orange-700 rounded-full text-xs font-semibold border border-orange-200 shadow-sm whitespace-nowrap">
+                                        <i data-lucide="circle-dollar-sign" class="w-3 h-3"></i>
                                         Unpaid
                                     </span>
                                 {% else %}
-                                    <span class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-gradient-to-r from-yellow-50 to-yellow-100 text-yellow-700 rounded-full text-xs font-semibold border border-yellow-200 shadow-sm">
-                                        <i data-lucide="circle-dollar-sign" class="w-3.5 h-3.5"></i>
+                                    <span class="inline-flex items-center gap-1 px-2.5 py-1 bg-gradient-to-r from-yellow-50 to-yellow-100 text-yellow-700 rounded-full text-xs font-semibold border border-yellow-200 shadow-sm whitespace-nowrap">
+                                        <i data-lucide="circle-dollar-sign" class="w-3 h-3"></i>
                                         Unpaid
                                     </span>
                                 {% endif %}
                             </td>
-                            <td class="px-6 py-4">
+                            <td class="px-4 py-4">
                                 {% if fee_info.is_paid %}
                                     <a href="{% url 'payment_detail' fee_info.payment.id %}" 
-                                       class="inline-flex items-center justify-center gap-2 px-4 py-2 min-w-[130px] bg-gradient-to-r from-green-500 to-emerald-600 text-white rounded-lg hover:from-green-600 hover:to-emerald-700 transition-all text-sm font-medium shadow-sm">
-                                        <i data-lucide="file-check" class="w-4 h-4"></i>
+                                       class="inline-flex items-center justify-center gap-1.5 px-3 py-1.5 bg-gradient-to-r from-green-500 to-emerald-600 text-white rounded-lg hover:from-green-600 hover:to-emerald-700 transition-all text-xs font-medium shadow-sm whitespace-nowrap">
+                                        <i data-lucide="file-check" class="w-3.5 h-3.5"></i>
                                         View Receipt
                                     </a>
                                 {% elif fee_info.has_pending_request and fee_info.has_qr_generated %}
                                     <a href="{% url 'view_payment_request_qr' request_id=fee_info.pending_request.request_id %}" 
-                                       class="inline-flex items-center justify-center gap-2 px-4 py-2 min-w-[130px] bg-gradient-to-r from-amber-300 to-orange-400 text-gray-900 rounded-lg hover:from-amber-400 hover:to-orange-500 transition-all text-sm font-medium shadow-sm">
-                                        <i data-lucide="qr-code" class="w-4 h-4"></i>
+                                       class="inline-flex items-center justify-center gap-1.5 px-3 py-1.5 bg-gradient-to-r from-amber-300 to-orange-400 text-gray-900 rounded-lg hover:from-amber-400 hover:to-orange-500 transition-all text-xs font-medium shadow-sm whitespace-nowrap">
+                                        <i data-lucide="qr-code" class="w-3.5 h-3.5"></i>
                                         View QR
                                     </a>
                                 {% elif fee_info.has_pending_request %}
                                     <a href="{% url 'view_payment_request_qr' request_id=fee_info.pending_request.request_id %}" 
-                                       class="inline-flex items-center justify-center gap-2 px-4 py-2 min-w-[130px] bg-gradient-to-r from-orange-500 to-amber-600 text-white rounded-lg hover:from-orange-600 hover:to-amber-700 transition-all text-sm font-medium shadow-sm">
-                                        <i data-lucide="qr-code" class="w-4 h-4"></i>
+                                       class="inline-flex items-center justify-center gap-1.5 px-3 py-1.5 bg-gradient-to-r from-orange-500 to-amber-600 text-white rounded-lg hover:from-orange-600 hover:to-amber-700 transition-all text-xs font-medium shadow-sm whitespace-nowrap">
+                                        <i data-lucide="qr-code" class="w-3.5 h-3.5"></i>
                                         Generate QR
                                     </a>
                                 {% else %}
                                     <form method="post" action="{% url 'quick_generate_qr' fee_info.fee_type.id %}" class="inline">
                                         {% csrf_token %}
                                         <button type="submit" 
-                                                class="inline-flex items-center justify-center gap-2 px-4 py-2 min-w-[130px] bg-gradient-to-r from-orange-500 to-amber-600 text-white rounded-lg hover:from-orange-600 hover:to-amber-700 transition-all text-sm font-medium shadow-sm">
-                                            <i data-lucide="qr-code" class="w-4 h-4"></i>
+                                                class="inline-flex items-center justify-center gap-1.5 px-3 py-1.5 bg-gradient-to-r from-orange-500 to-amber-600 text-white rounded-lg hover:from-orange-600 hover:to-amber-700 transition-all text-xs font-medium shadow-sm whitespace-nowrap">
+                                            <i data-lucide="qr-code" class="w-3.5 h-3.5"></i>
                                             Generate QR
                                         </button>
                                     </form>
@@ -174,7 +247,7 @@
                         </tr>
                         {% empty %}
                         <tr>
-                            <td colspan="6" class="px-6 py-12 text-center">
+                            <td colspan="6" class="px-4 py-12 text-center">
                                 <div class="flex flex-col items-center">
                                     <div class="w-12 h-12 bg-gray-100 rounded-full flex items-center justify-center mb-3">
                                         <i data-lucide="inbox" class="w-6 h-6 text-gray-400"></i>
@@ -190,15 +263,19 @@
             </div>
             
             <!-- Mobile Card View -->
-            <div class="md:hidden">
+            <div class="md:hidden" id="fees-mobile-view">
                 {% if all_fees_with_status %}
-                    <div class="divide-y divide-gray-200">
+                    <div class="divide-y divide-gray-200" id="fees-mobile-list">
                         {% for fee_info in all_fees_with_status %}
-                        <div class="p-4">
+                        <div class="p-4 fee-mobile-card" 
+                             data-fee-name="{{ fee_info.fee_type.name|lower }}"
+                             data-org-name="{{ fee_info.organization.name|lower }}"
+                             data-status="{% if fee_info.is_paid %}paid{% elif fee_info.has_pending_request and fee_info.has_qr_generated %}pending{% else %}unpaid{% endif %}"
+                             data-semester="{{ fee_info.fee_type.semester|lower }}">
                             <div class="flex items-start justify-between mb-2">
                                 <div class="flex-1 min-w-0">
-                                    <p class="text-gray-900 font-medium">{{ fee_info.fee_type.name }}</p>
-                                    <p class="text-gray-500 text-sm">{{ fee_info.organization.name }}</p>
+                                    <p class="text-gray-900 font-medium fee-name">{{ fee_info.fee_type.name }}</p>
+                                    <p class="text-gray-500 text-sm org-name">{{ fee_info.organization.name }}</p>
                                 </div>
                                 {% if fee_info.is_paid %}
                                     <span class="inline-flex items-center gap-1 px-2 py-1 bg-green-50 text-green-700 rounded-full text-xs font-medium">
@@ -218,11 +295,9 @@
                                 {% endif %}
                             </div>
                             <div class="flex items-center justify-between text-sm mb-3">
-                                <div class="flex flex-col">
-                                    <span class="inline-flex items-center px-2 py-0.5 bg-purple-50 text-purple-700 rounded text-xs font-medium">
-                                        {{ fee_info.fee_type.semester }}
-                                    </span>
-                                    <span class="text-gray-500 text-xs mt-0.5">{{ fee_info.fee_type.academic_year }}</span>
+                                <div>
+                                    <p class="text-gray-700 text-sm">{{ fee_info.fee_type.academic_year }}</p>
+                                    <p class="text-gray-500 text-xs">{{ fee_info.fee_type.semester }}</p>
                                 </div>
                                 <span class="text-gray-900 font-semibold">₱{{ fee_info.amount|floatformat:2 }}</span>
                             </div>
@@ -408,6 +483,184 @@
         activeBtn.classList.add('bg-green-600', 'text-white');
         setTimeout(() => lucide.createIcons(), 50);
     }
+
+    // Fees Filter Toggle
+    function toggleFeesFilter() {
+        const panel = document.getElementById('fees-filter-panel');
+        panel.classList.toggle('hidden');
+    }
+
+    // Fees Search Toggle
+    function toggleFeesSearch() {
+        const searchBar = document.getElementById('fees-search-bar');
+        const searchInput = document.getElementById('fees-search-input');
+        searchBar.classList.toggle('hidden');
+        if (!searchBar.classList.contains('hidden')) {
+            searchInput.focus();
+        }
+    }
+
+    // Apply Fees Filter
+    function applyFeesFilter() {
+        const status = document.getElementById('fees-filter-status').value.toLowerCase();
+        const org = document.getElementById('fees-filter-org').value.toLowerCase();
+        const semester = document.getElementById('fees-filter-semester').value.toLowerCase();
+        const searchTerm = document.getElementById('fees-search-input').value.toLowerCase();
+        
+        // Filter desktop table rows
+        const tableRows = document.querySelectorAll('.fee-row');
+        tableRows.forEach(row => {
+            const rowStatus = row.dataset.status || '';
+            const rowOrg = (row.dataset.org || '').toLowerCase();
+            const rowSemester = (row.dataset.semester || '').toLowerCase();
+            const rowFeeName = row.querySelector('.fee-name')?.textContent.toLowerCase() || '';
+            const rowOrgName = row.querySelector('.fee-org')?.textContent.toLowerCase() || '';
+            
+            const statusMatch = !status || rowStatus === status;
+            const orgMatch = !org || rowOrg.includes(org);
+            const semesterMatch = !semester || rowSemester.includes(semester.toLowerCase());
+            const searchMatch = !searchTerm || 
+                rowFeeName.includes(searchTerm) || 
+                rowOrgName.includes(searchTerm);
+            
+            if (statusMatch && orgMatch && semesterMatch && searchMatch) {
+                row.style.display = '';
+            } else {
+                row.style.display = 'none';
+            }
+        });
+        
+        // Filter mobile cards
+        const mobileCards = document.querySelectorAll('.fee-mobile-card');
+        mobileCards.forEach(card => {
+            const cardStatus = card.dataset.status || '';
+            const cardOrg = (card.dataset.orgName || '').toLowerCase();
+            const cardSemester = (card.dataset.semester || '').toLowerCase();
+            const cardFeeName = card.dataset.feeName || '';
+            
+            const statusMatch = !status || cardStatus === status;
+            const orgMatch = !org || cardOrg.includes(org.toLowerCase());
+            const semesterMatch = !semester || cardSemester.includes(semester.toLowerCase());
+            const searchMatch = !searchTerm || 
+                cardFeeName.includes(searchTerm) || 
+                cardOrg.includes(searchTerm);
+            
+            if (statusMatch && orgMatch && semesterMatch && searchMatch) {
+                card.style.display = '';
+            } else {
+                card.style.display = 'none';
+            }
+        });
+        
+        // Update filter indicator
+        updateFeesFilterIndicator();
+        
+        // Update no results message
+        updateNoFeesResultsMessage();
+    }
+
+    // Clear Fees Filter
+    function clearFeesFilter() {
+        document.getElementById('fees-filter-status').value = '';
+        document.getElementById('fees-filter-org').value = '';
+        document.getElementById('fees-filter-semester').value = '';
+        document.getElementById('fees-search-input').value = '';
+        applyFeesFilter();
+    }
+
+    // Update filter indicator dot
+    function updateFeesFilterIndicator() {
+        const status = document.getElementById('fees-filter-status').value;
+        const org = document.getElementById('fees-filter-org').value;
+        const semester = document.getElementById('fees-filter-semester').value;
+        const indicator = document.getElementById('fees-filter-indicator');
+        
+        if (status || org || semester) {
+            indicator.classList.remove('hidden');
+        } else {
+            indicator.classList.add('hidden');
+        }
+    }
+
+    // Update no results message
+    function updateNoFeesResultsMessage() {
+        const visibleRows = document.querySelectorAll('.fee-row:not([style*="display: none"])');
+        const visibleCards = document.querySelectorAll('.fee-mobile-card:not([style*="display: none"])');
+        
+        // Desktop no results
+        let noResultsRow = document.getElementById('fees-no-results-row');
+        if (!noResultsRow) {
+            const tbody = document.getElementById('fees-table-body');
+            if (tbody) {
+                noResultsRow = document.createElement('tr');
+                noResultsRow.id = 'fees-no-results-row';
+                noResultsRow.innerHTML = `
+                    <td colspan="6" class="px-6 py-12 text-center">
+                        <div class="flex flex-col items-center">
+                            <div class="w-12 h-12 bg-gray-100 rounded-full flex items-center justify-center mb-3">
+                                <i data-lucide="search-x" class="w-6 h-6 text-gray-400"></i>
+                            </div>
+                            <p class="text-gray-900 font-medium">No Matching Fees</p>
+                            <p class="text-gray-600 text-sm">Try adjusting your filter or search criteria.</p>
+                        </div>
+                    </td>
+                `;
+                tbody.appendChild(noResultsRow);
+                lucide.createIcons();
+            }
+        }
+        
+        if (noResultsRow) {
+            noResultsRow.style.display = visibleRows.length === 0 ? '' : 'none';
+        }
+        
+        // Mobile no results
+        let noResultsMobile = document.getElementById('fees-no-results-mobile');
+        if (!noResultsMobile) {
+            const mobileList = document.getElementById('fees-mobile-list');
+            if (mobileList) {
+                noResultsMobile = document.createElement('div');
+                noResultsMobile.id = 'fees-no-results-mobile';
+                noResultsMobile.className = 'p-8 text-center';
+                noResultsMobile.innerHTML = `
+                    <div class="w-12 h-12 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-3">
+                        <i data-lucide="search-x" class="w-6 h-6 text-gray-400"></i>
+                    </div>
+                    <p class="text-gray-900 font-medium">No Matching Fees</p>
+                    <p class="text-gray-600 text-sm">Try adjusting your filter or search criteria.</p>
+                `;
+                mobileList.appendChild(noResultsMobile);
+                lucide.createIcons();
+            }
+        }
+        
+        if (noResultsMobile) {
+            noResultsMobile.style.display = visibleCards.length === 0 ? '' : 'none';
+        }
+    }
+
+    // Search on input
+    document.addEventListener('DOMContentLoaded', function() {
+        // Fees search input handler
+        const searchInput = document.getElementById('fees-search-input');
+        if (searchInput) {
+            searchInput.addEventListener('input', function() {
+                applyFeesFilter();
+            });
+        }
+        
+        // Fees search toggle button
+        const searchToggle = document.getElementById('fees-search-toggle');
+        if (searchToggle) {
+            searchToggle.addEventListener('click', toggleFeesSearch);
+        }
+        
+        // Fees filter toggle button
+        const filterToggle = document.getElementById('fees-filter-toggle');
+        if (filterToggle) {
+            filterToggle.addEventListener('click', toggleFeesFilter);
+        }
+    });
 
     // Dropdown functionality for 3-dot menus
     document.addEventListener('DOMContentLoaded', function() {

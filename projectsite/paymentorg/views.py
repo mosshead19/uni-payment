@@ -1111,7 +1111,7 @@ class StudentDashboardView(StudentRequiredMixin, TemplateView):
         payments_count = completed_payments.count()
         
         # Two-tiered fee system: Get applicable fees
-        applicable_fees = student.get_applicable_fees()
+        applicable_fees = student.get_applicable_fees().order_by('-created_at')  # Most recently posted first
         tier1_fees = student.get_tier1_fees()
         tier2_fees = student.get_tier2_fees()
         total_outstanding = student.get_total_outstanding_fees()
@@ -1450,6 +1450,12 @@ class OfficerDashboardView(OfficerRequiredMixin, TemplateView):
             
             logger.info(f"Officer Dashboard - Organization: {organization.name}, Posted Requests Count: {posted_requests.count()}, Records: {list(posted_requests.values('fee_type__name', 'amount', 'student_count'))}")
             
+            # Get recent payments from all officers in this organization (not just today)
+            recent_payments = Payment.objects.filter(
+                organization=organization,
+                status='COMPLETED',
+            ).select_related('student', 'processed_by', 'receipt').order_by('-created_at')[:20]
+            
             context.update({
                 'is_superuser_only': False,
                 'officer': officer,
@@ -1458,12 +1464,7 @@ class OfficerDashboardView(OfficerRequiredMixin, TemplateView):
                 'posted_requests': posted_requests,
                 'today_collections': organization.get_today_collection(),
                 'total_collected_system': organization.get_total_collected(),
-                'recent_payments': Payment.objects.filter(
-                    organization=organization,
-                    status='COMPLETED',
-                    is_void=False,
-                    created_at__date=today
-                ).select_related('student', 'processed_by', 'receipt').order_by('-created_at')[:5],
+                'recent_payments': recent_payments,
             })
         return context
 

@@ -5,7 +5,7 @@
 
 {% block content %}
 <div class="py-6 md:py-8">
-    <div class="max-w-6xl mx-auto px-4 md:px-0">
+    <div class="w-full px-4 md:px-6 lg:max-w-6xl lg:mx-auto lg:px-0">
         <!-- Gradient Header Card -->
         <div class="page-header-gradient rounded-xl p-5 md:p-6 mb-6 shadow-lg relative overflow-hidden">
             <!-- Decorative Elements -->
@@ -36,6 +36,15 @@
                             <span class="hidden sm:inline">Create New</span>
                         </a>
                         {% endif %}
+                        <!-- Filter Button -->
+                        <button type="button" id="filter-toggle"
+                           class="px-3 md:px-4 py-2 bg-white/20 backdrop-blur-sm text-white rounded-lg hover:bg-white/30 transition-colors font-medium inline-flex items-center gap-2 text-sm border border-white/30">
+                            <i data-lucide="filter" class="w-4 h-4"></i>
+                            <span>Filters</span>
+                            {% if request.GET.organization or request.GET.status or request.GET.semester %}
+                            <span class="w-2 h-2 bg-orange-500 rounded-full"></span>
+                            {% endif %}
+                        </button>
                         <a href="{% url 'officer_dashboard' %}" 
                            class="px-3 md:px-4 py-2 bg-white/20 backdrop-blur-sm text-white rounded-lg hover:bg-white/30 transition-colors font-medium inline-flex items-center gap-2 text-sm border border-white/30">
                             <i data-lucide="arrow-left" class="w-4 h-4"></i>
@@ -44,82 +53,62 @@
                     </div>
                 </div>
                 
-                <!-- Filter Section -->
-                <form method="get" class="flex flex-wrap gap-3 items-end">
-                    <div class="flex-grow min-w-[200px]">
-                        <select name="organization" class="w-full px-4 py-2.5 bg-white/10 backdrop-blur-sm border border-white/20 rounded-lg focus:outline-none focus:ring-2 focus:ring-white/50 text-white">
-                            <option value="" class="text-gray-800">All Organizations</option>
-                            {% for org in organizations %}
-                                <option value="{{ org.pk }}" class="text-gray-800" {% if request.GET.organization == org.pk|stringformat:"s" %}selected{% endif %}>{{ org.name }}</option>
-                            {% endfor %}
-                        </select>
-                    </div>
-                    <div class="flex gap-2">
-                        <button type="submit" class="px-4 py-2.5 bg-white text-gray-800 rounded-lg hover:bg-gray-50 transition-colors font-medium inline-flex items-center gap-2 text-sm shadow-md">
-                            <i data-lucide="filter" class="w-4 h-4"></i>
-                            Filter
-                        </button>
-                        <a href="{% url 'feetype_list' %}" class="px-4 py-2.5 bg-white/20 backdrop-blur-sm text-white rounded-lg hover:bg-white/30 transition-colors font-medium inline-flex items-center gap-2 text-sm border border-white/30">
-                            Clear
-                        </a>
-                    </div>
-                </form>
-            </div>
-        </div>
-
-        <!-- Stats Cards -->
-        <div class="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4 mb-6">
-            <div class="bg-white rounded-xl p-4 border border-gray-100 shadow-sm hover:shadow-md hover:border-blue-200 transition-all">
-                <div class="flex items-center gap-3">
-                    <div class="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center">
-                        <i data-lucide="tags" class="w-5 h-5 text-blue-600"></i>
-                    </div>
-                    <div>
-                        <p class="text-xl md:text-2xl font-bold text-gray-900">{{ fee_types|length }}</p>
-                        <p class="text-xs text-gray-500">Total Fees</p>
-                    </div>
-                </div>
-            </div>
-            <div class="bg-white rounded-xl p-4 border border-gray-100 shadow-sm hover:shadow-md hover:border-emerald-200 transition-all">
-                <div class="flex items-center gap-3">
-                    <div class="w-10 h-10 bg-emerald-100 rounded-lg flex items-center justify-center">
-                        <i data-lucide="check-circle" class="w-5 h-5 text-emerald-600"></i>
-                    </div>
-                    <div>
-                        <p class="text-xl md:text-2xl font-bold text-gray-900">{{ fee_types|length }}</p>
-                        <p class="text-xs text-gray-500">Active Fees</p>
-                    </div>
-                </div>
-            </div>
-            <div class="bg-white rounded-xl p-4 border border-gray-100 shadow-sm hover:shadow-md hover:border-purple-200 transition-all">
-                <div class="flex items-center gap-3">
-                    <div class="w-10 h-10 bg-purple-100 rounded-lg flex items-center justify-center">
-                        <i data-lucide="building-2" class="w-5 h-5 text-purple-600"></i>
-                    </div>
-                    <div>
-                        <p class="text-xl md:text-2xl font-bold text-gray-900">{{ organizations|length }}</p>
-                        <p class="text-xs text-gray-500">Organizations</p>
-                    </div>
-                </div>
-            </div>
-            <div class="bg-white rounded-xl p-4 border border-gray-100 shadow-sm hover:shadow-md hover:border-amber-200 transition-all">
-                <div class="flex items-center gap-3">
-                    <div class="w-10 h-10 bg-amber-100 rounded-lg flex items-center justify-center">
-                        <i data-lucide="alert-circle" class="w-5 h-5 text-amber-600"></i>
-                    </div>
-                    <div>
-                        <p class="text-xl md:text-2xl font-bold text-gray-900">0</p>
-                        <p class="text-xs text-gray-500">Overdue</p>
-                    </div>
+                <!-- Search Bar -->
+                <div class="relative">
+                    <i data-lucide="search" class="w-5 h-5 text-white/60 absolute left-3 top-1/2 -translate-y-1/2"></i>
+                    <input type="text" 
+                           id="search-input"
+                           placeholder="Search fee types by name or organization..." 
+                           class="w-full pl-10 pr-4 py-3 bg-white/10 backdrop-blur-sm border border-white/20 rounded-lg focus:outline-none focus:ring-2 focus:ring-white/50 focus:border-transparent text-white placeholder-white/60">
                 </div>
             </div>
         </div>
 
-        <!-- Fee Types Table -->
+        <!-- Collapsible Filter Panel -->
+        <div id="filter-panel" class="hidden bg-white rounded-xl border border-gray-200 p-4 md:p-5 mb-6 shadow-sm">
+            <form method="get" class="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-4">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Organization</label>
+                    <select name="organization" class="w-full px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent text-sm">
+                        <option value="">All Organizations</option>
+                        {% for org in organizations %}
+                            <option value="{{ org.pk }}" {% if request.GET.organization == org.pk|stringformat:"s" %}selected{% endif %}>{{ org.name }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Status</label>
+                    <select name="status" class="w-full px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent text-sm">
+                        <option value="">All Statuses</option>
+                        <option value="active" {% if request.GET.status == 'active' %}selected{% endif %}>Active</option>
+                        <option value="inactive" {% if request.GET.status == 'inactive' %}selected{% endif %}>Inactive</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Semester</label>
+                    <select name="semester" class="w-full px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent text-sm">
+                        <option value="">All Semesters</option>
+                        <option value="1st Semester" {% if request.GET.semester == '1st Semester' %}selected{% endif %}>1st Semester</option>
+                        <option value="2nd Semester" {% if request.GET.semester == '2nd Semester' %}selected{% endif %}>2nd Semester</option>
+                        <option value="Summer" {% if request.GET.semester == 'Summer' %}selected{% endif %}>Summer</option>
+                    </select>
+                </div>
+                <div class="flex items-end gap-2">
+                    <button type="submit" class="flex-1 px-4 py-2 btn-gradient text-white rounded-lg transition-all font-medium text-sm shadow-sm">
+                        Apply
+                    </button>
+                    <a href="{% url 'feetype_list' %}" class="px-4 py-2 bg-gray-100 text-gray-600 rounded-lg hover:bg-gray-200 transition-colors text-sm">
+                        Clear
+                    </a>
+                </div>
+            </form>
+        </div>
+
+        <!-- Fee Types Table - Desktop -->
         {% if fee_types %}
-            <div class="bg-white rounded-xl border border-gray-200 overflow-hidden shadow-sm">
+            <div class="bg-white rounded-xl border border-gray-200 overflow-hidden shadow-sm hidden md:block">
                 <div class="overflow-x-auto">
-                    <table class="w-full up-table-responsive" id="feetypes-table">
+                    <table class="w-full" id="feetypes-table">
                         <thead class="bg-gradient-to-r from-gray-50 to-gray-100 border-b border-gray-200">
                             <tr>
                                 <th class="px-4 md:px-6 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Organization</th>
@@ -212,6 +201,70 @@
                 </div>
             </div>
 
+            <!-- Fee Types Cards - Mobile -->
+            <div class="md:hidden space-y-3">
+                {% for fee in fee_types %}
+                <div class="bg-white rounded-xl border border-gray-200 p-4 shadow-sm fee-row">
+                    <div class="flex items-start justify-between mb-3">
+                        <div>
+                            <span class="inline-flex items-center px-2 py-1 bg-emerald-100 text-emerald-700 rounded text-xs font-bold mb-2">
+                                {{ fee.organization.code }}
+                            </span>
+                            <p class="text-gray-900 font-semibold">{{ fee.name }}</p>
+                            <p class="text-gray-500 text-xs">{{ fee.applicable_year_levels }}</p>
+                        </div>
+                        <div class="relative">
+                            <button type="button" data-dropdown-toggle class="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-full transition-colors">
+                                <i data-lucide="more-vertical" class="w-5 h-5"></i>
+                            </button>
+                            <div data-dropdown-menu class="hidden absolute right-0 mt-1 w-48 bg-white rounded-lg shadow-lg border border-gray-200 z-50 py-1">
+                                <a href="{% url 'feetype_detail' fee.pk %}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50">
+                                    <i data-lucide="eye" class="w-4 h-4 inline mr-2"></i>View Details
+                                </a>
+                                <a href="{% url 'feetype_update' fee.pk %}" class="block px-4 py-2 text-sm text-amber-600 hover:bg-amber-50">
+                                    <i data-lucide="edit" class="w-4 h-4 inline mr-2"></i>Edit
+                                </a>
+                                <a href="{% url 'feetype_delete' fee.pk %}" class="block px-4 py-2 text-sm text-red-600 hover:bg-red-50">
+                                    <i data-lucide="trash-2" class="w-4 h-4 inline mr-2"></i>Delete
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="grid grid-cols-2 gap-2 text-sm mb-2">
+                        <div>
+                            <p class="text-gray-500 text-xs">Amount</p>
+                            <p class="text-gray-900 font-bold">₱{{ fee.amount|floatformat:2 }}</p>
+                        </div>
+                        <div>
+                            <p class="text-gray-500 text-xs">Period</p>
+                            <p class="text-gray-700 text-xs">{{ fee.academic_year }}</p>
+                            <p class="text-gray-500 text-xs">{{ fee.semester }}</p>
+                        </div>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        {% if fee.is_active %}
+                        <span class="inline-flex items-center gap-1 px-2 py-1 bg-emerald-100 text-emerald-700 rounded-full text-xs font-medium">
+                            <i data-lucide="check-circle" class="w-3 h-3"></i>Active
+                        </span>
+                        {% else %}
+                        <span class="inline-flex items-center gap-1 px-2 py-1 bg-gray-100 text-gray-600 rounded-full text-xs font-medium">
+                            <i data-lucide="pause-circle" class="w-3 h-3"></i>Inactive
+                        </span>
+                        {% endif %}
+                        {% if fee.is_overdue %}
+                        <span class="inline-flex items-center gap-1 px-2 py-1 bg-red-100 text-red-700 rounded-full text-xs font-medium">
+                            <i data-lucide="alert-circle" class="w-3 h-3"></i>Overdue
+                        </span>
+                        {% endif %}
+                    </div>
+                </div>
+                {% empty %}
+                <div class="bg-white rounded-xl border border-gray-200 p-8 text-center">
+                    <p class="text-gray-500">No fee types found.</p>
+                </div>
+                {% endfor %}
+            </div>
+
             <!-- Pagination -->
             {% if is_paginated %}
                 <div class="mt-6 flex flex-wrap justify-center items-center gap-2">
@@ -256,6 +309,17 @@
 
 {% block extra_js %}
 <script>
+    // Search functionality
+    document.getElementById('search-input').addEventListener('input', function(e) {
+        const searchTerm = e.target.value.toLowerCase();
+        const rows = document.querySelectorAll('.fee-row');
+        
+        rows.forEach(row => {
+            const text = row.textContent.toLowerCase();
+            row.style.display = text.includes(searchTerm) ? '' : 'none';
+        });
+    });
+
     // Dropdown functionality for 3-dot menus
     document.addEventListener('DOMContentLoaded', function() {
         const buttons = document.querySelectorAll('[data-dropdown-toggle]');
@@ -273,11 +337,21 @@
             });
         });
         
-        document.addEventListener('click', function() {
+        document.addEventListener('click', function(e) {
             document.querySelectorAll('[data-dropdown-menu]').forEach(menu => {
                 menu.classList.add('hidden');
             });
         });
+        
+        // Filter panel toggle
+        const filterToggle = document.getElementById('filter-toggle');
+        const filterPanel = document.getElementById('filter-panel');
+        if (filterToggle && filterPanel) {
+            filterToggle.addEventListener('click', function(e) {
+                e.stopPropagation();
+                filterPanel.classList.toggle('hidden');
+            });
+        }
         
         if (typeof lucide !== 'undefined') {
             lucide.createIcons();

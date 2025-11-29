@@ -189,8 +189,9 @@
                         </div>
                     </div>
                 {% else %}
-                    <a href="{% url 'login' %}" class="up-btn up-btn-primary">
-                        <i data-lucide="log-in" class="w-4 h-4"></i>
+                    {% load socialaccount %}
+                    <a href="{% provider_login_url 'google' %}" class="up-btn up-btn-primary">
+                        <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" alt="Google" class="w-4 h-4">
                         Sign In
                     </a>
                 {% endif %}
@@ -271,9 +272,9 @@
                         </form>
                     </div>
                 {% else %}
-                    <a href="{% url 'login' %}" class="up-btn up-btn-primary w-full">
-                        <i data-lucide="log-in" class="w-4 h-4"></i>
-                        Sign In
+                    <a href="{% provider_login_url 'google' %}" class="up-btn up-btn-primary w-full flex items-center justify-center gap-2">
+                        <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" alt="Google" class="w-4 h-4">
+                        Sign In with Google
                     </a>
                 {% endif %}
             </div>
