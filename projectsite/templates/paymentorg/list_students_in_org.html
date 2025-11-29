@@ -5,13 +5,11 @@
 
 {% block content %}
 <div class="py-6 md:py-8">
-    <div class="max-w-6xl mx-auto px-4 md:px-0">
+    <div class="w-full px-4 md:px-6 lg:px-8">
         <!-- Gradient Header Card -->
-        <div class="bg-gradient-to-r from-emerald-600 via-emerald-500 to-teal-500 rounded-xl p-5 md:p-6 mb-6 shadow-lg relative overflow-hidden">
+        <div class="page-header-gradient rounded-xl p-5 md:p-6 mb-6 shadow-lg relative overflow-hidden">
             <!-- Decorative Elements -->
-            <div class="absolute inset-0 bg-gradient-to-r from-orange-500/10 to-transparent"></div>
             <div class="absolute top-0 right-0 w-32 h-32 bg-white/5 rounded-full -translate-y-1/2 translate-x-1/2"></div>
-            <div class="absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r from-orange-400 via-orange-500 to-orange-400"></div>
             
             <div class="relative z-10">
                 <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-4">
@@ -22,11 +20,11 @@
                             </div>
                             <h1 class="text-xl md:text-2xl font-bold text-white">View Students</h1>
                         </div>
-                        <p class="text-emerald-100 text-sm md:text-base">{{ user_organization.name }}</p>
+                        <p class="text-white/80 text-sm md:text-base">{{ user_organization.name }}</p>
                     </div>
                     <div class="flex flex-wrap gap-2 md:gap-3">
                         <button onclick="exportStudents()" 
-                                class="px-3 md:px-4 py-2 bg-white text-emerald-700 rounded-lg hover:bg-emerald-50 transition-colors font-medium inline-flex items-center gap-2 text-sm shadow-md">
+                                class="px-3 md:px-4 py-2 bg-white text-gray-800 rounded-lg hover:bg-gray-50 transition-colors font-medium inline-flex items-center gap-2 text-sm shadow-md">
                             <i data-lucide="download" class="w-4 h-4"></i>
                             <span class="hidden sm:inline">Export</span>
                         </button>
@@ -40,18 +38,18 @@
                 
                 <!-- Search Bar -->
                 <div class="relative">
-                    <i data-lucide="search" class="w-5 h-5 text-emerald-300 absolute left-3 top-1/2 -translate-y-1/2"></i>
+                    <i data-lucide="search" class="w-5 h-5 text-white/60 absolute left-3 top-1/2 -translate-y-1/2"></i>
                     <input type="text" 
                            id="search-input"
                            placeholder="Search students by name, ID, or email..." 
-                           class="w-full pl-10 pr-4 py-3 bg-white/10 backdrop-blur-sm border border-white/20 rounded-lg focus:outline-none focus:ring-2 focus:ring-white/50 focus:border-transparent text-white placeholder-emerald-200">
+                           class="w-full pl-10 pr-4 py-3 bg-white/10 backdrop-blur-sm border border-white/20 rounded-lg focus:outline-none focus:ring-2 focus:ring-white/50 focus:border-transparent text-white placeholder-white/60">
                 </div>
             </div>
         </div>
 
         <!-- Stats Cards -->
         <div class="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4 mb-6">
-            <div class="bg-white rounded-xl p-4 border border-gray-100 shadow-sm">
+            <div class="bg-white rounded-xl p-4 border border-gray-100 shadow-sm hover:shadow-md hover:border-blue-200 transition-all">
                 <div class="flex items-center gap-3">
                     <div class="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center">
                         <i data-lucide="users" class="w-5 h-5 text-blue-600"></i>
@@ -62,7 +60,7 @@
                     </div>
                 </div>
             </div>
-            <div class="bg-white rounded-xl p-4 border border-gray-100 shadow-sm">
+            <div class="bg-white rounded-xl p-4 border border-gray-100 shadow-sm hover:shadow-md hover:border-emerald-200 transition-all">
                 <div class="flex items-center gap-3">
                     <div class="w-10 h-10 bg-emerald-100 rounded-lg flex items-center justify-center">
                         <i data-lucide="badge-check" class="w-5 h-5 text-emerald-600"></i>
@@ -73,7 +71,7 @@
                     </div>
                 </div>
             </div>
-            <div class="bg-white rounded-xl p-4 border border-gray-100 shadow-sm">
+            <div class="bg-white rounded-xl p-4 border border-gray-100 shadow-sm hover:shadow-md hover:border-purple-200 transition-all">
                 <div class="flex items-center gap-3">
                     <div class="w-10 h-10 bg-purple-100 rounded-lg flex items-center justify-center">
                         <i data-lucide="crown" class="w-5 h-5 text-purple-600"></i>
@@ -84,7 +82,7 @@
                     </div>
                 </div>
             </div>
-            <div class="bg-white rounded-xl p-4 border border-gray-100 shadow-sm">
+            <div class="bg-white rounded-xl p-4 border border-gray-100 shadow-sm hover:shadow-md hover:border-indigo-200 transition-all">
                 <div class="flex items-center gap-3">
                     <div class="w-10 h-10 bg-indigo-100 rounded-lg flex items-center justify-center">
                         <i data-lucide="shield" class="w-5 h-5 text-indigo-600"></i>
@@ -101,62 +99,72 @@
         {% if students %}
             <div class="bg-white rounded-xl border border-gray-200 overflow-hidden shadow-sm">
                 <div class="overflow-x-auto">
-                    <table class="w-full up-table-responsive" id="students-table">
+                    <table class="w-full up-table-responsive" id="students-table" style="min-width: 1000px;">
                         <thead class="bg-gradient-to-r from-gray-50 to-gray-100 border-b border-gray-200">
                             <tr>
-                                <th class="px-4 md:px-6 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Name</th>
-                                <th class="px-4 md:px-6 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">ID Number</th>
-                                <th class="px-4 md:px-6 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Email</th>
-                                <th class="px-4 md:px-6 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Program</th>
-                                <th class="px-4 md:px-6 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Status</th>
-                                <th class="px-4 md:px-6 py-3 text-center text-xs font-semibold text-gray-500 uppercase tracking-wider w-16">Actions</th>
+                                <th class="px-4 md:px-6 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider whitespace-nowrap" style="min-width: 180px;">Name</th>
+                                <th class="px-4 md:px-6 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider whitespace-nowrap" style="min-width: 130px;">ID Number</th>
+                                <th class="px-4 md:px-6 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider whitespace-nowrap" style="min-width: 200px;">Email</th>
+                                <th class="px-4 md:px-6 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider whitespace-nowrap" style="min-width: 120px;">Program</th>
+                                <th class="px-4 md:px-6 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider whitespace-nowrap" style="min-width: 100px;">Year Level</th>
+                                <th class="px-4 md:px-6 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider whitespace-nowrap" style="min-width: 130px;">Status</th>
+                                <th class="px-4 md:px-6 py-3 text-center text-xs font-semibold text-gray-500 uppercase tracking-wider whitespace-nowrap" style="min-width: 80px;">Actions</th>
                             </tr>
                         </thead>
                         <tbody class="divide-y divide-gray-200">
                             {% for student in students %}
                                 <tr class="hover:bg-gray-50 transition-colors student-row">
-                                    <td class="px-4 md:px-6 py-4" data-label="Name">
+                                    <td class="px-4 md:px-6 py-4 whitespace-nowrap" data-label="Name">
                                         <div class="flex items-center gap-3">
-                                            <div class="w-8 h-8 bg-gradient-to-br from-emerald-400 to-teal-500 rounded-full flex items-center justify-center text-white font-semibold text-sm">
-                                                {{ student.user.first_name|slice:":1"|upper }}{{ student.user.last_name|slice:":1"|upper }}
+                                            <div class="w-8 h-8 rounded-full flex items-center justify-center text-white font-semibold text-sm overflow-hidden flex-shrink-0 {% if not student.user.user_profile.profile_picture %}page-header-gradient{% endif %}">
+                                                {% if student.user.user_profile.profile_picture %}
+                                                    <img src="{{ student.user.user_profile.profile_picture }}" alt="{{ student.user.get_full_name }}" class="w-full h-full object-cover">
+                                                {% else %}
+                                                    {{ student.user.first_name|slice:":1"|upper }}{{ student.user.last_name|slice:":1"|upper }}
+                                                {% endif %}
                                             </div>
-                                            <p class="text-gray-900 font-medium">{{ student.user.get_full_name }}</p>
+                                            <p class="text-gray-900 font-medium whitespace-nowrap">{{ student.user.get_full_name }}</p>
                                         </div>
                                     </td>
-                                    <td class="px-4 md:px-6 py-4 text-gray-700 font-mono text-sm" data-label="ID Number">{{ student.student_id_number }}</td>
-                                    <td class="px-4 md:px-6 py-4 text-gray-700 text-sm" data-label="Email">{{ student.user.email }}</td>
-                                    <td class="px-4 md:px-6 py-4 text-gray-700 text-sm" data-label="Program">{{ student.course.program_type }}</td>
-                                    <td class="px-4 md:px-6 py-4" data-label="Status">
+                                    <td class="px-4 md:px-6 py-4 text-gray-700 font-mono text-sm whitespace-nowrap" data-label="ID Number">{{ student.student_id_number }}</td>
+                                    <td class="px-4 md:px-6 py-4 text-gray-700 text-sm whitespace-nowrap" data-label="Email">{{ student.user.email }}</td>
+                                    <td class="px-4 md:px-6 py-4 text-gray-700 text-sm whitespace-nowrap" data-label="Program">{{ student.course.program_type }}</td>
+                                    <td class="px-4 md:px-6 py-4 whitespace-nowrap" data-label="Year Level">
+                                        <span class="inline-flex items-center px-2.5 py-1 bg-gradient-to-r from-blue-50 to-blue-100 text-blue-700 rounded-lg text-xs font-semibold border border-blue-200">
+                                            Year {{ student.year_level }}
+                                        </span>
+                                    </td>
+                                    <td class="px-4 md:px-6 py-4 whitespace-nowrap" data-label="Status">
                                         {% if student.is_superuser %}
-                                            <span class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-gradient-to-r from-indigo-50 to-indigo-100 text-indigo-700 rounded-full text-xs font-semibold border border-indigo-200 shadow-sm">
+                                            <span class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-gradient-to-r from-indigo-50 to-indigo-100 text-indigo-700 rounded-full text-xs font-semibold border border-indigo-200 shadow-sm whitespace-nowrap">
                                                 <i data-lucide="shield" class="w-3.5 h-3.5"></i>
                                                 Superuser
                                             </span>
                                         {% elif student.is_super_officer %}
-                                            <span class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-gradient-to-r from-purple-50 to-purple-100 text-purple-700 rounded-full text-xs font-semibold border border-purple-200 shadow-sm">
+                                            <span class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-gradient-to-r from-purple-50 to-purple-100 text-purple-700 rounded-full text-xs font-semibold border border-purple-200 shadow-sm whitespace-nowrap">
                                                 <i data-lucide="crown" class="w-3.5 h-3.5"></i>
                                                 Super Officer
                                             </span>
                                         {% elif student.is_promoted %}
-                                            <span class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-gradient-to-r from-emerald-50 to-emerald-100 text-emerald-700 rounded-full text-xs font-semibold border border-emerald-200 shadow-sm">
+                                            <span class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-gradient-to-r from-emerald-50 to-emerald-100 text-emerald-700 rounded-full text-xs font-semibold border border-emerald-200 shadow-sm whitespace-nowrap">
                                                 <i data-lucide="badge-check" class="w-3.5 h-3.5"></i>
                                                 Officer
                                             </span>
                                         {% else %}
-                                            <span class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-gradient-to-r from-blue-50 to-blue-100 text-blue-700 rounded-full text-xs font-semibold border border-blue-200 shadow-sm">
+                                            <span class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-gradient-to-r from-blue-50 to-blue-100 text-blue-700 rounded-full text-xs font-semibold border border-blue-200 shadow-sm whitespace-nowrap">
                                                 <i data-lucide="user" class="w-3.5 h-3.5"></i>
                                                 Student
                                             </span>
                                         {% endif %}
                                     </td>
-                                    <td class="px-4 md:px-6 py-4 text-center" data-label="Actions">
+                                    <td class="px-4 md:px-6 py-4 text-center whitespace-nowrap" data-label="Actions">
                                         <div class="relative inline-block">
                                             <button type="button" data-dropdown-toggle 
                                                     class="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-full transition-colors">
                                                 <i data-lucide="more-vertical" class="w-5 h-5"></i>
                                             </button>
                                             <div data-dropdown-menu class="hidden absolute right-0 mt-1 w-48 bg-white rounded-lg shadow-lg border border-gray-200 z-50 py-1">
-                                                <a href="{% url 'student_detail' student.id %}" 
+                                                <a href="{% url 'student_detail' student.pk %}" 
                                                    class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50">
                                                     <i data-lucide="eye" class="w-4 h-4 inline mr-2"></i>
                                                     View Profile
@@ -211,7 +219,7 @@
                 <div class="mt-6 flex flex-wrap justify-center items-center gap-2">
                     {% if page_obj.has_previous %}
                         <a href="?page=1" class="px-3 py-2 bg-white border border-gray-200 hover:bg-gray-50 rounded-lg text-sm font-medium text-gray-700 shadow-sm">First</a>
-                        <a href="?page={{ page_obj.previous_page_number }}" class="px-3 py-2 bg-gradient-to-r from-emerald-500 to-teal-500 text-white hover:from-emerald-600 hover:to-teal-600 rounded-lg text-sm font-medium shadow-sm">
+                        <a href="?page={{ page_obj.previous_page_number }}" class="px-3 py-2 btn-gradient rounded-lg text-sm font-medium shadow-sm">
                             <i data-lucide="chevron-left" class="w-4 h-4 inline"></i> Prev
                         </a>
                     {% endif %}
@@ -221,7 +229,7 @@
                     </span>
 
                     {% if page_obj.has_next %}
-                        <a href="?page={{ page_obj.next_page_number }}" class="px-3 py-2 bg-gradient-to-r from-emerald-500 to-teal-500 text-white hover:from-emerald-600 hover:to-teal-600 rounded-lg text-sm font-medium shadow-sm">
+                        <a href="?page={{ page_obj.next_page_number }}" class="px-3 py-2 btn-gradient rounded-lg text-sm font-medium shadow-sm">
                             Next <i data-lucide="chevron-right" class="w-4 h-4 inline"></i>
                         </a>
                         <a href="?page={{ page_obj.paginator.num_pages }}" class="px-3 py-2 bg-white border border-gray-200 hover:bg-gray-50 rounded-lg text-sm font-medium text-gray-700 shadow-sm">Last</a>
@@ -230,13 +238,13 @@
             {% endif %}
         {% else %}
             <div class="bg-white rounded-xl border border-gray-200 p-8 md:p-12 text-center shadow-sm">
-                <div class="w-16 h-16 bg-gradient-to-br from-emerald-100 to-teal-100 rounded-full flex items-center justify-center mx-auto mb-4 border-2 border-emerald-200">
+                <div class="w-16 h-16 bg-emerald-100 rounded-full flex items-center justify-center mx-auto mb-4 border-2 border-emerald-200">
                     <i data-lucide="users" class="w-8 h-8 text-emerald-500"></i>
                 </div>
                 <h3 class="text-lg font-semibold text-gray-900 mb-2">No Students Found</h3>
                 <p class="text-gray-600 mb-6 max-w-md mx-auto">There are no students available in your organization yet.</p>
                 <a href="{% url 'officer_dashboard' %}" 
-                   class="px-4 py-2 bg-gradient-to-r from-emerald-500 to-teal-500 text-white rounded-lg hover:from-emerald-600 hover:to-teal-600 transition-all font-medium inline-flex items-center gap-2 shadow-md">
+                   class="px-4 py-2 btn-gradient rounded-lg transition-all font-medium inline-flex items-center gap-2 shadow-md">
                     <i data-lucide="arrow-left" class="w-4 h-4"></i>
                     Back to Dashboard
                 </a>
@@ -263,7 +271,7 @@
     function exportStudents() {
         const table = document.getElementById('students-table');
         const rows = table.querySelectorAll('tbody tr:not([style*="display: none"])');
-        let csv = 'Name,ID Number,Email,Program,Status\n';
+        let csv = 'Name,ID Number,Email,Program,Year Level,Status\n';
         
         rows.forEach(row => {
             const cells = row.querySelectorAll('td');
@@ -271,8 +279,9 @@
             const id = cells[1].textContent.trim();
             const email = cells[2].textContent.trim();
             const program = cells[3].textContent.trim();
-            const status = cells[4].textContent.trim();
-            csv += `"${name}","${id}","${email}","${program}","${status}"\n`;
+            const yearLevel = cells[4].textContent.trim();
+            const status = cells[5].textContent.trim();
+            csv += `"${name}","${id}","${email}","${program}","${yearLevel}","${status}"\n`;
         });
         
         const blob = new Blob([csv], { type: 'text/csv' });

@@ -66,6 +66,9 @@ urlpatterns = [
     ),
     path('officer/scan-qr/', views.OfficerScanQRView.as_view(), name='officer_scan_qr'),
     path('officer/post-bulk-payment/', views.PostBulkPaymentView.as_view(), name='officer_post_bulk_payment'),
+    path('officer/bulk-posting/<int:pk>/', views.BulkPaymentPostingDetailView.as_view(), name='bulk_posting_detail'),
+    path('officer/bulk-posting/<int:pk>/edit/', views.BulkPaymentPostingUpdateView.as_view(), name='bulk_posting_edit'),
+    path('officer/bulk-posting/<int:pk>/delete/', views.BulkPaymentPostingDeleteView.as_view(), name='bulk_posting_delete'),
     path('officer/void/<int:pk>/', views.VoidPaymentView.as_view(), name='officer_void_payment'),
     path('officer/step-down/', views.StepDownFromOfficerView.as_view(), name='officer_step_down'),
     

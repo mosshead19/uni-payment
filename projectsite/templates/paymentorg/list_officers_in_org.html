@@ -7,11 +7,9 @@
 <div class="py-6 md:py-8">
     <div class="max-w-6xl mx-auto px-4 md:px-0">
         <!-- Gradient Header Card -->
-        <div class="bg-gradient-to-r from-emerald-600 via-emerald-500 to-teal-500 rounded-xl p-5 md:p-6 mb-6 shadow-lg relative overflow-hidden">
+        <div class="page-header-gradient rounded-xl p-5 md:p-6 mb-6 shadow-lg relative overflow-hidden">
             <!-- Decorative Elements -->
-            <div class="absolute inset-0 bg-gradient-to-r from-orange-500/10 to-transparent"></div>
             <div class="absolute top-0 right-0 w-32 h-32 bg-white/5 rounded-full -translate-y-1/2 translate-x-1/2"></div>
-            <div class="absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r from-orange-400 via-orange-500 to-orange-400"></div>
             
             <div class="relative z-10">
                 <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-4">
@@ -22,11 +20,11 @@
                             </div>
                             <h1 class="text-xl md:text-2xl font-bold text-white">View Officers</h1>
                         </div>
-                        <p class="text-emerald-100 text-sm md:text-base">{{ user_organization.name }}</p>
+                        <p class="text-white/80 text-sm md:text-base">{{ user_organization.name }}</p>
                     </div>
                     <div class="flex flex-wrap gap-2 md:gap-3">
                         <a href="{% url 'promote_student_to_officer' %}" 
-                           class="px-3 md:px-4 py-2 bg-white text-emerald-700 rounded-lg hover:bg-emerald-50 transition-colors font-medium inline-flex items-center gap-2 text-sm shadow-md">
+                           class="px-3 md:px-4 py-2 bg-white text-gray-800 rounded-lg hover:bg-gray-50 transition-colors font-medium inline-flex items-center gap-2 text-sm shadow-md">
                             <i data-lucide="user-plus" class="w-4 h-4"></i>
                             <span class="hidden sm:inline">Add Officer</span>
                             <span class="sm:hidden">Add</span>
@@ -41,18 +39,18 @@
                 
                 <!-- Search Bar -->
                 <div class="relative">
-                    <i data-lucide="search" class="w-5 h-5 text-emerald-300 absolute left-3 top-1/2 -translate-y-1/2"></i>
+                    <i data-lucide="search" class="w-5 h-5 text-white/60 absolute left-3 top-1/2 -translate-y-1/2"></i>
                     <input type="text" 
                            id="search-input"
                            placeholder="Search officers by name, email, or position..." 
-                           class="w-full pl-10 pr-4 py-3 bg-white/10 backdrop-blur-sm border border-white/20 rounded-lg focus:outline-none focus:ring-2 focus:ring-white/50 focus:border-transparent text-white placeholder-emerald-200">
+                           class="w-full pl-10 pr-4 py-3 bg-white/10 backdrop-blur-sm border border-white/20 rounded-lg focus:outline-none focus:ring-2 focus:ring-white/50 focus:border-transparent text-white placeholder-white/60">
                 </div>
             </div>
         </div>
 
         <!-- Stats Cards -->
         <div class="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4 mb-6">
-            <div class="bg-white rounded-xl p-4 border border-gray-100 shadow-sm">
+            <div class="bg-white rounded-xl p-4 border border-gray-100 shadow-sm hover:shadow-md hover:border-emerald-200 transition-all">
                 <div class="flex items-center gap-3">
                     <div class="w-10 h-10 bg-emerald-100 rounded-lg flex items-center justify-center">
                         <i data-lucide="users" class="w-5 h-5 text-emerald-600"></i>
@@ -63,7 +61,7 @@
                     </div>
                 </div>
             </div>
-            <div class="bg-white rounded-xl p-4 border border-gray-100 shadow-sm">
+            <div class="bg-white rounded-xl p-4 border border-gray-100 shadow-sm hover:shadow-md hover:border-purple-200 transition-all">
                 <div class="flex items-center gap-3">
                     <div class="w-10 h-10 bg-purple-100 rounded-lg flex items-center justify-center">
                         <i data-lucide="crown" class="w-5 h-5 text-purple-600"></i>
@@ -74,7 +72,7 @@
                     </div>
                 </div>
             </div>
-            <div class="bg-white rounded-xl p-4 border border-gray-100 shadow-sm">
+            <div class="bg-white rounded-xl p-4 border border-gray-100 shadow-sm hover:shadow-md hover:border-indigo-200 transition-all">
                 <div class="flex items-center gap-3">
                     <div class="w-10 h-10 bg-indigo-100 rounded-lg flex items-center justify-center">
                         <i data-lucide="shield" class="w-5 h-5 text-indigo-600"></i>
@@ -85,10 +83,10 @@
                     </div>
                 </div>
             </div>
-            <div class="bg-white rounded-xl p-4 border border-gray-100 shadow-sm">
+            <div class="bg-white rounded-xl p-4 border border-gray-100 shadow-sm hover:shadow-md hover:border-yellow-200 transition-all">
                 <div class="flex items-center gap-3">
-                    <div class="w-10 h-10 bg-orange-100 rounded-lg flex items-center justify-center">
-                        <i data-lucide="check-circle" class="w-5 h-5 text-orange-600"></i>
+                    <div class="w-10 h-10 bg-yellow-100 rounded-lg flex items-center justify-center">
+                        <i data-lucide="check-circle" class="w-5 h-5 text-yellow-600"></i>
                     </div>
                     <div>
                         <p class="text-xl md:text-2xl font-bold text-gray-900">{{ active_count|default:officers|length }}</p>
@@ -118,8 +116,12 @@
                                 <tr class="hover:bg-gray-50 transition-colors officer-row">
                                     <td class="px-4 md:px-6 py-4" data-label="Name">
                                         <div class="flex items-center gap-3">
-                                            <div class="w-8 h-8 bg-gradient-to-br from-purple-400 to-indigo-500 rounded-full flex items-center justify-center text-white font-semibold text-sm">
-                                                {{ officer.user.first_name|slice:":1"|upper }}{{ officer.user.last_name|slice:":1"|upper }}
+                                            <div class="w-8 h-8 rounded-full flex items-center justify-center text-white font-semibold text-sm overflow-hidden {% if not officer.user.user_profile.profile_picture %}bg-gradient-to-br from-purple-400 to-indigo-500{% endif %}">
+                                                {% if officer.user.user_profile.profile_picture %}
+                                                    <img src="{{ officer.user.user_profile.profile_picture }}" alt="{{ officer.user.get_full_name }}" class="w-full h-full object-cover">
+                                                {% else %}
+                                                    {{ officer.user.first_name|slice:":1"|upper }}{{ officer.user.last_name|slice:":1"|upper }}
+                                                {% endif %}
                                             </div>
                                             <p class="text-gray-900 font-medium">{{ officer.user.get_full_name }}</p>
                                         </div>
@@ -208,7 +210,7 @@
                 <div class="mt-6 flex flex-wrap justify-center items-center gap-2">
                     {% if page_obj.has_previous %}
                         <a href="?page=1" class="px-3 py-2 bg-white border border-gray-200 hover:bg-gray-50 rounded-lg text-sm font-medium text-gray-700 shadow-sm">First</a>
-                        <a href="?page={{ page_obj.previous_page_number }}" class="px-3 py-2 bg-gradient-to-r from-emerald-500 to-teal-500 text-white hover:from-emerald-600 hover:to-teal-600 rounded-lg text-sm font-medium shadow-sm">
+                        <a href="?page={{ page_obj.previous_page_number }}" class="px-3 py-2 btn-gradient rounded-lg text-sm font-medium shadow-sm">
                             <i data-lucide="chevron-left" class="w-4 h-4 inline"></i> Prev
                         </a>
                     {% endif %}
@@ -218,7 +220,7 @@
                     </span>
 
                     {% if page_obj.has_next %}
-                        <a href="?page={{ page_obj.next_page_number }}" class="px-3 py-2 bg-gradient-to-r from-emerald-500 to-teal-500 text-white hover:from-emerald-600 hover:to-teal-600 rounded-lg text-sm font-medium shadow-sm">
+                        <a href="?page={{ page_obj.next_page_number }}" class="px-3 py-2 btn-gradient rounded-lg text-sm font-medium shadow-sm">
                             Next <i data-lucide="chevron-right" class="w-4 h-4 inline"></i>
                         </a>
                         <a href="?page={{ page_obj.paginator.num_pages }}" class="px-3 py-2 bg-white border border-gray-200 hover:bg-gray-50 rounded-lg text-sm font-medium text-gray-700 shadow-sm">Last</a>
@@ -227,13 +229,13 @@
             {% endif %}
         {% else %}
             <div class="bg-white rounded-xl border border-gray-200 p-8 md:p-12 text-center shadow-sm">
-                <div class="w-16 h-16 bg-gradient-to-br from-emerald-100 to-teal-100 rounded-full flex items-center justify-center mx-auto mb-4 border-2 border-emerald-200">
+                <div class="w-16 h-16 bg-emerald-100 rounded-full flex items-center justify-center mx-auto mb-4 border-2 border-emerald-200">
                     <i data-lucide="users" class="w-8 h-8 text-emerald-500"></i>
                 </div>
                 <h3 class="text-lg font-semibold text-gray-900 mb-2">No Officers Found</h3>
                 <p class="text-gray-600 mb-6 max-w-md mx-auto">There are no officers in your organization yet. Add your first officer to get started.</p>
                 <a href="{% url 'promote_student_to_officer' %}" 
-                   class="px-4 py-2 bg-gradient-to-r from-emerald-500 to-teal-500 text-white rounded-lg hover:from-emerald-600 hover:to-teal-600 transition-all font-medium inline-flex items-center gap-2 shadow-md">
+                   class="px-4 py-2 btn-gradient rounded-lg transition-all font-medium inline-flex items-center gap-2 shadow-md">
                     <i data-lucide="user-plus" class="w-4 h-4"></i>
                     Add First Officer
                 </a>

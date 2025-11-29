@@ -1,46 +1,46 @@
 /* UniPay Modern Design System
- * Inspired by Modern Minimalist Dashboard
- * Color Theme: Emerald, Orange, Green Gradient
+ * Minimalist & Modern Theme
+ * Color Theme: Green to Yellow Gradient
  */
 
 /* ===================================
    CSS Variables - Design Tokens
    =================================== */
 :root {
-  /* Primary Colors - Emerald/Green Gradient */
-  --color-primary: #10b981;
-  --color-primary-hover: #059669;
-  --color-primary-light: #d1fae5;
-  --color-primary-dark: #047857;
+  /* Primary Colors - Fresh Green */
+  --color-primary: #22c370;
+  --color-primary-hover: #1da960;
+  --color-primary-light: #e6f9ef;
+  --color-primary-dark: #198754;
   
-  /* Secondary Colors - Orange/Amber */
-  --color-secondary: #f97316;
-  --color-secondary-hover: #ea580c;
-  --color-secondary-light: #ffedd5;
-  --color-secondary-dark: #c2410c;
+  /* Secondary Colors - Golden Yellow */
+  --color-secondary: #fdbb2d;
+  --color-secondary-hover: #e5a820;
+  --color-secondary-light: #fff8e6;
+  --color-secondary-dark: #d4a017;
   
   /* Accent Colors */
-  --color-accent: #0ea5e9;
-  --color-accent-hover: #0284c7;
-  --color-accent-light: #e0f2fe;
+  --color-accent: #3cc268;
+  --color-accent-hover: #2fb05a;
+  --color-accent-light: #e8f8ee;
   
   /* Neutral Colors */
-  --color-background: #f8fafc;
-  --color-foreground: #0f172a;
+  --color-background: #fafbfc;
+  --color-foreground: #1a1a2e;
   --color-card: #ffffff;
-  --color-card-foreground: #1e293b;
-  --color-muted: #f1f5f9;
-  --color-muted-foreground: #64748b;
-  --color-border: #e2e8f0;
-  --color-border-light: #f1f5f9;
+  --color-card-foreground: #2d2d44;
+  --color-muted: #f4f6f8;
+  --color-muted-foreground: #6b7280;
+  --color-border: #e5e7eb;
+  --color-border-light: #f3f4f6;
   
   /* Status Colors */
-  --color-success: #22c55e;
-  --color-success-light: #dcfce7;
-  --color-success-dark: #16a34a;
-  --color-warning: #eab308;
-  --color-warning-light: #fef9c3;
-  --color-warning-dark: #ca8a04;
+  --color-success: #22c370;
+  --color-success-light: #e6f9ef;
+  --color-success-dark: #1da960;
+  --color-warning: #fdbb2d;
+  --color-warning-light: #fff8e6;
+  --color-warning-dark: #e5a820;
   --color-error: #ef4444;
   --color-error-light: #fee2e2;
   --color-error-dark: #dc2626;
@@ -51,18 +51,24 @@
   /* Role Badge Colors */
   --color-superuser: #6366f1;
   --color-superuser-light: #e0e7ff;
-  --color-super-officer: #a855f7;
-  --color-super-officer-light: #f3e8ff;
-  --color-officer: #10b981;
-  --color-officer-light: #d1fae5;
+  --color-super-officer: #8b5cf6;
+  --color-super-officer-light: #ede9fe;
+  --color-officer: #22c370;
+  --color-officer-light: #e6f9ef;
   --color-student: #3b82f6;
   --color-student-light: #dbeafe;
   
+  /* Brand Gradient */
+  --gradient-brand: linear-gradient(0deg, rgba(34, 195, 112, 1) 0%, rgba(60, 194, 104, 1) 39%, rgba(253, 187, 45, 1) 100%);
+  --gradient-brand-hover: linear-gradient(0deg, rgba(29, 169, 96, 1) 0%, rgba(47, 176, 90, 1) 39%, rgba(229, 168, 32, 1) 100%);
+  --gradient-brand-horizontal: linear-gradient(90deg, rgba(34, 195, 112, 1) 0%, rgba(60, 194, 104, 1) 50%, rgba(253, 187, 45, 1) 100%);
+  --gradient-brand-diagonal: linear-gradient(135deg, rgba(34, 195, 112, 1) 0%, rgba(60, 194, 104, 1) 50%, rgba(253, 187, 45, 1) 100%);
+  
   /* Shadows */
   --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
-  --shadow: 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1);
-  --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
-  --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+  --shadow: 0 1px 3px 0 rgb(0 0 0 / 0.08), 0 1px 2px -1px rgb(0 0 0 / 0.08);
+  --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.08), 0 2px 4px -2px rgb(0 0 0 / 0.08);
+  --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.08), 0 4px 6px -4px rgb(0 0 0 / 0.08);
   --shadow-xl: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);
   
   /* Border Radius */
@@ -112,17 +118,30 @@ body {
   font-weight: var(--font-weight-normal);
   line-height: 1.6;
   color: var(--color-foreground);
-  background: linear-gradient(135deg, #ecfdf5 0%, #d1fae5 50%, #a7f3d0 100%);
+  background: linear-gradient(180deg, #f0faf4 0%, #e6f9ef 50%, #fef9e7 100%);
   min-height: 100vh;
 }
 
 /* Remove default link underlines for navigation and UI elements */
 a {
-  text-decoration: none;
+  text-decoration: none !important;
 }
 
 a:hover {
-  text-decoration: none;
+  text-decoration: none !important;
+}
+
+/* Ensure buttons keep white text on hover */
+.up-btn-primary:hover,
+.up-btn-secondary:hover,
+.up-btn-accent:hover,
+.up-btn-dark:hover,
+.up-btn-danger:hover,
+.up-btn-success:hover,
+button[class*="bg-"]:hover,
+a[class*="bg-"]:hover {
+  color: white !important;
+  text-decoration: none !important;
 }
 
 /* ===================================
@@ -197,8 +216,8 @@ h6 { font-size: 0.875rem; }
 
 /* Card Variants */
 .up-card-gradient {
-  background: linear-gradient(135deg, #ffffff 0%, #f0fdf4 100%);
-  border: 1px solid #bbf7d0;
+  background: linear-gradient(135deg, #ffffff 0%, #f0faf4 100%);
+  border: 1px solid #c6f0d6;
 }
 
 .up-card-elevated {
@@ -573,7 +592,7 @@ h6 { font-size: 0.875rem; }
 .up-brand-icon {
   width: 2.5rem;
   height: 2.5rem;
-  background: linear-gradient(135deg, var(--color-primary) 0%, #047857 100%);
+  background: var(--gradient-brand);
   border-radius: var(--radius);
   display: flex;
   align-items: center;
@@ -609,47 +628,44 @@ h6 { font-size: 0.875rem; }
 }
 
 .up-nav-link {
-  display: flex;
+  display: inline-flex;
   align-items: center;
   gap: 0.5rem;
-  padding: 0.5rem 1rem;
-  font-size: 0.875rem;
-  font-weight: var(--font-weight-medium);
-  color: var(--color-muted-foreground);
+  padding: 0.625rem 1rem;
+  font-size: 0.8125rem;
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-foreground);
   text-decoration: none !important;
-  border-radius: var(--radius);
+  border-radius: var(--radius-lg);
   transition: all var(--transition-fast);
   position: relative;
+  white-space: nowrap;
+  border: 1px solid transparent;
 }
 
 .up-nav-link:hover {
   color: var(--color-primary);
   background: var(--color-primary-light);
+  border-color: var(--color-primary);
   text-decoration: none !important;
 }
 
 .up-nav-link.active {
-  color: white;
-  background: var(--color-primary);
+  color: white !important;
+  background: var(--gradient-brand-horizontal);
   text-decoration: none !important;
+  border-color: transparent;
+  box-shadow: var(--shadow-sm);
 }
 
 .up-nav-link.active:hover {
-  background: var(--color-primary-hover);
-  color: white;
+  background: var(--gradient-brand-hover);
+  color: white !important;
+  border-color: transparent;
 }
 
-/* Active indicator bar for nav links */
+/* Remove the underline indicator - using background now */
 .up-nav-link.active::after {
-  content: '';
-  position: absolute;
-  bottom: -0.5rem;
-  left: 50%;
-  transform: translateX(-50%);
-  width: 1.5rem;
-  height: 2px;
-  background: var(--color-primary);
-  border-radius: var(--radius-full);
   display: none;
 }
 
@@ -1268,38 +1284,38 @@ h6 { font-size: 0.875rem; }
    Gradient Backgrounds
    =================================== */
 .up-bg-gradient-primary {
-  background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-primary-dark) 100%);
+  background: var(--gradient-brand);
 }
 
 .up-bg-gradient-warm {
-  background: linear-gradient(135deg, var(--color-secondary) 0%, #fbbf24 100%);
+  background: linear-gradient(135deg, var(--color-secondary) 0%, #fcd34d 100%);
 }
 
 .up-bg-gradient-fresh {
-  background: linear-gradient(135deg, #ecfdf5 0%, #d1fae5 50%, #a7f3d0 100%);
+  background: linear-gradient(180deg, #f0faf4 0%, #e6f9ef 50%, #fef9e7 100%);
 }
 
-/* New Enhanced Gradients - Emerald & Orange */
+/* New Enhanced Gradients - Green & Yellow Brand */
 .up-gradient-hero {
-  background: linear-gradient(135deg, #10b981 0%, #059669 50%, #047857 100%);
+  background: var(--gradient-brand);
 }
 
 .up-gradient-hero-warm {
-  background: linear-gradient(135deg, #f97316 0%, #ea580c 50%, #c2410c 100%);
+  background: linear-gradient(135deg, #fdbb2d 0%, #e5a820 50%, #d4a017 100%);
 }
 
 .up-gradient-emerald-orange {
-  background: linear-gradient(135deg, #10b981 0%, #34d399 25%, #fbbf24 75%, #f97316 100%);
+  background: var(--gradient-brand-diagonal);
 }
 
 .up-gradient-card {
-  background: linear-gradient(145deg, #ffffff 0%, #f0fdf4 50%, #fefce8 100%);
-  border: 1px solid rgba(16, 185, 129, 0.15);
+  background: linear-gradient(145deg, #ffffff 0%, #f0faf4 50%, #fef9e7 100%);
+  border: 1px solid rgba(34, 195, 112, 0.15);
 }
 
 .up-gradient-card-warm {
-  background: linear-gradient(145deg, #ffffff 0%, #fff7ed 50%, #fef3c7 100%);
-  border: 1px solid rgba(249, 115, 22, 0.15);
+  background: linear-gradient(145deg, #ffffff 0%, #fef9e7 50%, #fff8e6 100%);
+  border: 1px solid rgba(253, 187, 45, 0.15);
 }
 
 .up-gradient-header {
@@ -1339,7 +1355,7 @@ h6 { font-size: 0.875rem; }
    Enhanced Page Header
    =================================== */
 .up-page-header {
-  background: linear-gradient(135deg, #10b981 0%, #059669 50%, #047857 100%);
+  background: var(--gradient-brand-horizontal);
   border-radius: var(--radius-xl);
   padding: 1.5rem;
   margin-bottom: 1.5rem;
@@ -1354,7 +1370,7 @@ h6 { font-size: 0.875rem; }
   right: -20%;
   width: 60%;
   height: 200%;
-  background: linear-gradient(135deg, rgba(249, 115, 22, 0.3) 0%, rgba(251, 191, 36, 0.2) 100%);
+  background: linear-gradient(135deg, rgba(253, 187, 45, 0.2) 0%, rgba(253, 187, 45, 0.1) 100%);
   border-radius: 50%;
   pointer-events: none;
 }
@@ -1961,4 +1977,368 @@ h6 { font-size: 0.875rem; }
     opacity: 1;
     transform: translateY(0);
   }
+}
+
+/* ===================================
+   Color Override Utilities
+   Replaces Tailwind emerald/orange with brand colors
+   =================================== */
+
+/* Background Colors */
+.bg-emerald-500, .bg-emerald-600 {
+  background-color: var(--color-primary) !important;
+}
+.bg-emerald-50, .bg-emerald-100 {
+  background-color: var(--color-primary-light) !important;
+}
+.bg-emerald-700, .bg-emerald-800 {
+  background-color: var(--color-primary-dark) !important;
+}
+.bg-orange-500, .bg-orange-400 {
+  background-color: var(--color-secondary) !important;
+}
+.bg-orange-50, .bg-orange-100 {
+  background-color: var(--color-secondary-light) !important;
+}
+.bg-orange-600, .bg-orange-700 {
+  background-color: var(--color-secondary-dark) !important;
+}
+
+/* Text Colors */
+.text-emerald-500, .text-emerald-600 {
+  color: var(--color-primary) !important;
+}
+.text-emerald-700, .text-emerald-800 {
+  color: var(--color-primary-dark) !important;
+}
+.text-orange-500, .text-orange-600 {
+  color: var(--color-secondary) !important;
+}
+.text-orange-700, .text-orange-800 {
+  color: var(--color-secondary-dark) !important;
+}
+
+/* Border Colors */
+.border-emerald-500, .border-emerald-600 {
+  border-color: var(--color-primary) !important;
+}
+.border-emerald-200, .border-emerald-300 {
+  border-color: var(--color-primary-light) !important;
+}
+.border-orange-500, .border-orange-600 {
+  border-color: var(--color-secondary) !important;
+}
+.border-orange-200, .border-orange-300 {
+  border-color: var(--color-secondary-light) !important;
+}
+
+/* Ring Colors */
+.ring-emerald-500, .ring-emerald-600 {
+  --tw-ring-color: var(--color-primary) !important;
+}
+.ring-orange-500, .ring-orange-600 {
+  --tw-ring-color: var(--color-secondary) !important;
+}
+
+/* Focus States */
+.focus\:ring-emerald-500:focus {
+  --tw-ring-color: var(--color-primary) !important;
+}
+.focus\:border-emerald-500:focus {
+  border-color: var(--color-primary) !important;
+}
+
+/* Hover States */
+.hover\:bg-emerald-600:hover,
+.hover\:bg-emerald-700:hover {
+  background-color: var(--color-primary-hover) !important;
+}
+.hover\:bg-emerald-50:hover,
+.hover\:bg-emerald-100:hover {
+  background-color: var(--color-primary-light) !important;
+}
+.hover\:bg-orange-600:hover,
+.hover\:bg-orange-700:hover {
+  background-color: var(--color-secondary-hover) !important;
+}
+.hover\:bg-orange-50:hover,
+.hover\:bg-orange-100:hover {
+  background-color: var(--color-secondary-light) !important;
+}
+.hover\:text-emerald-600:hover,
+.hover\:text-emerald-700:hover {
+  color: var(--color-primary-hover) !important;
+}
+.hover\:text-orange-600:hover,
+.hover\:text-orange-700:hover {
+  color: var(--color-secondary-hover) !important;
+}
+
+/* Gradient Overrides */
+.from-emerald-500 {
+  --tw-gradient-from: var(--color-primary) !important;
+  --tw-gradient-stops: var(--tw-gradient-from), var(--tw-gradient-to, rgba(34, 195, 112, 0)) !important;
+}
+.from-emerald-600 {
+  --tw-gradient-from: var(--color-accent) !important;
+  --tw-gradient-stops: var(--tw-gradient-from), var(--tw-gradient-to, rgba(60, 194, 104, 0)) !important;
+}
+.to-emerald-600, .to-emerald-700 {
+  --tw-gradient-to: var(--color-accent) !important;
+}
+.to-orange-500, .to-orange-600 {
+  --tw-gradient-to: var(--color-secondary) !important;
+}
+.via-emerald-500 {
+  --tw-gradient-via: var(--color-accent) !important;
+}
+
+/* Brand Gradient Background - Modern Look */
+.bg-gradient-brand,
+.bg-gradient-to-r.from-emerald-500.to-orange-500,
+.bg-gradient-to-r.from-emerald-600.to-orange-500 {
+  background: var(--gradient-brand-horizontal) !important;
+}
+
+.bg-gradient-to-br.from-emerald-500.to-orange-500,
+.bg-gradient-to-br.from-emerald-600.to-orange-500 {
+  background: var(--gradient-brand-diagonal) !important;
+}
+
+/* Header/Hero Gradient */
+.page-header-gradient {
+  background: var(--gradient-brand-horizontal);
+  background-size: 200% 200%;
+  animation: gradientShift 8s ease infinite;
+}
+
+@keyframes gradientShift {
+  0%, 100% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+}
+
+/* Modern Card Styling */
+.modern-card {
+  background: var(--color-card);
+  border-radius: var(--radius-xl);
+  box-shadow: var(--shadow-md);
+  border: 1px solid var(--color-border-light);
+  transition: box-shadow var(--transition-normal), transform var(--transition-normal);
+}
+
+.modern-card:hover {
+  box-shadow: var(--shadow-lg);
+  transform: translateY(-2px);
+}
+
+/* Primary Button */
+.btn-primary {
+  background: var(--color-primary);
+  color: white;
+  font-weight: var(--font-weight-medium);
+  border-radius: var(--radius-lg);
+  transition: all var(--transition-normal);
+}
+
+.btn-primary:hover {
+  background: var(--color-primary-hover);
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-md);
+}
+
+/* Secondary/Accent Button */
+.btn-accent {
+  background: var(--color-secondary);
+  color: var(--color-foreground);
+  font-weight: var(--font-weight-medium);
+  border-radius: var(--radius-lg);
+  transition: all var(--transition-normal);
+}
+
+.btn-accent:hover {
+  background: var(--color-secondary-hover);
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-md);
+}
+
+/* Gradient Button */
+.btn-gradient {
+  background: var(--gradient-brand-horizontal);
+  color: white !important;
+  font-weight: var(--font-weight-semibold);
+  border-radius: var(--radius-lg);
+  transition: all var(--transition-normal);
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+  text-decoration: none !important;
+}
+
+.btn-gradient:hover {
+  background: var(--gradient-brand-hover);
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-lg);
+  color: white !important;
+  text-decoration: none !important;
+}
+
+/* Status Badges */
+.badge-success {
+  background: var(--color-success-light);
+  color: var(--color-success-dark);
+  border: 1px solid var(--color-success);
+}
+
+.badge-warning {
+  background: var(--color-warning-light);
+  color: var(--color-warning-dark);
+  border: 1px solid var(--color-warning);
+}
+
+.badge-info {
+  background: var(--color-info-light);
+  color: var(--color-info-dark);
+  border: 1px solid var(--color-info);
+}
+
+.badge-error {
+  background: var(--color-error-light);
+  color: var(--color-error-dark);
+  border: 1px solid var(--color-error);
+}
+
+/* Input Focus Override */
+input:focus, select:focus, textarea:focus {
+  border-color: var(--color-primary) !important;
+  box-shadow: 0 0 0 3px rgba(34, 195, 112, 0.15) !important;
+  outline: none !important;
+}
+
+/* Checkbox/Radio Override */
+input[type="checkbox"]:checked,
+input[type="radio"]:checked {
+  background-color: var(--color-primary) !important;
+  border-color: var(--color-primary) !important;
+}
+
+/* Link Colors */
+a.text-emerald-600,
+a.text-emerald-500 {
+  color: var(--color-primary) !important;
+}
+
+a.text-emerald-600:hover,
+a.text-emerald-500:hover {
+  color: var(--color-primary-hover) !important;
+}
+
+/* Table Row Hover */
+.hover\:bg-emerald-50\/50:hover {
+  background-color: rgba(230, 249, 239, 0.5) !important;
+}
+
+/* Navigation Active States */
+.nav-active {
+  background: var(--gradient-brand-horizontal);
+  color: white;
+}
+
+.nav-item {
+  transition: all var(--transition-normal);
+  border-radius: var(--radius-lg);
+}
+
+.nav-item:hover:not(.nav-active) {
+  background-color: var(--color-muted);
+}
+
+/* Pagination Active */
+.pagination-active {
+  background: var(--color-primary) !important;
+  color: white !important;
+  border-color: var(--color-primary) !important;
+}
+
+/* Stats Card */
+.stats-card {
+  background: white;
+  border-radius: var(--radius-xl);
+  padding: var(--spacing-lg);
+  box-shadow: var(--shadow);
+  border: 1px solid var(--color-border-light);
+  transition: all var(--transition-normal);
+}
+
+.stats-card:hover {
+  box-shadow: var(--shadow-md);
+  border-color: var(--color-primary);
+}
+
+.stats-card-icon {
+  width: 3rem;
+  height: 3rem;
+  border-radius: var(--radius-lg);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.stats-card-icon.primary {
+  background: var(--color-primary-light);
+  color: var(--color-primary);
+}
+
+.stats-card-icon.accent {
+  background: var(--color-secondary-light);
+  color: var(--color-secondary-dark);
+}
+
+.stats-card-icon.info {
+  background: var(--color-info-light);
+  color: var(--color-info);
+}
+
+/* ===================================
+   Additional Teal Color Overrides
+   Map teal to accent (green-yellow transition)
+   =================================== */
+.bg-teal-500, .bg-teal-600 {
+  background-color: var(--color-accent) !important;
+}
+.bg-teal-50, .bg-teal-100 {
+  background-color: var(--color-accent-light) !important;
+}
+.text-teal-500, .text-teal-600 {
+  color: var(--color-accent) !important;
+}
+.text-teal-700, .text-teal-800 {
+  color: var(--color-accent-hover) !important;
+}
+.via-teal-500, .via-teal-600 {
+  --tw-gradient-via: var(--color-accent) !important;
+}
+.to-teal-500, .to-teal-600 {
+  --tw-gradient-to: var(--color-accent) !important;
+}
+
+/* Amber Color Overrides (map to secondary/yellow) */
+.bg-amber-500, .bg-amber-400 {
+  background-color: var(--color-secondary) !important;
+}
+.bg-amber-50, .bg-amber-100 {
+  background-color: var(--color-secondary-light) !important;
+}
+.text-amber-500, .text-amber-600 {
+  color: var(--color-secondary) !important;
+}
+.text-amber-700, .text-amber-800 {
+  color: var(--color-secondary-dark) !important;
+}
+.from-amber-500, .from-amber-400 {
+  --tw-gradient-from: var(--color-secondary) !important;
+}
+.to-amber-500, .to-amber-400 {
+  --tw-gradient-to: var(--color-secondary) !important;
 }

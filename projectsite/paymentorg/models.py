@@ -35,6 +35,13 @@ class UserProfile(BaseModel):
         verbose_name="Officer Status Flag",
         help_text="Grants officer-exclusive abilities when enabled"
     )
+    profile_picture = models.URLField(
+        max_length=500,
+        blank=True,
+        null=True,
+        verbose_name="Profile Picture URL",
+        help_text="URL to user's profile picture (from Google or uploaded)"
+    )
     
     class Meta:
         verbose_name = "User Profile"
@@ -42,6 +49,10 @@ class UserProfile(BaseModel):
     
     def __str__(self):
         return f"{self.user.username} - {'Officer' if self.is_officer else 'Student'}"
+    
+    def get_profile_picture(self):
+        """Return profile picture URL or None"""
+        return self.profile_picture if self.profile_picture else None
 
 # USER PROFILE MODELS
 
@@ -207,6 +218,9 @@ class Student(BaseModel):
         Get all applicable fees for this student based on two-tiered system:
         Tier 1: Program Affiliation Fees (specific to student's program)
         Tier 2: College-Based Organization Fees (mandatory for all)
+        
+        Shows ALL fees for the current academic year (all semesters)
+        so student can see their complete fee obligations.
         """
         from django.db.models import Q
         
@@ -218,23 +232,23 @@ class Student(BaseModel):
             return FeeType.objects.none()
         
         # Tier 1: Program-specific fees (only for student's specific program)
+        # No semester filter - show all semesters for current academic year
         tier1_fees = FeeType.objects.filter(
             organization__fee_tier='TIER_1',
             organization__program_affiliation=self.course.program_type,
             is_active=True,
-            academic_year=current_period.academic_year,
-            semester=current_period.semester
+            academic_year=current_period.academic_year
         ).filter(
             Q(applicable_year_levels__icontains=str(self.year_level)) |
             Q(applicable_year_levels__iexact='All')
         )
         
         # Tier 2: College-wide mandatory fees (for all students)
+        # No semester filter - show all semesters for current academic year
         tier2_fees = FeeType.objects.filter(
             organization__fee_tier='TIER_2',
             is_active=True,
-            academic_year=current_period.academic_year,
-            semester=current_period.semester
+            academic_year=current_period.academic_year
         ).filter(
             Q(applicable_year_levels__icontains=str(self.year_level)) |
             Q(applicable_year_levels__iexact='All')
@@ -268,7 +282,7 @@ class Student(BaseModel):
         return unpaid_fees.aggregate(total=Sum('amount'))['total'] or Decimal('0.00')
     
     def get_tier1_fees(self):
-        """Get Tier 1 (Program-specific) fees"""
+        """Get Tier 1 (Program-specific) fees - all semesters for current academic year"""
         from django.db.models import Q
         
         if not self.course:
@@ -282,15 +296,14 @@ class Student(BaseModel):
             organization__fee_tier='TIER_1',
             organization__program_affiliation=self.course.program_type,
             is_active=True,
-            academic_year=current_period.academic_year,
-            semester=current_period.semester
+            academic_year=current_period.academic_year
         ).filter(
             Q(applicable_year_levels__icontains=str(self.year_level)) |
             Q(applicable_year_levels__iexact='All')
         )
     
     def get_tier2_fees(self):
-        """Get Tier 2 (College-wide mandatory) fees"""
+        """Get Tier 2 (College-wide mandatory) fees - all semesters for current academic year"""
         from django.db.models import Q
         
         current_period = self._get_current_period()
@@ -300,8 +313,7 @@ class Student(BaseModel):
         return FeeType.objects.filter(
             organization__fee_tier='TIER_2',
             is_active=True,
-            academic_year=current_period.academic_year,
-            semester=current_period.semester
+            academic_year=current_period.academic_year
         ).filter(
             Q(applicable_year_levels__icontains=str(self.year_level)) |
             Q(applicable_year_levels__iexact='All')

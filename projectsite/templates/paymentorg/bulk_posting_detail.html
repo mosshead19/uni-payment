@@ -1,0 +1,129 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Bulk Posting Details - UniPay{% endblock %}
+
+{% block content %}
+<div class="py-6 md:py-8">
+    <div class="max-w-4xl mx-auto px-4 md:px-6 lg:px-8">
+        <!-- Header -->
+        <div class="flex items-center justify-between mb-6">
+            <div class="flex items-center gap-4">
+                <a href="{% url 'officer_dashboard' %}" 
+                   class="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg transition-colors">
+                    <i data-lucide="arrow-left" class="w-5 h-5"></i>
+                </a>
+                <div>
+                    <h1 class="text-2xl font-bold text-gray-900">Bulk Posting Details</h1>
+                    <p class="text-gray-600">Posted payment request information</p>
+                </div>
+            </div>
+            <div class="flex gap-2">
+                <a href="{% url 'bulk_posting_edit' posting.pk %}" 
+                   class="inline-flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium">
+                    <i data-lucide="edit" class="w-4 h-4"></i>
+                    Edit
+                </a>
+                <a href="{% url 'bulk_posting_delete' posting.pk %}" 
+                   class="inline-flex items-center gap-2 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors font-medium">
+                    <i data-lucide="trash-2" class="w-4 h-4"></i>
+                    Delete
+                </a>
+            </div>
+        </div>
+
+        <!-- Posting Details Card -->
+        <div class="bg-white rounded-xl border border-gray-200 shadow-sm mb-6">
+            <div class="p-6 border-b border-gray-200">
+                <h2 class="text-lg font-semibold text-gray-900">Posting Information</h2>
+            </div>
+            <div class="p-6">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                        <p class="text-sm text-gray-500 mb-1">Fee Type</p>
+                        <p class="text-gray-900 font-medium">{{ posting.fee_type.name }}</p>
+                    </div>
+                    <div>
+                        <p class="text-sm text-gray-500 mb-1">Amount</p>
+                        <p class="text-gray-900 font-semibold text-lg">₱{{ posting.amount|floatformat:2 }}</p>
+                    </div>
+                    <div>
+                        <p class="text-sm text-gray-500 mb-1">Organization</p>
+                        <p class="text-gray-900 font-medium">{{ posting.organization.name }}</p>
+                    </div>
+                    <div>
+                        <p class="text-sm text-gray-500 mb-1">Students Affected</p>
+                        <p class="text-gray-900 font-medium">{{ posting.student_count }} student(s)</p>
+                    </div>
+                    <div>
+                        <p class="text-sm text-gray-500 mb-1">Posted By</p>
+                        <p class="text-gray-900 font-medium">{{ posting.posted_by.get_full_name }}</p>
+                    </div>
+                    <div>
+                        <p class="text-sm text-gray-500 mb-1">Date Posted</p>
+                        <p class="text-gray-900 font-medium">{{ posting.created_at|date:"F d, Y g:i A" }}</p>
+                    </div>
+                </div>
+                {% if posting.notes %}
+                <div class="mt-6 pt-6 border-t border-gray-200">
+                    <p class="text-sm text-gray-500 mb-1">Notes</p>
+                    <p class="text-gray-900">{{ posting.notes }}</p>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Associated Payment Requests -->
+        <div class="bg-white rounded-xl border border-gray-200 shadow-sm">
+            <div class="p-6 border-b border-gray-200">
+                <h2 class="text-lg font-semibold text-gray-900">Associated Payment Requests</h2>
+                <p class="text-sm text-gray-600">Students who received this fee posting</p>
+            </div>
+            <div class="overflow-x-auto">
+                <table class="w-full">
+                    <thead class="bg-gray-50 border-b border-gray-200">
+                        <tr>
+                            <th class="px-6 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Student</th>
+                            <th class="px-6 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">ID Number</th>
+                            <th class="px-6 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Status</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-gray-200">
+                        {% for request in payment_requests %}
+                        <tr class="hover:bg-gray-50">
+                            <td class="px-6 py-4 text-gray-900">{{ request.student.user.get_full_name }}</td>
+                            <td class="px-6 py-4 text-gray-700 font-mono text-sm">{{ request.student.student_id_number }}</td>
+                            <td class="px-6 py-4">
+                                {% if request.status == 'PENDING' %}
+                                    <span class="inline-flex items-center px-2.5 py-1 bg-yellow-100 text-yellow-700 rounded-full text-xs font-medium">
+                                        Pending
+                                    </span>
+                                {% elif request.status == 'COMPLETED' %}
+                                    <span class="inline-flex items-center px-2.5 py-1 bg-green-100 text-green-700 rounded-full text-xs font-medium">
+                                        Paid
+                                    </span>
+                                {% elif request.status == 'EXPIRED' %}
+                                    <span class="inline-flex items-center px-2.5 py-1 bg-gray-100 text-gray-700 rounded-full text-xs font-medium">
+                                        Expired
+                                    </span>
+                                {% else %}
+                                    <span class="inline-flex items-center px-2.5 py-1 bg-gray-100 text-gray-700 rounded-full text-xs font-medium">
+                                        {{ request.status }}
+                                    </span>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="3" class="px-6 py-12 text-center text-gray-500">
+                                No payment requests found for this posting.
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

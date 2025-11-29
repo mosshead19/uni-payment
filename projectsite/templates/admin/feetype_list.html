@@ -1,151 +1,288 @@
 {% extends "base.html" %}
+{% load static %}
 
-{% block title %}Fee Types{% endblock %}
+{% block title %}Fee Types - UniPay{% endblock %}
 
 {% block content %}
-<div class="up-card overflow-hidden">
-    <!-- Header with Gradient -->
-    <div class="bg-gradient-to-r from-emerald-600 via-teal-500 to-orange-500 px-6 py-4">
-        <div class="d-flex justify-content-between align-items-center flex-wrap gap-3">
-            <div>
-                <h4 class="text-white mb-1 fw-semibold d-flex align-items-center gap-2">
-                    <i data-lucide="tags" class="w-5 h-5"></i>
-                    Fee Types
-                </h4>
-                <p class="text-white opacity-75 mb-0 small">
-                    {% if is_super_officer %}
-                        Managing fee types for {{ organization.name }}
-                    {% else %}
-                        Manage organization fee types
-                    {% endif %}
-                </p>
-            </div>
-            {% if user.is_staff %}
-            <a href="{% url 'create_fee_type' %}" class="btn btn-light btn-sm d-flex align-items-center gap-2">
-                <i data-lucide="plus" class="w-4 h-4"></i>
-                Create New
-            </a>
-            {% endif %}
-        </div>
-    </div>
-
-    <!-- Filters -->
-    <div class="p-4 bg-gray-50 border-bottom">
-        <form method="get" class="d-flex flex-wrap gap-3 align-items-end">
-            <div class="flex-grow-1" style="min-width: 200px;">
-                <label class="form-label small text-muted mb-1">Filter by Organization</label>
-                <select name="organization" class="form-select form-select-sm">
-                    <option value="">All Organizations</option>
-                    {% for org in organizations %}
-                        <option value="{{ org.pk }}" {% if request.GET.organization == org.pk|stringformat:"s" %}selected{% endif %}>{{ org.name }}</option>
-                    {% endfor %}
-                </select>
-            </div>
-            <div class="d-flex gap-2">
-                <button type="submit" class="btn btn-sm btn-primary d-flex align-items-center gap-1">
-                    <i data-lucide="filter" class="w-4 h-4"></i>
-                    Filter
-                </button>
-                <a href="{% url 'feetype_list' %}" class="btn btn-sm btn-outline-secondary">Clear</a>
-            </div>
-        </form>
-    </div>
-
-    <!-- Table -->
-    <div class="table-responsive">
-        <table class="table table-hover mb-0">
-            <thead class="bg-light">
-                <tr>
-                    <th class="px-4 py-3 text-xs font-semibold text-gray-500 text-uppercase">Organization</th>
-                    <th class="px-4 py-3 text-xs font-semibold text-gray-500 text-uppercase">Fee Name</th>
-                    <th class="px-4 py-3 text-xs font-semibold text-gray-500 text-uppercase">Amount</th>
-                    <th class="px-4 py-3 text-xs font-semibold text-gray-500 text-uppercase">Period</th>
-                    <th class="px-4 py-3 text-xs font-semibold text-gray-500 text-uppercase">Status</th>
-                    <th class="px-4 py-3 text-xs font-semibold text-gray-500 text-uppercase text-center">Actions</th>
-                </tr>
-            </thead>
-            <tbody class="divide-y">
-                {% for fee in fee_types %}
-                <tr class="hover:bg-gray-50">
-                    <td class="px-4 py-3">
-                        <span class="badge bg-emerald-100 text-emerald-700">{{ fee.organization.code }}</span>
-                    </td>
-                    <td class="px-4 py-3">
-                        <div class="fw-medium">{{ fee.name }}</div>
-                        <div class="text-muted small">{{ fee.applicable_year_levels }}</div>
-                    </td>
-                    <td class="px-4 py-3">
-                        <span class="fw-semibold text-emerald-600">₱{{ fee.amount|floatformat:2 }}</span>
-                    </td>
-                    <td class="px-4 py-3">
-                        <div class="small">{{ fee.academic_year }}</div>
-                        <div class="text-muted small">{{ fee.semester }}</div>
-                    </td>
-                    <td class="px-4 py-3">
-                        {% if fee.is_active %}
-                            <span class="badge bg-success-subtle text-success">Active</span>
-                        {% else %}
-                            <span class="badge bg-secondary-subtle text-secondary">Inactive</span>
-                        {% endif %}
-                        {% if fee.is_overdue %}
-                            <span class="badge bg-danger-subtle text-danger">Overdue</span>
-                        {% endif %}
-                    </td>
-                    <td class="px-4 py-3 text-center">
-                        <div class="d-flex gap-1 justify-content-center">
-                            <a href="{% url 'feetype_detail' fee.pk %}" class="btn btn-sm btn-outline-primary" title="View Details">
-                                <i data-lucide="eye" class="w-4 h-4"></i>
-                            </a>
-                            <a href="{% url 'feetype_update' fee.pk %}" class="btn btn-sm btn-outline-warning" title="Edit">
-                                <i data-lucide="edit" class="w-4 h-4"></i>
-                            </a>
-                            <a href="{% url 'feetype_delete' fee.pk %}" class="btn btn-sm btn-outline-danger" title="Delete">
-                                <i data-lucide="trash-2" class="w-4 h-4"></i>
-                            </a>
-                        </div>
-                    </td>
-                </tr>
-                {% empty %}
-                <tr>
-                    <td colspan="6" class="px-4 py-5 text-center">
-                        <div class="d-flex flex-column align-items-center">
-                            <div class="rounded-circle bg-gray-100 p-3 mb-3">
-                                <i data-lucide="tags" class="w-6 h-6 text-gray-400"></i>
+<div class="py-6 md:py-8">
+    <div class="max-w-6xl mx-auto px-4 md:px-0">
+        <!-- Gradient Header Card -->
+        <div class="page-header-gradient rounded-xl p-5 md:p-6 mb-6 shadow-lg relative overflow-hidden">
+            <!-- Decorative Elements -->
+            <div class="absolute top-0 right-0 w-32 h-32 bg-white/5 rounded-full -translate-y-1/2 translate-x-1/2"></div>
+            
+            <div class="relative z-10">
+                <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-4">
+                    <div>
+                        <div class="flex items-center gap-3 mb-2">
+                            <div class="w-10 h-10 bg-white/20 backdrop-blur-sm rounded-lg flex items-center justify-center">
+                                <i data-lucide="tags" class="w-5 h-5 text-white"></i>
                             </div>
-                            <p class="text-muted mb-0">No fee types found.</p>
+                            <h1 class="text-xl md:text-2xl font-bold text-white">Fee Types</h1>
                         </div>
-                    </td>
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
-    </div>
-    
-    {% if is_paginated %}
-    <div class="p-4 bg-gray-50 border-top">
-        <nav aria-label="Page navigation">
-            <ul class="pagination pagination-sm justify-content-center mb-0">
-                {% if page_obj.has_previous %}
-                    <li class="page-item"><a class="page-link" href="?page=1{% if request.GET.organization %}&organization={{ request.GET.organization }}{% endif %}">First</a></li>
-                    <li class="page-item"><a class="page-link" href="?page={{ page_obj.previous_page_number }}{% if request.GET.organization %}&organization={{ request.GET.organization }}{% endif %}">Previous</a></li>
-                {% endif %}
-                <li class="page-item active"><span class="page-link">{{ page_obj.number }} / {{ page_obj.paginator.num_pages }}</span></li>
-                {% if page_obj.has_next %}
-                    <li class="page-item"><a class="page-link" href="?page={{ page_obj.next_page_number }}{% if request.GET.organization %}&organization={{ request.GET.organization }}{% endif %}">Next</a></li>
-                    <li class="page-item"><a class="page-link" href="?page={{ page_obj.paginator.num_pages }}{% if request.GET.organization %}&organization={{ request.GET.organization }}{% endif %}">Last</a></li>
-                {% endif %}
-            </ul>
-        </nav>
-    </div>
-    {% endif %}
-</div>
+                        <p class="text-white/80 text-sm md:text-base">
+                            {% if is_super_officer %}
+                                Managing fee types for {{ organization.name }}
+                            {% else %}
+                                Manage organization fee types
+                            {% endif %}
+                        </p>
+                    </div>
+                    <div class="flex flex-wrap gap-2 md:gap-3">
+                        {% if user.is_staff %}
+                        <a href="{% url 'create_fee_type' %}" 
+                           class="px-3 md:px-4 py-2 bg-white text-gray-800 rounded-lg hover:bg-gray-50 transition-colors font-medium inline-flex items-center gap-2 text-sm shadow-md">
+                            <i data-lucide="plus" class="w-4 h-4"></i>
+                            <span class="hidden sm:inline">Create New</span>
+                        </a>
+                        {% endif %}
+                        <a href="{% url 'officer_dashboard' %}" 
+                           class="px-3 md:px-4 py-2 bg-white/20 backdrop-blur-sm text-white rounded-lg hover:bg-white/30 transition-colors font-medium inline-flex items-center gap-2 text-sm border border-white/30">
+                            <i data-lucide="arrow-left" class="w-4 h-4"></i>
+                            <span class="hidden sm:inline">Back</span>
+                        </a>
+                    </div>
+                </div>
+                
+                <!-- Filter Section -->
+                <form method="get" class="flex flex-wrap gap-3 items-end">
+                    <div class="flex-grow min-w-[200px]">
+                        <select name="organization" class="w-full px-4 py-2.5 bg-white/10 backdrop-blur-sm border border-white/20 rounded-lg focus:outline-none focus:ring-2 focus:ring-white/50 text-white">
+                            <option value="" class="text-gray-800">All Organizations</option>
+                            {% for org in organizations %}
+                                <option value="{{ org.pk }}" class="text-gray-800" {% if request.GET.organization == org.pk|stringformat:"s" %}selected{% endif %}>{{ org.name }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="flex gap-2">
+                        <button type="submit" class="px-4 py-2.5 bg-white text-gray-800 rounded-lg hover:bg-gray-50 transition-colors font-medium inline-flex items-center gap-2 text-sm shadow-md">
+                            <i data-lucide="filter" class="w-4 h-4"></i>
+                            Filter
+                        </button>
+                        <a href="{% url 'feetype_list' %}" class="px-4 py-2.5 bg-white/20 backdrop-blur-sm text-white rounded-lg hover:bg-white/30 transition-colors font-medium inline-flex items-center gap-2 text-sm border border-white/30">
+                            Clear
+                        </a>
+                    </div>
+                </form>
+            </div>
+        </div>
 
+        <!-- Stats Cards -->
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4 mb-6">
+            <div class="bg-white rounded-xl p-4 border border-gray-100 shadow-sm hover:shadow-md hover:border-blue-200 transition-all">
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center">
+                        <i data-lucide="tags" class="w-5 h-5 text-blue-600"></i>
+                    </div>
+                    <div>
+                        <p class="text-xl md:text-2xl font-bold text-gray-900">{{ fee_types|length }}</p>
+                        <p class="text-xs text-gray-500">Total Fees</p>
+                    </div>
+                </div>
+            </div>
+            <div class="bg-white rounded-xl p-4 border border-gray-100 shadow-sm hover:shadow-md hover:border-emerald-200 transition-all">
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 bg-emerald-100 rounded-lg flex items-center justify-center">
+                        <i data-lucide="check-circle" class="w-5 h-5 text-emerald-600"></i>
+                    </div>
+                    <div>
+                        <p class="text-xl md:text-2xl font-bold text-gray-900">{{ fee_types|length }}</p>
+                        <p class="text-xs text-gray-500">Active Fees</p>
+                    </div>
+                </div>
+            </div>
+            <div class="bg-white rounded-xl p-4 border border-gray-100 shadow-sm hover:shadow-md hover:border-purple-200 transition-all">
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 bg-purple-100 rounded-lg flex items-center justify-center">
+                        <i data-lucide="building-2" class="w-5 h-5 text-purple-600"></i>
+                    </div>
+                    <div>
+                        <p class="text-xl md:text-2xl font-bold text-gray-900">{{ organizations|length }}</p>
+                        <p class="text-xs text-gray-500">Organizations</p>
+                    </div>
+                </div>
+            </div>
+            <div class="bg-white rounded-xl p-4 border border-gray-100 shadow-sm hover:shadow-md hover:border-amber-200 transition-all">
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 bg-amber-100 rounded-lg flex items-center justify-center">
+                        <i data-lucide="alert-circle" class="w-5 h-5 text-amber-600"></i>
+                    </div>
+                    <div>
+                        <p class="text-xl md:text-2xl font-bold text-gray-900">0</p>
+                        <p class="text-xs text-gray-500">Overdue</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Fee Types Table -->
+        {% if fee_types %}
+            <div class="bg-white rounded-xl border border-gray-200 overflow-hidden shadow-sm">
+                <div class="overflow-x-auto">
+                    <table class="w-full up-table-responsive" id="feetypes-table">
+                        <thead class="bg-gradient-to-r from-gray-50 to-gray-100 border-b border-gray-200">
+                            <tr>
+                                <th class="px-4 md:px-6 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Organization</th>
+                                <th class="px-4 md:px-6 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Fee Name</th>
+                                <th class="px-4 md:px-6 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Amount</th>
+                                <th class="px-4 md:px-6 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Period</th>
+                                <th class="px-4 md:px-6 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Status</th>
+                                <th class="px-4 md:px-6 py-3 text-center text-xs font-semibold text-gray-500 uppercase tracking-wider w-16">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-gray-200">
+                            {% for fee in fee_types %}
+                                <tr class="hover:bg-gray-50 transition-colors fee-row">
+                                    <td class="px-4 md:px-6 py-4" data-label="Organization">
+                                        <span class="inline-flex items-center px-3 py-1.5 bg-gradient-to-r from-emerald-50 to-emerald-100 text-emerald-700 rounded-lg text-xs font-bold border border-emerald-200">
+                                            {{ fee.organization.code }}
+                                        </span>
+                                    </td>
+                                    <td class="px-4 md:px-6 py-4" data-label="Fee Name">
+                                        <p class="text-gray-900 font-medium">{{ fee.name }}</p>
+                                        <p class="text-gray-500 text-sm">{{ fee.applicable_year_levels }}</p>
+                                    </td>
+                                    <td class="px-4 md:px-6 py-4" data-label="Amount">
+                                        <span class="text-gray-900 font-bold">₱{{ fee.amount|floatformat:2 }}</span>
+                                    </td>
+                                    <td class="px-4 md:px-6 py-4" data-label="Period">
+                                        <p class="text-gray-700 text-sm">{{ fee.academic_year }}</p>
+                                        <p class="text-gray-500 text-xs">{{ fee.semester }}</p>
+                                    </td>
+                                    <td class="px-4 md:px-6 py-4" data-label="Status">
+                                        {% if fee.is_active %}
+                                            <span class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-gradient-to-r from-emerald-50 to-emerald-100 text-emerald-700 rounded-full text-xs font-semibold border border-emerald-200 shadow-sm">
+                                                <i data-lucide="check-circle" class="w-3.5 h-3.5"></i>
+                                                Active
+                                            </span>
+                                        {% else %}
+                                            <span class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-gradient-to-r from-gray-50 to-gray-100 text-gray-600 rounded-full text-xs font-semibold border border-gray-200 shadow-sm">
+                                                <i data-lucide="pause-circle" class="w-3.5 h-3.5"></i>
+                                                Inactive
+                                            </span>
+                                        {% endif %}
+                                        {% if fee.is_overdue %}
+                                            <span class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-gradient-to-r from-red-50 to-red-100 text-red-700 rounded-full text-xs font-semibold border border-red-200 shadow-sm ml-1">
+                                                <i data-lucide="alert-circle" class="w-3.5 h-3.5"></i>
+                                                Overdue
+                                            </span>
+                                        {% endif %}
+                                    </td>
+                                    <td class="px-4 md:px-6 py-4 text-center" data-label="Actions">
+                                        <div class="relative inline-block">
+                                            <button type="button" data-dropdown-toggle 
+                                                    class="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-full transition-colors">
+                                                <i data-lucide="more-vertical" class="w-5 h-5"></i>
+                                            </button>
+                                            <div data-dropdown-menu class="hidden absolute right-0 mt-1 w-48 bg-white rounded-lg shadow-lg border border-gray-200 z-50 py-1">
+                                                <a href="{% url 'feetype_detail' fee.pk %}" 
+                                                   class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50">
+                                                    <i data-lucide="eye" class="w-4 h-4 inline mr-2"></i>
+                                                    View Details
+                                                </a>
+                                                <a href="{% url 'feetype_update' fee.pk %}" 
+                                                   class="block px-4 py-2 text-sm text-amber-600 hover:bg-amber-50">
+                                                    <i data-lucide="edit" class="w-4 h-4 inline mr-2"></i>
+                                                    Edit Fee
+                                                </a>
+                                                <div class="border-t border-gray-100 my-1"></div>
+                                                <a href="{% url 'feetype_delete' fee.pk %}" 
+                                                   class="block px-4 py-2 text-sm text-red-600 hover:bg-red-50">
+                                                    <i data-lucide="trash-2" class="w-4 h-4 inline mr-2"></i>
+                                                    Delete
+                                                </a>
+                                            </div>
+                                        </div>
+                                    </td>
+                                </tr>
+                            {% empty %}
+                                <tr>
+                                    <td colspan="6" class="px-6 py-12 text-center">
+                                        <div class="flex flex-col items-center">
+                                            <div class="w-12 h-12 bg-gray-100 rounded-full flex items-center justify-center mb-3">
+                                                <i data-lucide="tags" class="w-6 h-6 text-gray-400"></i>
+                                            </div>
+                                            <p class="text-gray-500">No fee types found.</p>
+                                        </div>
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Pagination -->
+            {% if is_paginated %}
+                <div class="mt-6 flex flex-wrap justify-center items-center gap-2">
+                    {% if page_obj.has_previous %}
+                        <a href="?page=1{% if request.GET.organization %}&organization={{ request.GET.organization }}{% endif %}" class="px-3 py-2 bg-white border border-gray-200 hover:bg-gray-50 rounded-lg text-sm font-medium text-gray-700 shadow-sm">First</a>
+                        <a href="?page={{ page_obj.previous_page_number }}{% if request.GET.organization %}&organization={{ request.GET.organization }}{% endif %}" class="px-3 py-2 btn-gradient rounded-lg text-sm font-medium shadow-sm">
+                            <i data-lucide="chevron-left" class="w-4 h-4 inline"></i> Prev
+                        </a>
+                    {% endif %}
+
+                    <span class="px-4 py-2 text-sm text-gray-600 bg-gray-50 rounded-lg">
+                        Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}
+                    </span>
+
+                    {% if page_obj.has_next %}
+                        <a href="?page={{ page_obj.next_page_number }}{% if request.GET.organization %}&organization={{ request.GET.organization }}{% endif %}" class="px-3 py-2 btn-gradient rounded-lg text-sm font-medium shadow-sm">
+                            Next <i data-lucide="chevron-right" class="w-4 h-4 inline"></i>
+                        </a>
+                        <a href="?page={{ page_obj.paginator.num_pages }}{% if request.GET.organization %}&organization={{ request.GET.organization }}{% endif %}" class="px-3 py-2 bg-white border border-gray-200 hover:bg-gray-50 rounded-lg text-sm font-medium text-gray-700 shadow-sm">Last</a>
+                    {% endif %}
+                </div>
+            {% endif %}
+        {% else %}
+            <div class="bg-white rounded-xl border border-gray-200 p-8 md:p-12 text-center shadow-sm">
+                <div class="w-16 h-16 bg-emerald-100 rounded-full flex items-center justify-center mx-auto mb-4 border-2 border-emerald-200">
+                    <i data-lucide="tags" class="w-8 h-8 text-emerald-500"></i>
+                </div>
+                <h3 class="text-lg font-semibold text-gray-900 mb-2">No Fee Types Found</h3>
+                <p class="text-gray-600 mb-6 max-w-md mx-auto">No fee types have been created yet.</p>
+                {% if user.is_staff %}
+                <a href="{% url 'create_fee_type' %}" 
+                   class="px-4 py-2 btn-gradient rounded-lg transition-all font-medium inline-flex items-center gap-2 shadow-md">
+                    <i data-lucide="plus" class="w-4 h-4"></i>
+                    Create Fee Type
+                </a>
+                {% endif %}
+            </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
 <script>
-document.addEventListener('DOMContentLoaded', function() {
-    if (typeof lucide !== 'undefined') {
-        lucide.createIcons();
-    }
-});
+    // Dropdown functionality for 3-dot menus
+    document.addEventListener('DOMContentLoaded', function() {
+        const buttons = document.querySelectorAll('[data-dropdown-toggle]');
+        
+        buttons.forEach(button => {
+            const menu = button.nextElementSibling;
+            
+            button.addEventListener('click', function(e) {
+                e.stopPropagation();
+                document.querySelectorAll('[data-dropdown-menu]').forEach(m => {
+                    if (m !== menu) m.classList.add('hidden');
+                });
+                menu.classList.toggle('hidden');
+                lucide.createIcons();
+            });
+        });
+        
+        document.addEventListener('click', function() {
+            document.querySelectorAll('[data-dropdown-menu]').forEach(menu => {
+                menu.classList.add('hidden');
+            });
+        });
+        
+        if (typeof lucide !== 'undefined') {
+            lucide.createIcons();
+        }
+    });
 </script>
 {% endblock %}
 

@@ -1,0 +1,62 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Edit Bulk Posting - UniPay{% endblock %}
+
+{% block content %}
+<div class="py-6 md:py-8">
+    <div class="max-w-2xl mx-auto px-4 md:px-6 lg:px-8">
+        <!-- Header -->
+        <div class="flex items-center gap-4 mb-6">
+            <a href="{% url 'bulk_posting_detail' object.pk %}" 
+               class="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg transition-colors">
+                <i data-lucide="arrow-left" class="w-5 h-5"></i>
+            </a>
+            <div>
+                <h1 class="text-2xl font-bold text-gray-900">Edit Bulk Posting</h1>
+                <p class="text-gray-600">Update posting notes</p>
+            </div>
+        </div>
+
+        <!-- Info Card -->
+        <div class="bg-blue-50 rounded-lg p-4 mb-6 border border-blue-200">
+            <div class="flex gap-3">
+                <i data-lucide="info" class="w-5 h-5 text-blue-600 flex-shrink-0 mt-0.5"></i>
+                <div>
+                    <p class="text-blue-800 font-medium">{{ object.fee_type.name }}</p>
+                    <p class="text-blue-700 text-sm">₱{{ object.amount|floatformat:2 }} • {{ object.student_count }} students • Posted {{ object.created_at|date:"M d, Y" }}</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Edit Form -->
+        <div class="bg-white rounded-xl border border-gray-200 shadow-sm">
+            <div class="p-6 border-b border-gray-200">
+                <h2 class="text-lg font-semibold text-gray-900">Edit Details</h2>
+            </div>
+            <form method="post" class="p-6">
+                {% csrf_token %}
+                <div class="mb-6">
+                    <label for="id_notes" class="block text-sm font-medium text-gray-700 mb-2">Notes</label>
+                    <textarea 
+                        name="notes" 
+                        id="id_notes" 
+                        rows="4" 
+                        class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-colors"
+                        placeholder="Add any notes about this posting...">{{ object.notes }}</textarea>
+                </div>
+                <div class="flex gap-3">
+                    <button type="submit" 
+                            class="flex-1 px-4 py-3 btn-gradient rounded-lg font-medium transition-colors">
+                        Save Changes
+                    </button>
+                    <a href="{% url 'bulk_posting_detail' object.pk %}" 
+                       class="px-4 py-3 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors font-medium">
+                        Cancel
+                    </a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

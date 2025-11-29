@@ -27,6 +27,20 @@ class MySocialAccountAdapter(DefaultSocialAccountAdapter):
             from allauth.exceptions import ImmediateHttpResponse
             from django.shortcuts import render
             raise ImmediateHttpResponse(render(request, 'account/login_error.html', {'error': 'Only @psu.palawan.edu.ph emails are allowed.'}))
+        
+        # Update profile picture for existing users on every login
+        data = sociallogin.account.extra_data
+        picture_url = data.get('picture')
+        
+        # If user exists (returning user), update their profile picture
+        if sociallogin.is_existing:
+            user = sociallogin.user
+            if picture_url and user:
+                from paymentorg.models import UserProfile
+                profile, created = UserProfile.objects.get_or_create(user=user)
+                if profile.profile_picture != picture_url:
+                    profile.profile_picture = picture_url
+                    profile.save(update_fields=['profile_picture'])
 
     def save_user(self, request, sociallogin, form=None):
         user = super().save_user(request, sociallogin, form)
@@ -36,4 +50,13 @@ class MySocialAccountAdapter(DefaultSocialAccountAdapter):
         if data.get('family_name'):
             user.last_name = data.get('family_name')
         user.save()
+        
+        # Save Google profile picture to UserProfile
+        picture_url = data.get('picture')
+        if picture_url:
+            from paymentorg.models import UserProfile
+            profile, created = UserProfile.objects.get_or_create(user=user)
+            profile.profile_picture = picture_url
+            profile.save(update_fields=['profile_picture'])
+        
         return user

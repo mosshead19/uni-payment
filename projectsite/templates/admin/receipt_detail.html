@@ -9,10 +9,9 @@
         <!-- Receipt Card -->
         <div class="bg-white rounded-2xl border border-gray-200 shadow-lg overflow-hidden">
             <!-- Receipt Header -->
-            <div class="bg-gradient-to-r from-emerald-600 via-emerald-500 to-teal-500 p-6 text-white relative overflow-hidden">
-                <div class="absolute inset-0 bg-gradient-to-r from-orange-500/10 to-transparent"></div>
+            <div class="page-header-gradient p-6 text-white relative overflow-hidden">
                 <div class="absolute top-0 right-0 w-32 h-32 bg-white/5 rounded-full -translate-y-1/2 translate-x-1/2"></div>
-                <div class="absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r from-orange-400 via-orange-500 to-orange-400"></div>
+                <div class="absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r from-yellow-400 via-yellow-500 to-yellow-400"></div>
                 
                 <div class="relative z-10 flex items-center justify-center gap-3">
                     <div class="w-10 h-10 bg-white/20 backdrop-blur-sm rounded-lg flex items-center justify-center">
@@ -20,7 +19,7 @@
                     </div>
                     <div class="text-center">
                         <h2 class="text-lg font-bold">OFFICIAL RECEIPT</h2>
-                        <p class="text-emerald-100 text-xs">UniPay Payment System</p>
+                        <p class="text-white/80 text-xs">UniPay Payment System</p>
                     </div>
                 </div>
             </div>
@@ -169,7 +168,7 @@
                     <div class="flex flex-wrap justify-center gap-2">
                         {% if receipt.receipt_pdf %}
                         <a href="{{ receipt.receipt_pdf.url }}" target="_blank"
-                           class="px-4 py-2 bg-gradient-to-r from-emerald-500 to-teal-500 text-white rounded-lg hover:from-emerald-600 hover:to-teal-600 transition-all font-medium inline-flex items-center gap-2 text-sm shadow-sm">
+                           class="px-4 py-2 btn-gradient rounded-lg transition-all font-medium inline-flex items-center gap-2 text-sm shadow-sm">
                             <i data-lucide="download" class="w-4 h-4"></i>
                             Download PDF
                         </a>

@@ -902,6 +902,12 @@ class ListStudentsInOrgView(LoginRequiredMixin, UserPassesTestMixin, ListView):
                                                  officer.is_super_officer)
                 # Only superusers can make someone a superuser
                 student.can_make_superuser = user.is_superuser and not student.is_superuser
+            
+            # Calculate accurate stats from the current student list
+            students_list = list(context['students'])
+            context['officer_count'] = sum(1 for s in students_list if s.is_promoted and not s.is_super_officer and not s.is_superuser)
+            context['super_officer_count'] = sum(1 for s in students_list if s.is_super_officer)
+            context['superuser_count'] = sum(1 for s in students_list if s.is_superuser)
         return context
 
 
@@ -1451,6 +1457,7 @@ class OfficerDashboardView(OfficerRequiredMixin, TemplateView):
                 'pending_requests': pending_requests,
                 'posted_requests': posted_requests,
                 'today_collections': organization.get_today_collection(),
+                'total_collected_system': organization.get_total_collected(),
                 'recent_payments': Payment.objects.filter(
                     organization=organization,
                     status='COMPLETED',
@@ -1821,6 +1828,73 @@ class PostBulkPaymentView(OfficerRequiredMixin, View):
         }
         return render(request, self.template_name, context)
 
+
+class BulkPaymentPostingDetailView(OfficerRequiredMixin, DetailView):
+    """View details of a bulk payment posting"""
+    model = BulkPaymentPosting
+    template_name = 'paymentorg/bulk_posting_detail.html'
+    context_object_name = 'posting'
+    
+    def get_queryset(self):
+        user = self.request.user
+        if user.is_superuser:
+            return BulkPaymentPosting.objects.all()
+        if hasattr(user, 'officer_profile'):
+            return BulkPaymentPosting.objects.filter(organization=user.officer_profile.organization)
+        return BulkPaymentPosting.objects.none()
+    
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        posting = self.get_object()
+        # Get associated payment requests for this posting (based on fee_type, organization, and date)
+        context['payment_requests'] = PaymentRequest.objects.filter(
+            fee_type=posting.fee_type,
+            organization=posting.organization,
+            amount=posting.amount,
+            created_at__date=posting.created_at.date()
+        ).select_related('student', 'student__user')[:50]
+        return context
+
+
+class BulkPaymentPostingUpdateView(OfficerRequiredMixin, UpdateView):
+    """Edit a bulk payment posting"""
+    model = BulkPaymentPosting
+    template_name = 'paymentorg/bulk_posting_edit.html'
+    fields = ['notes']
+    
+    def get_queryset(self):
+        user = self.request.user
+        if user.is_superuser:
+            return BulkPaymentPosting.objects.all()
+        if hasattr(user, 'officer_profile'):
+            return BulkPaymentPosting.objects.filter(organization=user.officer_profile.organization)
+        return BulkPaymentPosting.objects.none()
+    
+    def get_success_url(self):
+        messages.success(self.request, 'Bulk posting updated successfully.')
+        return reverse_lazy('officer_dashboard')
+
+
+class BulkPaymentPostingDeleteView(OfficerRequiredMixin, DeleteView):
+    """Delete a bulk payment posting"""
+    model = BulkPaymentPosting
+    template_name = 'paymentorg/bulk_posting_delete.html'
+    success_url = reverse_lazy('officer_dashboard')
+    
+    def get_queryset(self):
+        user = self.request.user
+        if user.is_superuser:
+            return BulkPaymentPosting.objects.all()
+        if hasattr(user, 'officer_profile'):
+            return BulkPaymentPosting.objects.filter(organization=user.officer_profile.organization)
+        return BulkPaymentPosting.objects.none()
+    
+    def delete(self, request, *args, **kwargs):
+        posting = self.get_object()
+        messages.success(request, f'Bulk posting for "{posting.fee_type.name}" deleted successfully.')
+        return super().delete(request, *args, **kwargs)
+
+
 class VoidPaymentView(OfficerRequiredMixin, UpdateView):
     model = Payment
     form_class = VoidPaymentForm
@@ -1834,6 +1908,12 @@ class VoidPaymentView(OfficerRequiredMixin, UpdateView):
         if hasattr(user, 'officer_profile'):
             return user.officer_profile.can_void_payments or user.officer_profile.is_super_officer
         return False
+
+    def get_form_kwargs(self):
+        # Remove 'instance' from kwargs since VoidPaymentForm is a regular Form, not ModelForm
+        kwargs = super().get_form_kwargs()
+        kwargs.pop('instance', None)
+        return kwargs
 
     def get_object(self):
         user = self.request.user
@@ -2413,23 +2493,29 @@ class PaymentListView(LoginRequiredMixin, ListView):
     def get_queryset(self):
         user = self.request.user
         
-        # Students see only their own payments
-        if hasattr(user, 'student_profile'):
-            return Payment.objects.filter(
-                student=user.student_profile
-            ).select_related('student', 'organization', 'fee_type', 'processed_by').order_by('-created_at')
-        
-        # Officers and admins
-        queryset = Payment.objects.select_related(
-            'student', 'organization', 'fee_type', 'processed_by'
-        ).all()
-        
-        # Filter by organization if officer (using organization hierarchy)
+        # Officers and admins see organization payments (transaction history)
+        # Check officer_profile FIRST since officers are also students
         if hasattr(user, 'officer_profile'):
             # Get all accessible organizations (including child orgs)
             accessible_org_ids = user.officer_profile.organization.get_accessible_organization_ids()
-            queryset = queryset.filter(organization_id__in=accessible_org_ids)
+            queryset = Payment.objects.select_related(
+                'student', 'organization', 'fee_type', 'processed_by'
+            ).filter(organization_id__in=accessible_org_ids)
+        elif user.is_staff or user.is_superuser:
+            # Staff/superuser see all payments
+            queryset = Payment.objects.select_related(
+                'student', 'organization', 'fee_type', 'processed_by'
+            ).all()
+        elif hasattr(user, 'student_profile'):
+            # Regular students (not officers) see only their own payments
+            return Payment.objects.filter(
+                student=user.student_profile
+            ).select_related('student', 'organization', 'fee_type', 'processed_by').order_by('-created_at')
+        else:
+            # No profile - return empty
+            return Payment.objects.none()
         
+        # Apply filters for officers/admins
         status_filter = self.request.GET.get('status')
         if status_filter:
             queryset = queryset.filter(status=status_filter)
@@ -2474,7 +2560,8 @@ class PaymentListView(LoginRequiredMixin, ListView):
             ('2nd Semester', '2nd Semester'),
         ]
         context['is_super_officer'] = hasattr(self.request.user, 'officer_profile') and self.request.user.officer_profile.is_super_officer
-        if context['is_super_officer']:
+        if hasattr(self.request.user, 'officer_profile'):
+            context['officer'] = self.request.user.officer_profile
             context['organization'] = self.request.user.officer_profile.organization
         
         # Calculate stats for the stats cards (use get_queryset to get unsliced queryset)

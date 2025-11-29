@@ -5,7 +5,7 @@
 {% block content %}
 <div class="up-card overflow-hidden">
     <!-- Compact Header with Gradient -->
-    <div class="{% if payment.is_void %}bg-gradient-to-r from-red-600 to-red-500{% else %}bg-gradient-to-r from-emerald-600 via-teal-500 to-orange-500{% endif %} px-4 py-3">
+    <div class="{% if payment.is_void %}bg-gradient-to-r from-red-600 to-red-500{% else %}page-header-gradient{% endif %} px-4 py-3">
         <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
             <div class="d-flex align-items-center gap-2">
                 <a href="{% url 'payment_list' %}" class="text-white text-decoration-none opacity-75 hover:opacity-100">

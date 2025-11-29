@@ -23,17 +23,41 @@
             theme: {
                 extend: {
                     colors: {
+                        primary: {
+                            50: '#e6f9ef',
+                            100: '#c6f0d6',
+                            200: '#9de5b8',
+                            300: '#6dd899',
+                            400: '#3cc268',
+                            500: '#22c370',
+                            600: '#1da960',
+                            700: '#198754',
+                            800: '#156b44',
+                            900: '#0f4f32',
+                        },
+                        secondary: {
+                            50: '#fff8e6',
+                            100: '#fef0c3',
+                            200: '#fde68a',
+                            300: '#fcd34d',
+                            400: '#fdbb2d',
+                            500: '#f59e0b',
+                            600: '#e5a820',
+                            700: '#d4a017',
+                            800: '#b45309',
+                            900: '#78350f',
+                        },
                         emerald: {
-                            50: '#ecfdf5',
-                            100: '#d1fae5',
-                            200: '#a7f3d0',
-                            300: '#6ee7b7',
-                            400: '#34d399',
-                            500: '#10b981',
-                            600: '#059669',
-                            700: '#047857',
-                            800: '#065f46',
-                            900: '#064e3b',
+                            50: '#e6f9ef',
+                            100: '#c6f0d6',
+                            200: '#9de5b8',
+                            300: '#6dd899',
+                            400: '#3cc268',
+                            500: '#22c370',
+                            600: '#1da960',
+                            700: '#198754',
+                            800: '#156b44',
+                            900: '#0f4f32',
                         }
                     }
                 }
@@ -129,9 +153,13 @@
                     <div class="up-dropdown" id="userDropdown">
                         <button type="button" class="up-btn up-btn-ghost flex items-center gap-2" onclick="toggleDropdown('userDropdownMenu')">
                             <div class="up-avatar up-avatar-sm">
-                                <span class="up-avatar-initials">{{ user.username|slice:":2"|upper }}</span>
+                                {% if user.user_profile and user.user_profile.profile_picture %}
+                                    <img src="{{ user.user_profile.profile_picture }}" alt="{{ user.username }}" class="w-full h-full object-cover rounded-full">
+                                {% else %}
+                                    <span class="up-avatar-initials">{{ user.username|slice:":2"|upper }}</span>
+                                {% endif %}
                             </div>
-                            <span class="hidden lg:inline text-sm font-medium text-gray-700">{{ user.username }}</span>
+                            <span class="hidden lg:inline text-sm font-medium text-gray-700">{{ user.get_full_name|default:user.username }}</span>
                             <i data-lucide="chevron-down" class="w-4 h-4 text-gray-400"></i>
                         </button>
                         <div class="up-dropdown-menu" id="userDropdownMenu">

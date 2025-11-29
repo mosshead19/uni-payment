@@ -6,12 +6,14 @@
 <div class="space-y-6">
     
     <!-- Officer Info Card -->
-    <div class="bg-white rounded-lg border border-gray-200 p-6 md:p-8">
+    <div class="bg-green-50 rounded-lg border border-green-200 p-6 md:p-8">
         <div class="flex flex-col md:flex-row md:items-start md:justify-between gap-4 mb-6">
             <div>
                 <h2 class="text-2xl font-semibold text-gray-900 mb-2">{{ officer.get_full_name|default:user.get_full_name }}</h2>
-                <p class="text-gray-600">{{ officer.position|default:"Officer" }}</p>
-                <p class="text-gray-600">{{ officer.organization.name }}</p>
+                <div class="space-y-1 text-gray-600">
+                    <p><span class="font-medium text-gray-700">Role:</span> {{ officer.role|default:"Officer" }}</p>
+                    <p><span class="font-medium text-gray-700">Organization:</span> {{ officer.organization.name }}</p>
+                </div>
                 {% if officer.is_super_officer %}
                 <span class="inline-flex items-center gap-1 mt-2 px-2 py-1 bg-amber-100 text-amber-700 rounded-full text-xs font-medium">
                     <i data-lucide="shield" class="w-3 h-3"></i>
@@ -38,79 +40,79 @@
         <!-- System Status -->
         <div class="flex items-center gap-2 mb-6">
             <div class="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
-            <span class="text-gray-700 text-sm">System Status: <span class="font-medium">Online & Active</span></span>
+            <span class="text-gray-600 text-sm">System Status: <span class="font-medium text-gray-900">Online & Active</span></span>
         </div>
+    </div>
 
-        <!-- Quick Stats Grid -->
-        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-            <div class="bg-gray-50 rounded-lg p-4 border border-gray-100">
-                <div class="flex items-center gap-3">
-                    <div class="p-2 bg-orange-100 rounded-lg">
-                        <i data-lucide="clock" class="w-5 h-5 text-orange-600"></i>
-                    </div>
-                    <div>
-                        <p class="text-sm text-gray-600">Pending Requests</p>
-                        <p class="text-xl font-semibold text-gray-900">{{ pending_requests|length }}</p>
-                    </div>
+    <!-- Quick Stats Grid - 2 columns on mobile, 4 on desktop -->
+    <div class="grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4">
+        <div class="bg-gray-50 rounded-lg p-3 md:p-4 border border-gray-100">
+            <div class="flex items-center gap-2 md:gap-3">
+                <div class="p-1.5 md:p-2 bg-orange-100 rounded-lg flex-shrink-0">
+                    <i data-lucide="clock" class="w-4 h-4 md:w-5 md:h-5 text-orange-600"></i>
+                </div>
+                <div class="min-w-0">
+                    <p class="text-xs md:text-sm text-gray-600 truncate">Pending</p>
+                    <p class="text-lg md:text-xl font-semibold text-gray-900">{{ pending_requests|length }}</p>
                 </div>
             </div>
-            <div class="bg-gray-50 rounded-lg p-4 border border-gray-100">
-                <div class="flex items-center gap-3">
-                    <div class="p-2 bg-green-100 rounded-lg">
-                        <i data-lucide="dollar-sign" class="w-5 h-5 text-green-600"></i>
-                    </div>
-                    <div>
-                        <p class="text-sm text-gray-600">Total Collected</p>
-                        <p class="text-xl font-semibold text-gray-900">₱{{ total_collected_system|floatformat:0 }}</p>
-                    </div>
+        </div>
+        <div class="bg-gray-50 rounded-lg p-3 md:p-4 border border-gray-100">
+            <div class="flex items-center gap-2 md:gap-3">
+                <div class="p-1.5 md:p-2 bg-green-100 rounded-lg flex-shrink-0">
+                    <i data-lucide="dollar-sign" class="w-4 h-4 md:w-5 md:h-5 text-green-600"></i>
+                </div>
+                <div class="min-w-0">
+                    <p class="text-xs md:text-sm text-gray-600 truncate">Total</p>
+                    <p class="text-lg md:text-xl font-semibold text-gray-900">₱{{ total_collected_system|floatformat:0 }}</p>
                 </div>
             </div>
-            <div class="bg-gray-50 rounded-lg p-4 border border-gray-100">
-                <div class="flex items-center gap-3">
-                    <div class="p-2 bg-blue-100 rounded-lg">
-                        <i data-lucide="activity" class="w-5 h-5 text-blue-600"></i>
-                    </div>
-                    <div>
-                        <p class="text-sm text-gray-600">Today's Collection</p>
-                        <p class="text-xl font-semibold text-gray-900">₱{{ today_collections|floatformat:0 }}</p>
-                    </div>
+        </div>
+        <div class="bg-gray-50 rounded-lg p-3 md:p-4 border border-gray-100">
+            <div class="flex items-center gap-2 md:gap-3">
+                <div class="p-1.5 md:p-2 bg-blue-100 rounded-lg flex-shrink-0">
+                    <i data-lucide="activity" class="w-4 h-4 md:w-5 md:h-5 text-blue-600"></i>
+                </div>
+                <div class="min-w-0">
+                    <p class="text-xs md:text-sm text-gray-600 truncate">Today</p>
+                    <p class="text-lg md:text-xl font-semibold text-gray-900">₱{{ today_collections|floatformat:0 }}</p>
                 </div>
             </div>
-            <div class="bg-gray-50 rounded-lg p-4 border border-gray-100">
-                <div class="flex items-center gap-3">
-                    <div class="p-2 bg-purple-100 rounded-lg">
-                        <i data-lucide="shield" class="w-5 h-5 text-purple-600"></i>
-                    </div>
-                    <div>
-                        <p class="text-sm text-gray-600">Access Level</p>
-                        <p class="text-xl font-semibold text-gray-900">
-                            {% if officer and officer.can_void_payments %}Full{% elif officer and officer.can_process_payments %}Process{% else %}View{% endif %}
-                        </p>
-                    </div>
+        </div>
+        <div class="bg-gray-50 rounded-lg p-3 md:p-4 border border-gray-100">
+            <div class="flex items-center gap-2 md:gap-3">
+                <div class="p-1.5 md:p-2 bg-purple-100 rounded-lg flex-shrink-0">
+                    <i data-lucide="shield" class="w-4 h-4 md:w-5 md:h-5 text-purple-600"></i>
+                </div>
+                <div class="min-w-0">
+                    <p class="text-xs md:text-sm text-gray-600 truncate">Access</p>
+                    <p class="text-lg md:text-xl font-semibold text-gray-900">
+                        {% if officer and officer.can_void_payments %}Full{% elif officer and officer.can_process_payments %}Process{% else %}View{% endif %}
+                    </p>
                 </div>
             </div>
         </div>
     </div>
 
     <!-- Features Card -->
-    <div class="bg-white rounded-lg border border-gray-200 p-6">
-        <h3 class="text-lg font-semibold text-gray-900 mb-4">Features</h3>
-        <div class="flex gap-2 flex-wrap">
-            <button id="qr-tab-btn" onclick="showFeature('qr')" class="feature-tab px-4 py-2 bg-emerald-600 text-white rounded-lg font-medium transition-colors">
-                <i data-lucide="camera" class="w-4 h-4 inline mr-1"></i>
-                QR Scanner
+    <div class="bg-white rounded-lg border border-gray-200 p-4 md:p-6">
+        <h3 class="text-lg font-semibold text-gray-900 mb-3 md:mb-4">Features</h3>
+        <div class="grid grid-cols-2 md:flex md:flex-wrap gap-2">
+            <button id="qr-tab-btn" onclick="showFeature('qr')" class="feature-tab flex items-center justify-center gap-1.5 px-3 md:px-4 py-2.5 md:py-2 btn-gradient rounded-lg font-medium transition-colors text-sm md:text-base">
+                <i data-lucide="camera" class="w-4 h-4"></i>
+                <span>QR Scanner</span>
             </button>
-            <button id="post-tab-btn" onclick="showFeature('post')" class="feature-tab px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 font-medium transition-colors">
-                <i data-lucide="send" class="w-4 h-4 inline mr-1"></i>
-                Post Payment
+            <button id="post-tab-btn" onclick="showFeature('post')" class="feature-tab flex items-center justify-center gap-1.5 px-3 md:px-4 py-2.5 md:py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 font-medium transition-colors text-sm md:text-base">
+                <i data-lucide="send" class="w-4 h-4"></i>
+                <span>Post Payment</span>
             </button>
-            <button id="posted-tab-btn" onclick="showFeature('posted')" class="feature-tab px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 font-medium transition-colors">
-                <i data-lucide="file-check" class="w-4 h-4 inline mr-1"></i>
-                Posted Payments
+            <button id="posted-tab-btn" onclick="showFeature('posted')" class="feature-tab flex items-center justify-center gap-1.5 px-3 md:px-4 py-2.5 md:py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 font-medium transition-colors text-sm md:text-base">
+                <i data-lucide="file-check" class="w-4 h-4"></i>
+                <span>Posted</span>
             </button>
-            <button id="transactions-tab-btn" onclick="showFeature('transactions')" class="feature-tab px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 font-medium transition-colors">
-                <i data-lucide="list" class="w-4 h-4 inline mr-1"></i>
-                Transactions
+            <button id="transactions-tab-btn" onclick="showFeature('transactions')" class="feature-tab flex items-center justify-center gap-1.5 px-3 md:px-4 py-2.5 md:py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 font-medium transition-colors text-sm md:text-base">
+                <i data-lucide="list" class="w-4 h-4"></i>
+                <span>Transactions</span>
             </button>
         </div>
     </div>
@@ -133,7 +135,7 @@
                     </div>
                     <!-- Action -->
                     <a href="{% url 'officer_scan_qr' %}" 
-                       class="w-full flex items-center justify-center gap-2 px-4 py-3 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 transition-colors font-medium">
+                       class="w-full flex items-center justify-center gap-2 px-4 py-3 btn-gradient rounded-lg transition-colors font-medium">
                         <i data-lucide="camera" class="w-5 h-5"></i>
                         Start Scan
                     </a>
@@ -152,7 +154,7 @@
                 <p class="text-gray-600 mb-6">Create payment requests for all eligible students in bulk</p>
             </div>
             <a href="{% url 'officer_post_bulk_payment' %}" 
-               class="w-full flex items-center justify-center gap-2 px-4 py-3 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 transition-colors font-medium">
+               class="w-full flex items-center justify-center gap-2 px-4 py-3 btn-gradient rounded-lg transition-colors font-medium">
                 <i data-lucide="send" class="w-5 h-5"></i>
                 Post Bulk Payment
             </a>
@@ -161,10 +163,12 @@
 
     <div id="posted-feature" class="feature-content hidden">
         <div class="bg-white rounded-lg border border-gray-200">
-            <div class="p-6 border-b border-gray-200">
+            <div class="p-4 md:p-6 border-b border-gray-200">
                 <h3 class="text-lg font-semibold text-gray-900">Posted Payments</h3>
             </div>
-            <div class="overflow-x-auto overflow-y-visible">
+            
+            <!-- Desktop Table View -->
+            <div class="hidden md:block overflow-x-auto">
                 <table class="w-full">
                     <thead class="bg-gray-50 border-b border-gray-200">
                         <tr>
@@ -190,15 +194,20 @@
                                             <i data-lucide="more-vertical" class="w-5 h-5"></i>
                                         </button>
                                         <div data-dropdown-menu class="hidden absolute right-0 mt-1 w-40 bg-white rounded-lg shadow-lg border border-gray-200 z-50 py-1">
-                                            <a href="#" 
+                                            <a href="{% url 'bulk_posting_detail' posting.pk %}" 
                                                class="flex items-center gap-2 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50">
                                                 <i data-lucide="eye" class="w-4 h-4"></i>
                                                 View Details
                                             </a>
-                                            <a href="#" 
-                                               class="flex items-center gap-2 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50">
-                                                <i data-lucide="users" class="w-4 h-4"></i>
-                                                View Students
+                                            <a href="{% url 'feetype_update' posting.fee_type.pk %}" 
+                                               class="flex items-center gap-2 px-4 py-2 text-sm text-blue-600 hover:bg-blue-50">
+                                                <i data-lucide="edit" class="w-4 h-4"></i>
+                                                Edit Fee Type
+                                            </a>
+                                            <a href="{% url 'bulk_posting_delete' posting.pk %}" 
+                                               class="flex items-center gap-2 px-4 py-2 text-sm text-red-600 hover:bg-red-50">
+                                                <i data-lucide="trash-2" class="w-4 h-4"></i>
+                                                Delete
                                             </a>
                                         </div>
                                     </div>
@@ -220,23 +229,68 @@
                     </tbody>
                 </table>
             </div>
+            
+            <!-- Mobile Card View -->
+            <div class="md:hidden divide-y divide-gray-200">
+                {% if posted_requests %}
+                    {% for posting in posted_requests %}
+                    <div class="p-4">
+                        <div class="flex items-start justify-between mb-2">
+                            <div>
+                                <p class="font-medium text-gray-900">{{ posting.fee_type.name }}</p>
+                                <p class="text-lg font-semibold text-emerald-600">₱{{ posting.amount|floatformat:2 }}</p>
+                            </div>
+                            <div class="relative">
+                                <button type="button" data-dropdown-toggle 
+                                        class="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-full transition-colors">
+                                    <i data-lucide="more-vertical" class="w-5 h-5"></i>
+                                </button>
+                                <div data-dropdown-menu class="hidden absolute right-0 mt-1 w-40 bg-white rounded-lg shadow-lg border border-gray-200 z-50 py-1">
+                                    <a href="{% url 'bulk_posting_detail' posting.pk %}" class="flex items-center gap-2 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50">
+                                        <i data-lucide="eye" class="w-4 h-4"></i>View Details
+                                    </a>
+                                    <a href="{% url 'feetype_update' posting.fee_type.pk %}" class="flex items-center gap-2 px-4 py-2 text-sm text-blue-600 hover:bg-blue-50">
+                                        <i data-lucide="edit" class="w-4 h-4"></i>Edit Fee Type
+                                    </a>
+                                    <a href="{% url 'bulk_posting_delete' posting.pk %}" class="flex items-center gap-2 px-4 py-2 text-sm text-red-600 hover:bg-red-50">
+                                        <i data-lucide="trash-2" class="w-4 h-4"></i>Delete
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="text-sm text-gray-500">
+                            <p>{{ posting.created_at|date:"M d, Y" }} • {{ posting.posted_by.get_full_name }}</p>
+                        </div>
+                    </div>
+                    {% endfor %}
+                {% else %}
+                    <div class="p-8 text-center">
+                        <div class="w-12 h-12 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-3">
+                            <i data-lucide="inbox" class="w-6 h-6 text-gray-400"></i>
+                        </div>
+                        <p class="text-gray-600">No posted payment requests</p>
+                    </div>
+                {% endif %}
+            </div>
         </div>
     </div>
 
     <div id="transactions-feature" class="feature-content hidden">
         <div class="bg-white rounded-lg border border-gray-200">
-            <div class="p-6 border-b border-gray-200 flex items-center justify-between">
+            <div class="p-4 md:p-6 border-b border-gray-200 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
                 <div>
                     <h3 class="text-lg font-semibold text-gray-900">Recent Transactions</h3>
                     <p class="text-gray-600 text-sm">Your processed payments</p>
                 </div>
                 <a href="{% url 'payment_list' %}" 
-                   class="inline-flex items-center gap-2 px-4 py-2 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 transition-colors font-medium text-sm">
+                   class="inline-flex items-center justify-center gap-2 px-4 py-2 btn-gradient rounded-lg transition-colors font-medium text-sm">
                     <i data-lucide="list" class="w-4 h-4"></i>
                     View All Transactions
                 </a>
             </div>
-            <div class="overflow-x-auto overflow-y-visible">
+            
+            <!-- Desktop Table View -->
+            <div class="hidden md:block overflow-x-auto overflow-y-visible">
                 <table class="w-full">
                     <thead class="bg-gray-50 border-b border-gray-200">
                         <tr>
@@ -292,12 +346,14 @@
                                                 <i data-lucide="eye" class="w-4 h-4"></i>
                                                 View Details
                                             </a>
-                                            {% if not payment.is_void and officer.can_void_payments %}
-                                            <a href="{% url 'officer_void_payment' payment.id %}" 
-                                               class="flex items-center gap-2 px-4 py-2 text-sm text-red-600 hover:bg-red-50">
-                                                <i data-lucide="x-circle" class="w-4 h-4"></i>
-                                                Void Payment
-                                            </a>
+                                            {% if not payment.is_void %}
+                                                {% if user.is_superuser or officer.is_super_officer or officer.can_void_payments %}
+                                                <a href="{% url 'officer_void_payment' payment.id %}" 
+                                                   class="flex items-center gap-2 px-4 py-2 text-sm text-red-600 hover:bg-red-50">
+                                                    <i data-lucide="x-circle" class="w-4 h-4"></i>
+                                                    Void Payment
+                                                </a>
+                                                {% endif %}
                                             {% endif %}
                                         </div>
                                     </div>
@@ -313,7 +369,7 @@
                                         </div>
                                         <p class="text-gray-600 mb-4">No recent transactions</p>
                                         <a href="{% url 'payment_list' %}" 
-                                           class="inline-flex items-center gap-2 px-4 py-2 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 transition-colors font-medium text-sm">
+                                           class="inline-flex items-center gap-2 px-4 py-2 btn-gradient rounded-lg transition-colors font-medium text-sm">
                                             <i data-lucide="list" class="w-4 h-4"></i>
                                             View All Transactions
                                         </a>
@@ -323,6 +379,74 @@
                         {% endif %}
                     </tbody>
                 </table>
+            </div>
+            
+            <!-- Mobile Card View -->
+            <div class="md:hidden">
+                {% if recent_payments %}
+                    <div class="divide-y divide-gray-200">
+                        {% for payment in recent_payments %}
+                        <div class="p-4">
+                            <div class="flex items-start justify-between mb-2">
+                                <div class="flex-1 min-w-0">
+                                    <p class="text-gray-900 font-medium truncate">{{ payment.student.get_full_name }}</p>
+                                    <p class="text-gray-500 text-sm">{{ payment.student.student_id_number }}</p>
+                                </div>
+                                {% if payment.is_void %}
+                                    <span class="inline-flex items-center gap-1 px-2 py-1 bg-red-50 text-red-700 rounded-full text-xs font-medium">
+                                        <i data-lucide="x-circle" class="w-3 h-3"></i>
+                                        Voided
+                                    </span>
+                                {% else %}
+                                    <span class="inline-flex items-center gap-1 px-2 py-1 bg-green-50 text-green-700 rounded-full text-xs font-medium">
+                                        <i data-lucide="check-circle" class="w-3 h-3"></i>
+                                        Completed
+                                    </span>
+                                {% endif %}
+                            </div>
+                            <div class="flex items-center justify-between text-sm mb-2">
+                                <span class="text-gray-500">OR: <span class="font-mono text-gray-700">{{ payment.or_number }}</span></span>
+                                <span class="text-gray-900 font-semibold">₱{{ payment.amount|floatformat:2 }}</span>
+                            </div>
+                            <div class="flex items-center justify-between">
+                                <div class="text-xs text-gray-500">
+                                    {% if payment.processed_by %}
+                                        {{ payment.processed_by.get_full_name }} · {{ payment.created_at|date:"M d, g:i A" }}
+                                    {% else %}
+                                        {{ payment.created_at|date:"M d, g:i A" }}
+                                    {% endif %}
+                                </div>
+                                <div class="flex items-center gap-2">
+                                    <a href="{% url 'payment_detail' payment.id %}" 
+                                       class="p-1.5 text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded">
+                                        <i data-lucide="eye" class="w-4 h-4"></i>
+                                    </a>
+                                    {% if not payment.is_void %}
+                                        {% if user.is_superuser or officer.is_super_officer or officer.can_void_payments %}
+                                        <a href="{% url 'officer_void_payment' payment.id %}" 
+                                           class="p-1.5 text-red-500 hover:text-red-700 hover:bg-red-50 rounded">
+                                            <i data-lucide="x-circle" class="w-4 h-4"></i>
+                                        </a>
+                                        {% endif %}
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <div class="p-8 text-center">
+                        <div class="w-12 h-12 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-3">
+                            <i data-lucide="inbox" class="w-6 h-6 text-gray-400"></i>
+                        </div>
+                        <p class="text-gray-600 mb-4">No recent transactions</p>
+                        <a href="{% url 'payment_list' %}" 
+                           class="inline-flex items-center gap-2 px-4 py-2 btn-gradient rounded-lg transition-colors font-medium text-sm">
+                            <i data-lucide="list" class="w-4 h-4"></i>
+                            View All
+                        </a>
+                    </div>
+                {% endif %}
             </div>
             {% if recent_payments %}
             <div class="p-4 bg-gray-50 border-t border-gray-200 text-center">
@@ -347,7 +471,7 @@
         
         // Reset all tab buttons
         document.querySelectorAll('.feature-tab').forEach(btn => {
-            btn.classList.remove('bg-emerald-600', 'text-white');
+            btn.classList.remove('btn-gradient');
             btn.classList.add('bg-gray-100', 'text-gray-700');
         });
         
@@ -357,7 +481,7 @@
         // Activate selected tab button
         const activeBtn = document.getElementById(feature + '-tab-btn');
         activeBtn.classList.remove('bg-gray-100', 'text-gray-700');
-        activeBtn.classList.add('bg-emerald-600', 'text-white');
+        activeBtn.classList.add('btn-gradient');
         
         // Re-initialize icons
         setTimeout(() => lucide.createIcons(), 50);
