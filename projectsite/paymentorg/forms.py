@@ -647,11 +647,21 @@ class VoidPaymentForm(forms.Form):
 class StudentForm(forms.ModelForm):
     class Meta:
         model = Student
-        fields = ['year_level', 'phone_number', 'middle_name']
+        fields = ['middle_name', 'phone_number', 'year_level']
         widgets = {
-            'year_level': forms.NumberInput(attrs={'class': 'form-control'}),
-            'phone_number': forms.TextInput(attrs={'class': 'form-control'}),
-            'middle_name': forms.TextInput(attrs={'class': 'form-control'}),
+            'middle_name': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Enter your middle name'}),
+            'phone_number': forms.TextInput(attrs={'class': 'form-control', 'placeholder': '09XX-XXX-XXXX'}),
+            'year_level': forms.NumberInput(attrs={'class': 'form-control', 'min': 1, 'max': 5}),
+        }
+        labels = {
+            'middle_name': 'Middle Name',
+            'phone_number': 'Phone Number',
+            'year_level': 'Year Level',
+        }
+        help_texts = {
+            'middle_name': 'Your middle name (optional)',
+            'phone_number': 'Format: 09XX-XXX-XXXX',
+            'year_level': 'Your current year level (1-5)',
         }
 
 class OfficerForm(forms.ModelForm):

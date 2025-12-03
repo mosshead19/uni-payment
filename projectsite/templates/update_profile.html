@@ -154,15 +154,41 @@
                             <p class="text-gray-900 font-medium">{{ user.student_profile.student_id_number }}</p>
                         </div>
                         <div class="space-y-1">
-                            <p class="text-xs text-gray-500 uppercase tracking-wide font-medium">Program</p>
-                            <p class="text-gray-900 font-medium">{{ user.student_profile.course.program_type }}</p>
+                            <p class="text-xs text-gray-500 uppercase tracking-wide font-medium">First Name</p>
+                            <p class="text-gray-900 font-medium">{{ user.first_name|default:"Not set" }}</p>
                         </div>
-                        {% if user.student_profile.year_level %}
+                        <div class="space-y-1">
+                            <p class="text-xs text-gray-500 uppercase tracking-wide font-medium">Last Name</p>
+                            <p class="text-gray-900 font-medium">{{ user.last_name|default:"Not set" }}</p>
+                        </div>
+                        <div class="space-y-1">
+                            <p class="text-xs text-gray-500 uppercase tracking-wide font-medium">Middle Name</p>
+                            <p class="text-gray-900 font-medium">{{ user.student_profile.middle_name|default:"Not set" }}</p>
+                        </div>
+                        <div class="space-y-1">
+                            <p class="text-xs text-gray-500 uppercase tracking-wide font-medium">Email Address</p>
+                            <p class="text-gray-900 font-medium">{{ user.email }}</p>
+                        </div>
+                        <div class="space-y-1">
+                            <p class="text-xs text-gray-500 uppercase tracking-wide font-medium">Phone Number</p>
+                            <p class="text-gray-900 font-medium">{{ user.student_profile.phone_number|default:"Not set" }}</p>
+                        </div>
+                        <div class="space-y-1">
+                            <p class="text-xs text-gray-500 uppercase tracking-wide font-medium">Course/Program</p>
+                            <p class="text-gray-900 font-medium">{{ user.student_profile.course.name|default:"Not set" }}</p>
+                        </div>
+                        <div class="space-y-1">
+                            <p class="text-xs text-gray-500 uppercase tracking-wide font-medium">Program Type</p>
+                            <p class="text-gray-900 font-medium">{{ user.student_profile.course.program_type|default:"Not set" }}</p>
+                        </div>
                         <div class="space-y-1">
                             <p class="text-xs text-gray-500 uppercase tracking-wide font-medium">Year Level</p>
-                            <p class="text-gray-900 font-medium">Year {{ user.student_profile.year_level }}</p>
+                            <p class="text-gray-900 font-medium">{% if user.student_profile.year_level %}Year {{ user.student_profile.year_level }}{% else %}Not set{% endif %}</p>
                         </div>
-                        {% endif %}
+                        <div class="space-y-1">
+                            <p class="text-xs text-gray-500 uppercase tracking-wide font-medium">College/Department</p>
+                            <p class="text-gray-900 font-medium">{{ user.student_profile.course.college.name|default:"Not set" }}</p>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -177,7 +203,10 @@
                                 <div class="w-8 h-8 bg-green-100 rounded-lg flex items-center justify-center">
                                     <i data-lucide="edit-3" class="w-4 h-4 text-green-600"></i>
                                 </div>
-                                <h3 class="font-semibold text-gray-900">Edit Profile</h3>
+                                <div>
+                                    <h3 class="font-semibold text-gray-900">Edit Profile</h3>
+                                    <p class="text-xs text-gray-500">Only certain fields can be modified</p>
+                                </div>
                             </div>
                             <button type="button" id="close-edit-btn" class="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg transition-colors">
                                 <i data-lucide="x" class="w-5 h-5"></i>
@@ -187,6 +216,38 @@
                     <div class="p-5">
                         <form method="post" id="profileForm" class="space-y-4">
                             {% csrf_token %}
+                            
+                            {% if user.student_profile %}
+                            <!-- Read-only Student Info Display -->
+                            <div class="bg-gray-50 rounded-lg p-4 mb-4">
+                                <p class="text-xs text-gray-500 uppercase tracking-wide font-medium mb-3">Read-Only Information</p>
+                                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 text-sm">
+                                    <div>
+                                        <span class="text-gray-500">Student ID:</span>
+                                        <span class="text-gray-900 font-medium ml-1">{{ user.student_profile.student_id_number }}</span>
+                                    </div>
+                                    <div>
+                                        <span class="text-gray-500">Name:</span>
+                                        <span class="text-gray-900 font-medium ml-1">{{ user.get_full_name }}</span>
+                                    </div>
+                                    <div>
+                                        <span class="text-gray-500">Email:</span>
+                                        <span class="text-gray-900 font-medium ml-1">{{ user.email }}</span>
+                                    </div>
+                                    <div>
+                                        <span class="text-gray-500">Course:</span>
+                                        <span class="text-gray-900 font-medium ml-1">{{ user.student_profile.course.name|default:"Not set" }}</span>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Editable Fields Label -->
+                            <div class="flex items-center gap-2 mb-2">
+                                <div class="w-1.5 h-1.5 bg-green-500 rounded-full"></div>
+                                <p class="text-xs text-gray-600 font-medium uppercase tracking-wide">Editable Fields</p>
+                            </div>
+                            {% endif %}
+                            
                             {% for field in form %}
                             <div>
                                 <label for="{{ field.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-1.5">
