@@ -187,12 +187,9 @@ SOCIALACCOUNT_AUTO_SIGNUP = True
 SENDGRID_API_KEY = os.environ.get('SENDGRID_API_KEY', '')
 
 if SENDGRID_API_KEY:
-    EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
-    EMAIL_HOST = 'smtp.sendgrid.net'
-    EMAIL_PORT = 587
-    EMAIL_USE_TLS = True
-    EMAIL_HOST_USER = 'apikey'
-    EMAIL_HOST_PASSWORD = SENDGRID_API_KEY
+    # Use SendGrid Web API backend (works on PythonAnywhere free tier)
+    EMAIL_BACKEND = 'sendgrid_backend.SendgridBackend'
+    SENDGRID_SANDBOX_MODE_IN_DEBUG = False
 else:
     # Fallback to console for development
     EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
