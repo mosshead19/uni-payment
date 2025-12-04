@@ -1498,6 +1498,18 @@ class OfficerDashboardView(OfficerRequiredMixin, TemplateView):
                 status='COMPLETED',
             ).select_related('student', 'processed_by', 'receipt').order_by('-created_at')[:20]
             
+            # Get recent activity logs for this organization
+            # Filter by: officers in this org, or payments/requests belonging to this org
+            org_officer_user_ids = Officer.objects.filter(
+                organization=organization
+            ).values_list('user_id', flat=True)
+            
+            recent_activity_logs = ActivityLog.objects.filter(
+                Q(user_id__in=org_officer_user_ids) |
+                Q(payment__organization=organization) |
+                Q(payment_request__organization=organization)
+            ).select_related('user', 'payment', 'payment_request').order_by('-created_at')[:15]
+            
             context.update({
                 'is_superuser_only': False,
                 'officer': officer,
@@ -1507,6 +1519,7 @@ class OfficerDashboardView(OfficerRequiredMixin, TemplateView):
                 'today_collections': organization.get_today_collection(),
                 'total_collected_system': organization.get_total_collected(),
                 'recent_payments': recent_payments,
+                'recent_activity_logs': recent_activity_logs,
             })
         return context
 
@@ -1855,8 +1868,7 @@ class PostBulkPaymentView(OfficerRequiredMixin, View):
             
             messages.success(
                 request,
-                f"Bulk payment posted successfully! "
-                f"Created {created_count} payment request(s) for {fee_type_name}. "
+                f"Payment posted successfully for {fee_type_name}. "
                 f"Students can now generate QR codes from their dashboard to pay."
             )
             

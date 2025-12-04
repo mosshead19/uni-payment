@@ -107,6 +107,10 @@
                 <i data-lucide="list" class="w-4 h-4"></i>
                 <span>Transactions</span>
             </button>
+            <button id="activity-tab-btn" onclick="showFeature('activity')" class="feature-tab flex items-center justify-center gap-1.5 px-3 md:px-4 py-2.5 md:py-2 bg-gray-100 text-gray-700 rounded-lg font-medium transition-all duration-200 text-sm md:text-base hover:bg-green-400 hover:text-white border border-transparent">
+                <i data-lucide="activity" class="w-4 h-4"></i>
+                <span>Activity</span>
+            </button>
         </div>
     </div>
 
@@ -450,6 +454,100 @@
                 </a>
             </div>
             {% endif %}
+        </div>
+    </div>
+
+    <!-- Activity Log Feature -->
+    <div id="activity-feature" class="feature-content hidden">
+        <div class="bg-white rounded-lg border border-gray-200">
+            <div class="p-4 md:p-6 border-b border-gray-200">
+                <div class="flex items-center justify-between">
+                    <div class="flex items-center gap-3">
+                        <div class="p-2 bg-blue-100 rounded-lg">
+                            <i data-lucide="activity" class="w-5 h-5 text-blue-600"></i>
+                        </div>
+                        <div>
+                            <h3 class="text-lg font-semibold text-gray-900">Recent Activity</h3>
+                            <p class="text-sm text-gray-500">Officer actions in your organization</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="divide-y divide-gray-100">
+                {% if recent_activity_logs %}
+                    {% for log in recent_activity_logs %}
+                    <div class="p-4 hover:bg-gray-50 transition-colors">
+                        <div class="flex items-start gap-3">
+                            <!-- Action Icon -->
+                            <div class="flex-shrink-0 mt-0.5">
+                                {% if 'PAYMENT' in log.action or 'PROCESS' in log.action %}
+                                    <div class="w-8 h-8 bg-green-100 rounded-full flex items-center justify-center">
+                                        <i data-lucide="check-circle" class="w-4 h-4 text-green-600"></i>
+                                    </div>
+                                {% elif 'VOID' in log.action %}
+                                    <div class="w-8 h-8 bg-red-100 rounded-full flex items-center justify-center">
+                                        <i data-lucide="x-circle" class="w-4 h-4 text-red-600"></i>
+                                    </div>
+                                {% elif 'QR' in log.action or 'GENERATE' in log.action %}
+                                    <div class="w-8 h-8 bg-purple-100 rounded-full flex items-center justify-center">
+                                        <i data-lucide="qr-code" class="w-4 h-4 text-purple-600"></i>
+                                    </div>
+                                {% elif 'POST' in log.action or 'BULK' in log.action %}
+                                    <div class="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
+                                        <i data-lucide="send" class="w-4 h-4 text-blue-600"></i>
+                                    </div>
+                                {% elif 'LOGIN' in log.action %}
+                                    <div class="w-8 h-8 bg-gray-100 rounded-full flex items-center justify-center">
+                                        <i data-lucide="log-in" class="w-4 h-4 text-gray-600"></i>
+                                    </div>
+                                {% else %}
+                                    <div class="w-8 h-8 bg-gray-100 rounded-full flex items-center justify-center">
+                                        <i data-lucide="file-text" class="w-4 h-4 text-gray-600"></i>
+                                    </div>
+                                {% endif %}
+                            </div>
+                            
+                            <!-- Content -->
+                            <div class="flex-1 min-w-0">
+                                <div class="flex items-start justify-between gap-2">
+                                    <div class="min-w-0 flex-1">
+                                        <p class="text-sm font-medium text-gray-900">
+                                            {{ log.action|title }}
+                                        </p>
+                                        <p class="text-sm text-gray-600 mt-0.5 line-clamp-2">{{ log.description }}</p>
+                                    </div>
+                                    <span class="text-xs text-gray-400 whitespace-nowrap flex-shrink-0">
+                                        {{ log.created_at|timesince }} ago
+                                    </span>
+                                </div>
+                                <div class="flex items-center gap-2 mt-1.5">
+                                    <span class="text-xs text-gray-500">
+                                        {% if log.user %}
+                                            <span class="font-medium text-gray-700">{{ log.user.get_full_name|default:log.user.username }}</span>
+                                        {% else %}
+                                            <span class="text-gray-400">System</span>
+                                        {% endif %}
+                                    </span>
+                                    {% if log.payment %}
+                                        <span class="text-gray-300">•</span>
+                                        <span class="text-xs text-gray-500">{{ log.payment.or_number }}</span>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                {% else %}
+                    <div class="p-12 text-center">
+                        <div class="w-12 h-12 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-3">
+                            <i data-lucide="activity" class="w-6 h-6 text-gray-400"></i>
+                        </div>
+                        <p class="text-gray-600 text-sm">No recent activity</p>
+                        <p class="text-gray-400 text-xs mt-1">Actions will appear here as they happen</p>
+                    </div>
+                {% endif %}
+            </div>
         </div>
     </div>
 
