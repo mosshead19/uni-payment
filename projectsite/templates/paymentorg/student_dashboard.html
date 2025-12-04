@@ -5,21 +5,26 @@
 <div class="space-y-6">
     
     <!-- Hero Section - Student Info -->
-    <div class="bg-green-200 rounded-lg border border-green-400 p-6 md:p-8 shadow-md">
+    <div class="bg-green-200 rounded-lg border border-green-400 p-4 md:p-8 shadow-md">
         <div class="flex flex-col md:flex-row md:items-start md:justify-between gap-4">
-            <div>
-                <h2 class="text-2xl font-semibold text-gray-900 mb-2">Welcome back, {{ student.get_full_name }}</h2>
-                <div class="space-y-1 text-gray-700">
+            <div class="min-w-0 flex-1">
+                <h2 class="text-xl md:text-2xl font-semibold text-gray-900 mb-2">Welcome back, {{ student.get_full_name }}</h2>
+                <div class="space-y-1 text-gray-700 text-sm md:text-base">
                     <p>Student ID: <span class="font-medium text-gray-900">{{ student.student_id_number }}</span></p>
-                    <p>{{ student.course.name }} • Year {{ student.year_level }}</p>
-                    <p>{{ user.email }}</p>
+                    <p class="flex flex-wrap items-center gap-x-2">
+                        <span class="truncate">{{ student.course.name }}</span>
+                        <span class="text-gray-400 hidden sm:inline">•</span>
+                        <span class="font-medium text-gray-900 whitespace-nowrap">Year {{ student.year_level }}</span>
+                    </p>
+                    <p class="truncate">{{ user.email }}</p>
                 </div>
             </div>
             {% if user.officer_profile or user.is_superuser %}
             <a href="{% url 'officer_dashboard' %}" 
-               class="inline-flex items-center gap-2 px-4 py-2 btn-gradient rounded-lg transition-colors font-medium">
+               class="inline-flex items-center justify-center gap-2 px-4 py-2 btn-gradient rounded-lg transition-colors font-medium text-sm md:text-base flex-shrink-0">
                 <i data-lucide="repeat" class="w-4 h-4"></i>
-                Switch to Officer View
+                <span class="hidden sm:inline">Switch to Officer View</span>
+                <span class="sm:hidden">Officer View</span>
             </a>
             {% endif %}
         </div>
@@ -89,7 +94,16 @@
             <!-- Header with Filter & Search -->
             <div class="p-3 sm:p-4 border-b border-gray-200">
                 <div class="flex items-center justify-between gap-2">
-                    <h3 class="text-base sm:text-lg font-semibold text-gray-900">Organization Fees</h3>
+                    <div>
+                        <h3 class="text-base sm:text-lg font-semibold text-gray-900">Organization Fees</h3>
+                        {% if selected_academic_year or selected_semester %}
+                        <p class="text-xs text-gray-500 mt-0.5">
+                            Showing: 
+                            <span class="font-medium text-green-600">{{ selected_academic_year }}</span>
+                            {% if selected_semester %}<span class="text-gray-400 mx-1">•</span><span class="font-medium text-green-600">{{ selected_semester }}</span>{% endif %}
+                        </p>
+                        {% endif %}
+                    </div>
                     <div class="flex items-center gap-1.5 sm:gap-2 flex-shrink-0">
                         <!-- Search Toggle Button -->
                         <button type="button" id="fees-search-toggle"
@@ -120,7 +134,40 @@
                 
                 <!-- Collapsible Filter Panel -->
                 <div id="fees-filter-panel" class="hidden mt-3 pt-3 border-t border-gray-100">
-                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+                    <!-- Server-side Filters (School Year & Semester) -->
+                    <form method="get" action="" class="mb-3 pb-3 border-b border-gray-100">
+                        <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">School Year</label>
+                                <select name="academic_year" class="w-full px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent text-sm">
+                                    <option value="">All School Years</option>
+                                    {% for year in academic_year_choices %}
+                                    <option value="{{ year }}" {% if year == selected_academic_year %}selected{% endif %}>{{ year }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Semester</label>
+                                <select name="semester" class="w-full px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent text-sm">
+                                    <option value="">All Semesters</option>
+                                    <option value="1st Semester" {% if selected_semester == '1st Semester' %}selected{% endif %}>1st Semester</option>
+                                    <option value="2nd Semester" {% if selected_semester == '2nd Semester' %}selected{% endif %}>2nd Semester</option>
+                                    <option value="Summer" {% if selected_semester == 'Summer' %}selected{% endif %}>Summer</option>
+                                </select>
+                            </div>
+                            <div class="flex items-end gap-2">
+                                <button type="submit" class="flex-1 px-4 py-2 btn-gradient text-white rounded-lg transition-all font-medium text-sm shadow-sm">
+                                    Apply
+                                </button>
+                                <a href="{% url 'student_dashboard' %}" class="px-4 py-2 bg-gray-100 text-gray-600 rounded-lg hover:bg-gray-200 transition-colors text-sm">
+                                    Reset
+                                </a>
+                            </div>
+                        </div>
+                    </form>
+                    
+                    <!-- Client-side Filters (Status & Organization) -->
+                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
                         <div>
                             <label class="block text-sm font-medium text-gray-700 mb-1">Status</label>
                             <select id="fees-filter-status" class="w-full px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent text-sm">
@@ -139,18 +186,9 @@
                                 {% endfor %}
                             </select>
                         </div>
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-1">Semester</label>
-                            <select id="fees-filter-semester" class="w-full px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent text-sm">
-                                <option value="">All Semesters</option>
-                                <option value="1st Semester">1st Semester</option>
-                                <option value="2nd Semester">2nd Semester</option>
-                                <option value="Summer">Summer</option>
-                            </select>
-                        </div>
                         <div class="flex items-end gap-2">
-                            <button type="button" onclick="applyFeesFilter()" class="flex-1 px-4 py-2 btn-gradient text-white rounded-lg transition-all font-medium text-sm shadow-sm">
-                                Apply
+                            <button type="button" onclick="applyFeesFilter()" class="flex-1 px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-all font-medium text-sm shadow-sm">
+                                Filter
                             </button>
                             <button type="button" onclick="clearFeesFilter()" class="px-4 py-2 bg-gray-100 text-gray-600 rounded-lg hover:bg-gray-200 transition-colors text-sm">
                                 Clear
@@ -500,11 +538,10 @@
         }
     }
 
-    // Apply Fees Filter
+    // Apply Fees Filter (Client-side for Status and Organization)
     function applyFeesFilter() {
         const status = document.getElementById('fees-filter-status').value.toLowerCase();
         const org = document.getElementById('fees-filter-org').value.toLowerCase();
-        const semester = document.getElementById('fees-filter-semester').value.toLowerCase();
         const searchTerm = document.getElementById('fees-search-input').value.toLowerCase();
         
         // Filter desktop table rows
@@ -512,18 +549,16 @@
         tableRows.forEach(row => {
             const rowStatus = row.dataset.status || '';
             const rowOrg = (row.dataset.org || '').toLowerCase();
-            const rowSemester = (row.dataset.semester || '').toLowerCase();
             const rowFeeName = row.querySelector('.fee-name')?.textContent.toLowerCase() || '';
             const rowOrgName = row.querySelector('.fee-org')?.textContent.toLowerCase() || '';
             
             const statusMatch = !status || rowStatus === status;
             const orgMatch = !org || rowOrg.includes(org);
-            const semesterMatch = !semester || rowSemester.includes(semester.toLowerCase());
             const searchMatch = !searchTerm || 
                 rowFeeName.includes(searchTerm) || 
                 rowOrgName.includes(searchTerm);
             
-            if (statusMatch && orgMatch && semesterMatch && searchMatch) {
+            if (statusMatch && orgMatch && searchMatch) {
                 row.style.display = '';
             } else {
                 row.style.display = 'none';
@@ -535,17 +570,15 @@
         mobileCards.forEach(card => {
             const cardStatus = card.dataset.status || '';
             const cardOrg = (card.dataset.orgName || '').toLowerCase();
-            const cardSemester = (card.dataset.semester || '').toLowerCase();
             const cardFeeName = card.dataset.feeName || '';
             
             const statusMatch = !status || cardStatus === status;
             const orgMatch = !org || cardOrg.includes(org.toLowerCase());
-            const semesterMatch = !semester || cardSemester.includes(semester.toLowerCase());
             const searchMatch = !searchTerm || 
                 cardFeeName.includes(searchTerm) || 
                 cardOrg.includes(searchTerm);
             
-            if (statusMatch && orgMatch && semesterMatch && searchMatch) {
+            if (statusMatch && orgMatch && searchMatch) {
                 card.style.display = '';
             } else {
                 card.style.display = 'none';
@@ -559,11 +592,10 @@
         updateNoFeesResultsMessage();
     }
 
-    // Clear Fees Filter
+    // Clear Fees Filter (Client-side only - Status and Organization)
     function clearFeesFilter() {
         document.getElementById('fees-filter-status').value = '';
         document.getElementById('fees-filter-org').value = '';
-        document.getElementById('fees-filter-semester').value = '';
         document.getElementById('fees-search-input').value = '';
         applyFeesFilter();
     }
@@ -572,10 +604,12 @@
     function updateFeesFilterIndicator() {
         const status = document.getElementById('fees-filter-status').value;
         const org = document.getElementById('fees-filter-org').value;
-        const semester = document.getElementById('fees-filter-semester').value;
         const indicator = document.getElementById('fees-filter-indicator');
         
-        if (status || org || semester) {
+        // Also check if server-side filters are active
+        const hasServerFilters = '{{ selected_academic_year }}' || '{{ selected_semester }}';
+        
+        if (status || org || hasServerFilters) {
             indicator.classList.remove('hidden');
         } else {
             indicator.classList.add('hidden');
@@ -660,6 +694,9 @@
         if (filterToggle) {
             filterToggle.addEventListener('click', toggleFeesFilter);
         }
+        
+        // Update filter indicator on page load
+        updateFeesFilterIndicator();
     });
 
     // Dropdown functionality for 3-dot menus

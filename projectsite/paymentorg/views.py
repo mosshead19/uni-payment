@@ -1105,16 +1105,50 @@ class StudentDashboardView(StudentRequiredMixin, TemplateView):
         
         pending_payments = student.payment_requests.filter(status='PENDING').order_by('-created_at')
         
-        # Calculate statistics
-        completed_payments = student.get_completed_payments()
-        total_paid = completed_payments.aggregate(Sum('amount'))['amount__sum'] or 0
-        payments_count = completed_payments.count()
+        # Get academic year choices from all fee types
+        academic_year_choices = list(
+            FeeType.objects.values_list('academic_year', flat=True)
+            .distinct()
+            .order_by('-academic_year')
+        )
+        
+        # Get filter parameters from request
+        selected_academic_year = self.request.GET.get('academic_year', '')
+        selected_semester = self.request.GET.get('semester', '')
+        
+        # Default to most recent academic year if not specified
+        if not selected_academic_year and academic_year_choices:
+            selected_academic_year = academic_year_choices[0]
         
         # Two-tiered fee system: Get applicable fees
         applicable_fees = student.get_applicable_fees().order_by('-created_at')  # Most recently posted first
-        tier1_fees = student.get_tier1_fees()
-        tier2_fees = student.get_tier2_fees()
-        total_outstanding = student.get_total_outstanding_fees()
+        
+        # Apply academic year filter
+        if selected_academic_year:
+            applicable_fees = applicable_fees.filter(academic_year=selected_academic_year)
+        
+        # Apply semester filter
+        if selected_semester:
+            applicable_fees = applicable_fees.filter(semester=selected_semester)
+        
+        # Calculate statistics based on FILTERED fees
+        completed_payments = student.get_completed_payments()
+        
+        # Filter completed payments by the same criteria
+        filtered_completed_payments = completed_payments
+        if selected_academic_year:
+            filtered_completed_payments = filtered_completed_payments.filter(fee_type__academic_year=selected_academic_year)
+        if selected_semester:
+            filtered_completed_payments = filtered_completed_payments.filter(fee_type__semester=selected_semester)
+        
+        total_paid = filtered_completed_payments.aggregate(Sum('amount'))['amount__sum'] or 0
+        payments_count = filtered_completed_payments.count()
+        
+        # Calculate outstanding for filtered fees
+        total_outstanding = 0
+        for fee in applicable_fees:
+            if not completed_payments.filter(fee_type=fee).exists():
+                total_outstanding += fee.amount
         
         # Build a comprehensive list of all fees with their payment status
         all_fees_with_status = []
@@ -1161,19 +1195,27 @@ class StudentDashboardView(StudentRequiredMixin, TemplateView):
             }
             all_fees_with_status.append(fee_info)
         
+        # Get student organizations for filter dropdown (from their applicable fees)
+        student_organizations = Organization.objects.filter(
+            fee_types__in=student.get_applicable_fees()
+        ).distinct().order_by('name')
+        
         context.update({
             'student': student,
             'pending_payments': pending_payments,
-            'completed_payments': completed_payments.order_by('-created_at')[:5],
+            'completed_payments': filtered_completed_payments.order_by('-created_at')[:5],
             'total_paid': total_paid,
             'payments_count': payments_count,
             'pending_count': pending_count,  # Fees with QR generated
             'unpaid_count': unpaid_count,    # Fees without payment/QR
             'applicable_fees': applicable_fees,
-            'tier1_fees': tier1_fees,
-            'tier2_fees': tier2_fees,
             'total_outstanding': total_outstanding,
             'all_fees_with_status': all_fees_with_status,
+            'student_organizations': student_organizations,
+            # Filter context
+            'academic_year_choices': academic_year_choices,
+            'selected_academic_year': selected_academic_year,
+            'selected_semester': selected_semester,
         })
         return context
 
@@ -2552,25 +2594,18 @@ class PaymentListView(LoginRequiredMixin, ListView):
         
         # Apply filters for officers/admins
         status_filter = self.request.GET.get('status')
-        if status_filter:
-            queryset = queryset.filter(status=status_filter)
-        
-        void_filter = self.request.GET.get('is_void')
-        if void_filter == 'true':
-            queryset = queryset.filter(is_void=True)
-        elif void_filter == 'false':
+        if status_filter == 'completed':
             queryset = queryset.filter(is_void=False)
+        elif status_filter == 'voided':
+            queryset = queryset.filter(is_void=True)
         
         org_filter = self.request.GET.get('organization')
         if org_filter and user.is_staff:  # Only allow filtering if staff
             queryset = queryset.filter(organization_id=org_filter)
         
-        date_from = self.request.GET.get('date_from')
-        date_to = self.request.GET.get('date_to')
-        if date_from:
-            queryset = queryset.filter(created_at__date__gte=date_from)
-        if date_to:
-            queryset = queryset.filter(created_at__date__lte=date_to)
+        academic_year_filter = self.request.GET.get('academic_year')
+        if academic_year_filter:
+            queryset = queryset.filter(fee_type__academic_year=academic_year_filter)
         
         semester_filter = self.request.GET.get('semester')
         if semester_filter:
@@ -2584,16 +2619,18 @@ class PaymentListView(LoginRequiredMixin, ListView):
         context['status_choices'] = Payment._meta.get_field('status').choices
         context['current_filters'] = {
             'status': self.request.GET.get('status', ''),
-            'is_void': self.request.GET.get('is_void', ''),
-            'organization': self.request.GET.get('organization', ''),
-            'date_from': self.request.GET.get('date_from', ''),
-            'date_to': self.request.GET.get('date_to', ''),
+            'academic_year': self.request.GET.get('academic_year', ''),
             'semester': self.request.GET.get('semester', ''),
         }
         context['semester_choices'] = [
             ('1st Semester', '1st Semester'),
             ('2nd Semester', '2nd Semester'),
         ]
+        # Get distinct academic years from fee types
+        context['academic_year_choices'] = FeeType.objects.values_list(
+            'academic_year', flat=True
+        ).distinct().order_by('-academic_year')
+        
         context['is_super_officer'] = hasattr(self.request.user, 'officer_profile') and self.request.user.officer_profile.is_super_officer
         if hasattr(self.request.user, 'officer_profile'):
             context['officer'] = self.request.user.officer_profile

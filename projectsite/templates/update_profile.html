@@ -4,72 +4,64 @@
 {% block title %}Update Profile - UniPay{% endblock %}
 
 {% block content %}
-<div class="py-6 md:py-8">
-    <div class="w-full px-4 md:px-6 lg:px-8 max-w-4xl mx-auto">
-        <!-- Gradient Header Card -->
-        <div class="page-header-gradient rounded-xl p-5 md:p-6 mb-6 shadow-lg relative overflow-hidden">
-            <!-- Decorative Elements -->
-            <div class="absolute top-0 right-0 w-32 h-32 bg-white/5 rounded-full -translate-y-1/2 translate-x-1/2"></div>
-            <div class="absolute bottom-0 left-0 w-24 h-24 bg-white/5 rounded-full translate-y-1/2 -translate-x-1/2"></div>
-            
-            <div class="relative z-10">
-                <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-                    <div>
-                        <div class="flex items-center gap-3 mb-2">
-                            <div class="w-12 h-12 bg-white/20 backdrop-blur-sm rounded-xl flex items-center justify-center">
-                                <i data-lucide="user-circle" class="w-6 h-6 text-white"></i>
-                            </div>
-                            <div>
-                                <h1 class="text-xl md:text-2xl font-bold text-white">My Profile</h1>
-                                <p class="text-white/80 text-sm">View and manage your information</p>
-                            </div>
-                        </div>
+<div class="py-4 md:py-6">
+    <div class="w-full px-4 md:px-6 max-w-4xl mx-auto">
+        <!-- Compact Header -->
+        <div class="bg-white rounded-xl border border-gray-200 p-4 mb-4 shadow-sm">
+            <div class="flex items-center justify-between gap-3">
+                <div class="flex items-center gap-3 min-w-0">
+                    <div class="w-10 h-10 page-header-gradient rounded-lg flex items-center justify-center flex-shrink-0">
+                        <i data-lucide="user-circle" class="w-5 h-5 text-white"></i>
                     </div>
-                    <div class="flex flex-wrap gap-2 md:gap-3">
-                        <button type="button" id="edit-toggle-btn"
-                           class="px-3 md:px-4 py-2 bg-white text-gray-800 rounded-lg hover:bg-gray-50 transition-colors font-medium inline-flex items-center gap-2 text-sm shadow-md">
-                            <i data-lucide="edit-3" class="w-4 h-4"></i>
-                            <span>Edit Profile</span>
-                        </button>
-                        <a href="{% if user.student_profile %}{% url 'student_dashboard' %}{% elif user.officer_profile %}{% url 'officer_dashboard' %}{% else %}{% url 'home' %}{% endif %}" 
-                           class="px-3 md:px-4 py-2 bg-white/20 backdrop-blur-sm text-white rounded-lg hover:bg-white/30 transition-colors font-medium inline-flex items-center gap-2 text-sm border border-white/30">
-                            <i data-lucide="arrow-left" class="w-4 h-4"></i>
-                            <span class="hidden sm:inline">Back</span>
-                        </a>
+                    <div class="min-w-0">
+                        <h1 class="text-lg font-bold text-gray-900 truncate">My Profile</h1>
+                        <p class="text-xs text-gray-500">View and manage your info</p>
                     </div>
+                </div>
+                <div class="flex items-center gap-2 flex-shrink-0">
+                    <button type="button" id="edit-toggle-btn"
+                       class="w-9 h-9 md:w-auto md:h-auto md:px-4 md:py-2 bg-emerald-100 text-emerald-600 rounded-lg hover:bg-emerald-200 transition-colors font-medium inline-flex items-center justify-center gap-2 text-sm" title="Edit Profile">
+                        <i data-lucide="edit-3" class="w-4 h-4"></i>
+                        <span class="hidden md:inline">Edit</span>
+                    </button>
+                    <a href="{% if user.student_profile %}{% url 'student_dashboard' %}{% elif user.officer_profile %}{% url 'officer_dashboard' %}{% else %}{% url 'home' %}{% endif %}" 
+                       class="w-9 h-9 md:w-auto md:h-auto md:px-4 md:py-2 bg-gray-100 text-gray-600 rounded-lg hover:bg-gray-200 transition-colors font-medium inline-flex items-center justify-center gap-2 text-sm" title="Back">
+                        <i data-lucide="arrow-left" class="w-4 h-4"></i>
+                        <span class="hidden md:inline">Back</span>
+                    </a>
                 </div>
             </div>
         </div>
 
         <!-- Profile Content -->
-        <div class="space-y-6">
+        <div class="space-y-4">
             <!-- User Information Card -->
             <div class="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
-                <div class="px-5 py-4 border-b border-gray-100 bg-gray-50/50">
+                <div class="px-4 py-3 border-b border-gray-100 bg-gray-50/50">
                     <div class="flex items-center gap-2">
-                        <div class="w-8 h-8 bg-green-100 rounded-lg flex items-center justify-center">
-                            <i data-lucide="user" class="w-4 h-4 text-green-600"></i>
+                        <div class="w-7 h-7 bg-green-100 rounded-lg flex items-center justify-center">
+                            <i data-lucide="user" class="w-3.5 h-3.5 text-green-600"></i>
                         </div>
-                        <h3 class="font-semibold text-gray-900">User Information</h3>
+                        <h3 class="font-semibold text-gray-900 text-sm">User Information</h3>
                     </div>
                 </div>
-                <div class="p-5">
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <div class="space-y-1">
-                            <p class="text-xs text-gray-500 uppercase tracking-wide font-medium">Full Name</p>
-                            <p class="text-gray-900 font-medium">{{ user.get_full_name|default:"Not set" }}</p>
+                <div class="p-4">
+                    <div class="grid grid-cols-2 gap-3">
+                        <div class="space-y-0.5">
+                            <p class="text-xs text-gray-500 font-medium">Full Name</p>
+                            <p class="text-gray-900 text-sm font-medium truncate">{{ user.get_full_name|default:"Not set" }}</p>
                         </div>
-                        <div class="space-y-1">
-                            <p class="text-xs text-gray-500 uppercase tracking-wide font-medium">Email</p>
-                            <p class="text-gray-900 font-medium">{{ user.email }}</p>
+                        <div class="space-y-0.5">
+                            <p class="text-xs text-gray-500 font-medium">Email</p>
+                            <p class="text-gray-900 text-sm font-medium truncate">{{ user.email }}</p>
                         </div>
-                        <div class="space-y-1">
-                            <p class="text-xs text-gray-500 uppercase tracking-wide font-medium">Username</p>
-                            <p class="text-gray-900 font-medium">{{ user.username }}</p>
+                        <div class="space-y-0.5">
+                            <p class="text-xs text-gray-500 font-medium">Username</p>
+                            <p class="text-gray-900 text-sm font-medium truncate">{{ user.username }}</p>
                         </div>
-                        <div class="space-y-1">
-                            <p class="text-xs text-gray-500 uppercase tracking-wide font-medium">Date Joined</p>
-                            <p class="text-gray-900 font-medium">{{ user.date_joined|date:"M d, Y" }}</p>
+                        <div class="space-y-0.5">
+                            <p class="text-xs text-gray-500 font-medium">Date Joined</p>
+                            <p class="text-gray-900 text-sm font-medium">{{ user.date_joined|date:"M d, Y" }}</p>
                         </div>
                     </div>
                 </div>
@@ -78,56 +70,56 @@
             <!-- Officer Information Card -->
             {% if user.officer_profile %}
             <div class="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
-                <div class="px-5 py-4 border-b border-gray-100 bg-gray-50/50">
+                <div class="px-4 py-3 border-b border-gray-100 bg-gray-50/50">
                     <div class="flex items-center gap-2">
-                        <div class="w-8 h-8 bg-amber-100 rounded-lg flex items-center justify-center">
-                            <i data-lucide="shield" class="w-4 h-4 text-amber-600"></i>
+                        <div class="w-7 h-7 bg-amber-100 rounded-lg flex items-center justify-center">
+                            <i data-lucide="shield" class="w-3.5 h-3.5 text-amber-600"></i>
                         </div>
-                        <h3 class="font-semibold text-gray-900">Officer Information</h3>
+                        <h3 class="font-semibold text-gray-900 text-sm">Officer Information</h3>
                     </div>
                 </div>
-                <div class="p-5">
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-                        <div class="space-y-1">
-                            <p class="text-xs text-gray-500 uppercase tracking-wide font-medium">Organization</p>
-                            <p class="text-gray-900 font-medium">{{ user.officer_profile.organization.name }}</p>
+                <div class="p-4">
+                    <div class="grid grid-cols-2 gap-3 mb-3">
+                        <div class="space-y-0.5">
+                            <p class="text-xs text-gray-500 font-medium">Organization</p>
+                            <p class="text-gray-900 text-sm font-medium truncate">{{ user.officer_profile.organization.name }}</p>
                         </div>
-                        <div class="space-y-1">
-                            <p class="text-xs text-gray-500 uppercase tracking-wide font-medium">Role/Position</p>
-                            <p class="text-gray-900 font-medium">{{ user.officer_profile.role|default:"Not set" }}</p>
+                        <div class="space-y-0.5">
+                            <p class="text-xs text-gray-500 font-medium">Role/Position</p>
+                            <p class="text-gray-900 text-sm font-medium truncate">{{ user.officer_profile.role|default:"Not set" }}</p>
                         </div>
                     </div>
-                    <div class="pt-4 border-t border-gray-100">
-                        <p class="text-xs text-gray-500 uppercase tracking-wide font-medium mb-3">Status & Permissions</p>
-                        <div class="flex flex-wrap gap-2">
+                    <div class="pt-3 border-t border-gray-100">
+                        <p class="text-xs text-gray-500 font-medium mb-2">Permissions</p>
+                        <div class="flex flex-wrap gap-1.5">
                             {% if user.is_superuser %}
-                            <span class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-red-100 text-red-700 rounded-full text-xs font-semibold">
+                            <span class="inline-flex items-center gap-1 px-2 py-1 bg-red-100 text-red-700 rounded-full text-xs font-medium">
                                 <i data-lucide="crown" class="w-3 h-3"></i>
                                 Superuser
                             </span>
                             {% endif %}
                             {% if user.officer_profile.is_super_officer %}
-                            <span class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-amber-100 text-amber-700 rounded-full text-xs font-semibold">
+                            <span class="inline-flex items-center gap-1 px-2 py-1 bg-amber-100 text-amber-700 rounded-full text-xs font-medium">
                                 <i data-lucide="star" class="w-3 h-3"></i>
                                 Super Officer
                             </span>
                             {% endif %}
                             {% if user.officer_profile.can_process_payments %}
-                            <span class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-green-100 text-green-700 rounded-full text-xs font-semibold">
+                            <span class="inline-flex items-center gap-1 px-2 py-1 bg-green-100 text-green-700 rounded-full text-xs font-medium">
                                 <i data-lucide="check-circle" class="w-3 h-3"></i>
-                                Can Process Payments
+                                Process
                             </span>
                             {% endif %}
                             {% if user.officer_profile.can_void_payments %}
-                            <span class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-green-100 text-green-700 rounded-full text-xs font-semibold">
+                            <span class="inline-flex items-center gap-1 px-2 py-1 bg-green-100 text-green-700 rounded-full text-xs font-medium">
                                 <i data-lucide="x-circle" class="w-3 h-3"></i>
-                                Can Void Payments
+                                Void
                             </span>
                             {% endif %}
                             {% if user.officer_profile.can_generate_reports %}
-                            <span class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-green-100 text-green-700 rounded-full text-xs font-semibold">
+                            <span class="inline-flex items-center gap-1 px-2 py-1 bg-green-100 text-green-700 rounded-full text-xs font-medium">
                                 <i data-lucide="file-text" class="w-3 h-3"></i>
-                                Can Generate Reports
+                                Reports
                             </span>
                             {% endif %}
                         </div>
@@ -139,55 +131,51 @@
             <!-- Student Information Card -->
             {% if user.student_profile %}
             <div class="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
-                <div class="px-5 py-4 border-b border-gray-100 bg-gray-50/50">
+                <div class="px-4 py-3 border-b border-gray-100 bg-gray-50/50">
                     <div class="flex items-center gap-2">
-                        <div class="w-8 h-8 bg-blue-100 rounded-lg flex items-center justify-center">
-                            <i data-lucide="graduation-cap" class="w-4 h-4 text-blue-600"></i>
+                        <div class="w-7 h-7 bg-blue-100 rounded-lg flex items-center justify-center">
+                            <i data-lucide="graduation-cap" class="w-3.5 h-3.5 text-blue-600"></i>
                         </div>
-                        <h3 class="font-semibold text-gray-900">Student Information</h3>
+                        <h3 class="font-semibold text-gray-900 text-sm">Student Information</h3>
                     </div>
                 </div>
-                <div class="p-5">
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <div class="space-y-1">
-                            <p class="text-xs text-gray-500 uppercase tracking-wide font-medium">Student ID</p>
-                            <p class="text-gray-900 font-medium">{{ user.student_profile.student_id_number }}</p>
+                <div class="p-4">
+                    <div class="grid grid-cols-2 gap-3">
+                        <div class="space-y-0.5">
+                            <p class="text-xs text-gray-500 font-medium">Student ID</p>
+                            <p class="text-gray-900 text-sm font-medium">{{ user.student_profile.student_id_number }}</p>
                         </div>
-                        <div class="space-y-1">
-                            <p class="text-xs text-gray-500 uppercase tracking-wide font-medium">First Name</p>
-                            <p class="text-gray-900 font-medium">{{ user.first_name|default:"Not set" }}</p>
+                        <div class="space-y-0.5">
+                            <p class="text-xs text-gray-500 font-medium">First Name</p>
+                            <p class="text-gray-900 text-sm font-medium truncate">{{ user.first_name|default:"Not set" }}</p>
                         </div>
-                        <div class="space-y-1">
-                            <p class="text-xs text-gray-500 uppercase tracking-wide font-medium">Last Name</p>
-                            <p class="text-gray-900 font-medium">{{ user.last_name|default:"Not set" }}</p>
+                        <div class="space-y-0.5">
+                            <p class="text-xs text-gray-500 font-medium">Last Name</p>
+                            <p class="text-gray-900 text-sm font-medium truncate">{{ user.last_name|default:"Not set" }}</p>
                         </div>
-                        <div class="space-y-1">
-                            <p class="text-xs text-gray-500 uppercase tracking-wide font-medium">Middle Name</p>
-                            <p class="text-gray-900 font-medium">{{ user.student_profile.middle_name|default:"Not set" }}</p>
+                        <div class="space-y-0.5">
+                            <p class="text-xs text-gray-500 font-medium">Middle Name</p>
+                            <p class="text-gray-900 text-sm font-medium truncate">{{ user.student_profile.middle_name|default:"Not set" }}</p>
                         </div>
-                        <div class="space-y-1">
-                            <p class="text-xs text-gray-500 uppercase tracking-wide font-medium">Email Address</p>
-                            <p class="text-gray-900 font-medium">{{ user.email }}</p>
+                        <div class="space-y-0.5 col-span-2">
+                            <p class="text-xs text-gray-500 font-medium">Email Address</p>
+                            <p class="text-gray-900 text-sm font-medium truncate">{{ user.email }}</p>
                         </div>
-                        <div class="space-y-1">
-                            <p class="text-xs text-gray-500 uppercase tracking-wide font-medium">Phone Number</p>
-                            <p class="text-gray-900 font-medium">{{ user.student_profile.phone_number|default:"Not set" }}</p>
+                        <div class="space-y-0.5">
+                            <p class="text-xs text-gray-500 font-medium">Phone</p>
+                            <p class="text-gray-900 text-sm font-medium">{{ user.student_profile.phone_number|default:"Not set" }}</p>
                         </div>
-                        <div class="space-y-1">
-                            <p class="text-xs text-gray-500 uppercase tracking-wide font-medium">Course/Program</p>
-                            <p class="text-gray-900 font-medium">{{ user.student_profile.course.name|default:"Not set" }}</p>
+                        <div class="space-y-0.5">
+                            <p class="text-xs text-gray-500 font-medium">Year Level</p>
+                            <p class="text-gray-900 text-sm font-medium">{% if user.student_profile.year_level %}Year {{ user.student_profile.year_level }}{% else %}Not set{% endif %}</p>
                         </div>
-                        <div class="space-y-1">
-                            <p class="text-xs text-gray-500 uppercase tracking-wide font-medium">Program Type</p>
-                            <p class="text-gray-900 font-medium">{{ user.student_profile.course.program_type|default:"Not set" }}</p>
+                        <div class="space-y-0.5 col-span-2">
+                            <p class="text-xs text-gray-500 font-medium">Course/Program</p>
+                            <p class="text-gray-900 text-sm font-medium truncate">{{ user.student_profile.course.name|default:"Not set" }}</p>
                         </div>
-                        <div class="space-y-1">
-                            <p class="text-xs text-gray-500 uppercase tracking-wide font-medium">Year Level</p>
-                            <p class="text-gray-900 font-medium">{% if user.student_profile.year_level %}Year {{ user.student_profile.year_level }}{% else %}Not set{% endif %}</p>
-                        </div>
-                        <div class="space-y-1">
-                            <p class="text-xs text-gray-500 uppercase tracking-wide font-medium">College/Department</p>
-                            <p class="text-gray-900 font-medium">{{ user.student_profile.course.college.name|default:"Not set" }}</p>
+                        <div class="space-y-0.5">
+                            <p class="text-xs text-gray-500 font-medium">College</p>
+                            <p class="text-gray-900 text-sm font-medium truncate">{{ user.student_profile.course.college.name|default:"Not set" }}</p>
                         </div>
                     </div>
                 </div>
@@ -197,46 +185,42 @@
             <!-- Edit Profile Form (Hidden by default) -->
             <div id="edit-form-section" class="hidden">
                 <div class="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
-                    <div class="px-5 py-4 border-b border-gray-100 bg-gradient-to-r from-green-50 to-emerald-50">
+                    <div class="px-4 py-3 border-b border-gray-100 bg-gradient-to-r from-green-50 to-emerald-50">
                         <div class="flex items-center justify-between">
                             <div class="flex items-center gap-2">
-                                <div class="w-8 h-8 bg-green-100 rounded-lg flex items-center justify-center">
-                                    <i data-lucide="edit-3" class="w-4 h-4 text-green-600"></i>
+                                <div class="w-7 h-7 bg-green-100 rounded-lg flex items-center justify-center">
+                                    <i data-lucide="edit-3" class="w-3.5 h-3.5 text-green-600"></i>
                                 </div>
                                 <div>
-                                    <h3 class="font-semibold text-gray-900">Edit Profile</h3>
+                                    <h3 class="font-semibold text-gray-900 text-sm">Edit Profile</h3>
                                     <p class="text-xs text-gray-500">Only certain fields can be modified</p>
                                 </div>
                             </div>
-                            <button type="button" id="close-edit-btn" class="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg transition-colors">
-                                <i data-lucide="x" class="w-5 h-5"></i>
+                            <button type="button" id="close-edit-btn" class="w-8 h-8 flex items-center justify-center text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg transition-colors">
+                                <i data-lucide="x" class="w-4 h-4"></i>
                             </button>
                         </div>
                     </div>
-                    <div class="p-5">
+                    <div class="p-4">
                         <form method="post" id="profileForm" class="space-y-4">
                             {% csrf_token %}
                             
                             {% if user.officer_profile %}
                             <!-- Read-only Officer Info Display -->
-                            <div class="bg-gray-50 rounded-lg p-4 mb-4">
-                                <p class="text-xs text-gray-500 uppercase tracking-wide font-medium mb-3">Read-Only Information</p>
-                                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 text-sm">
+                            <div class="bg-gray-50 rounded-lg p-3">
+                                <p class="text-xs text-gray-500 font-medium mb-2">Read-Only Information</p>
+                                <div class="grid grid-cols-2 gap-2 text-xs">
                                     <div>
                                         <span class="text-gray-500">Name:</span>
                                         <span class="text-gray-900 font-medium ml-1">{{ user.get_full_name }}</span>
                                     </div>
                                     <div>
                                         <span class="text-gray-500">Email:</span>
-                                        <span class="text-gray-900 font-medium ml-1">{{ user.email }}</span>
+                                        <span class="text-gray-900 font-medium ml-1 truncate block">{{ user.email }}</span>
                                     </div>
-                                    <div>
+                                    <div class="col-span-2">
                                         <span class="text-gray-500">Organization:</span>
                                         <span class="text-gray-900 font-medium ml-1">{{ user.officer_profile.organization.name }}</span>
-                                    </div>
-                                    <div>
-                                        <span class="text-gray-500">Permissions:</span>
-                                        <span class="text-gray-500 text-xs ml-1">Contact your Super Officer to update</span>
                                     </div>
                                     {% if user.student_profile %}
                                     <div>
@@ -245,22 +229,22 @@
                                     </div>
                                     <div>
                                         <span class="text-gray-500">Course:</span>
-                                        <span class="text-gray-900 font-medium ml-1">{{ user.student_profile.course.name|default:"Not set" }}</span>
+                                        <span class="text-gray-900 font-medium ml-1 truncate block">{{ user.student_profile.course.name|default:"Not set" }}</span>
                                     </div>
                                     {% endif %}
                                 </div>
                             </div>
                             
                             <!-- Editable Fields Label -->
-                            <div class="flex items-center gap-2 mb-2">
+                            <div class="flex items-center gap-2">
                                 <div class="w-1.5 h-1.5 bg-green-500 rounded-full"></div>
-                                <p class="text-xs text-gray-600 font-medium uppercase tracking-wide">Editable Fields</p>
+                                <p class="text-xs text-gray-600 font-medium">Editable Fields</p>
                             </div>
                             {% elif user.student_profile %}
                             <!-- Read-only Student Info Display -->
-                            <div class="bg-gray-50 rounded-lg p-4 mb-4">
-                                <p class="text-xs text-gray-500 uppercase tracking-wide font-medium mb-3">Read-Only Information</p>
-                                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 text-sm">
+                            <div class="bg-gray-50 rounded-lg p-3">
+                                <p class="text-xs text-gray-500 font-medium mb-2">Read-Only Information</p>
+                                <div class="grid grid-cols-2 gap-2 text-xs">
                                     <div>
                                         <span class="text-gray-500">Student ID:</span>
                                         <span class="text-gray-900 font-medium ml-1">{{ user.student_profile.student_id_number }}</span>
@@ -269,11 +253,11 @@
                                         <span class="text-gray-500">Name:</span>
                                         <span class="text-gray-900 font-medium ml-1">{{ user.get_full_name }}</span>
                                     </div>
-                                    <div>
+                                    <div class="col-span-2">
                                         <span class="text-gray-500">Email:</span>
                                         <span class="text-gray-900 font-medium ml-1">{{ user.email }}</span>
                                     </div>
-                                    <div>
+                                    <div class="col-span-2">
                                         <span class="text-gray-500">Course:</span>
                                         <span class="text-gray-900 font-medium ml-1">{{ user.student_profile.course.name|default:"Not set" }}</span>
                                     </div>
@@ -281,16 +265,16 @@
                             </div>
                             
                             <!-- Editable Fields Label -->
-                            <div class="flex items-center gap-2 mb-2">
+                            <div class="flex items-center gap-2">
                                 <div class="w-1.5 h-1.5 bg-green-500 rounded-full"></div>
-                                <p class="text-xs text-gray-600 font-medium uppercase tracking-wide">Editable Fields</p>
+                                <p class="text-xs text-gray-600 font-medium">Editable Fields</p>
                             </div>
                             {% endif %}
                             
                             <!-- Officer Role Field -->
                             {% for field in form %}
                             <div>
-                                <label for="{{ field.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-1.5">
+                                <label for="{{ field.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-1">
                                     {{ field.label }}
                                     {% if field.field.required %}
                                     <span class="text-red-500">*</span>

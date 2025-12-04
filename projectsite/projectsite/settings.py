@@ -53,7 +53,13 @@ INSTALLED_APPS = [
 ]
 
 
-SITE_ID = 7
+# SITE_ID: 7 for PythonAnywhere (deployed), 6 for local development
+import socket
+if 'pythonanywhere' in socket.gethostname().lower():
+    SITE_ID = 7
+else:
+    SITE_ID = 6
+
 AUTHENTICATION_BACKENDS = [
 'django.contrib.auth.backends.ModelBackend',
 'allauth.account.auth_backends.AuthenticationBackend',

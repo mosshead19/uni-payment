@@ -207,16 +207,35 @@
         <div id="mobileMenu" class="hidden md:hidden border-t border-gray-100 bg-white">
             <div class="p-4 space-y-2">
                 {% if user.is_authenticated %}
-                    <!-- User Info -->
+                    <!-- User Info with Profile Picture -->
                     <div class="flex items-center gap-3 p-3 bg-gray-50 rounded-lg mb-4">
                         <div class="up-avatar">
-                            <span class="up-avatar-initials">{{ user.username|slice:":2"|upper }}</span>
+                            {% if user.user_profile and user.user_profile.profile_picture %}
+                                <img src="{{ user.user_profile.profile_picture }}" alt="{{ user.username }}" class="w-full h-full object-cover rounded-full">
+                            {% else %}
+                                <span class="up-avatar-initials">{{ user.username|slice:":2"|upper }}</span>
+                            {% endif %}
                         </div>
-                        <div>
-                            <p class="font-medium text-gray-900">{{ user.get_full_name|default:user.username }}</p>
-                            <p class="text-sm text-gray-500">{{ user.email }}</p>
+                        <div class="flex-1 min-w-0">
+                            <p class="font-medium text-gray-900 truncate">{{ user.get_full_name|default:user.username }}</p>
+                            <p class="text-sm text-gray-500 truncate">{{ user.email }}</p>
                         </div>
                     </div>
+
+                    <!-- Edit Profile Link -->
+                    {% if user.officer_profile %}
+                        <a href="{% url 'officer_profile_update' %}" class="up-dropdown-item rounded-lg">
+                            <i data-lucide="user-cog" class="w-4 h-4"></i>
+                            Edit Profile
+                        </a>
+                    {% elif user.student_profile %}
+                        <a href="{% url 'student_profile_update' %}" class="up-dropdown-item rounded-lg">
+                            <i data-lucide="user" class="w-4 h-4"></i>
+                            Edit Profile
+                        </a>
+                    {% endif %}
+
+                    <div class="border-t border-gray-100 my-3"></div>
                     
                     {% if user.officer_profile or user.is_superuser %}
                         <a href="{% url 'officer_dashboard' %}" class="up-dropdown-item rounded-lg {% if request.resolver_match.url_name == 'officer_dashboard' %}bg-emerald-100 text-emerald-700{% endif %}">
@@ -272,6 +291,7 @@
                         </form>
                     </div>
                 {% else %}
+                    {% load socialaccount %}
                     <a href="{% provider_login_url 'google' %}" class="up-btn up-btn-primary w-full flex items-center justify-center gap-2">
                         <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" alt="Google" class="w-4 h-4">
                         Sign In with Google
