@@ -34,45 +34,45 @@
     <div class="grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4">
         <div class="bg-gray-50 rounded-lg p-3 md:p-4 border border-gray-100">
             <div class="flex items-center gap-2 md:gap-3">
-                <div class="p-1.5 md:p-2 bg-green-100 rounded-lg flex-shrink-0">
-                    <i data-lucide="check-circle" class="w-4 h-4 md:w-5 md:h-5 text-green-600"></i>
+                <div class="p-1.5 md:p-2 bg-blue-100 rounded-lg flex-shrink-0">
+                    <i data-lucide="receipt" class="w-4 h-4 md:w-5 md:h-5 text-blue-600"></i>
+                </div>
+                <div class="min-w-0 flex-1">
+                    <p class="text-xs md:text-sm text-gray-600">Amount Due</p>
+                    <p class="text-base md:text-xl font-semibold text-gray-900 truncate">₱{{ total_amount_due|floatformat:2 }}</p>
+                </div>
+            </div>
+        </div>
+        <div class="bg-gray-50 rounded-lg p-3 md:p-4 border border-gray-100">
+            <div class="flex items-center gap-2 md:gap-3">
+                <div class="p-1.5 md:p-2 bg-emerald-100 rounded-lg flex-shrink-0">
+                    <i data-lucide="check-circle" class="w-4 h-4 md:w-5 md:h-5 text-emerald-600"></i>
                 </div>
                 <div class="min-w-0 flex-1">
                     <p class="text-xs md:text-sm text-gray-600">Total Paid</p>
-                    <p class="text-base md:text-xl font-semibold text-gray-900 truncate">₱{{ total_paid|floatformat:2 }}</p>
+                    <p class="text-base md:text-xl font-semibold text-emerald-600 truncate">₱{{ total_paid|floatformat:2 }}</p>
                 </div>
             </div>
         </div>
         <div class="bg-gray-50 rounded-lg p-3 md:p-4 border border-gray-100">
             <div class="flex items-center gap-2 md:gap-3">
-                <div class="p-1.5 md:p-2 bg-yellow-100 rounded-lg flex-shrink-0">
-                    <i data-lucide="circle-dollar-sign" class="w-4 h-4 md:w-5 md:h-5 text-yellow-600"></i>
+                <div class="p-1.5 md:p-2 bg-orange-100 rounded-lg flex-shrink-0">
+                    <i data-lucide="wallet" class="w-4 h-4 md:w-5 md:h-5 text-orange-700"></i>
                 </div>
                 <div class="min-w-0 flex-1">
-                    <p class="text-xs md:text-sm text-gray-600">Unpaid</p>
-                    <p class="text-base md:text-xl font-semibold text-gray-900">{{ unpaid_count }}</p>
+                    <p class="text-xs md:text-sm text-gray-600">Balance</p>
+                    <p class="text-base md:text-xl font-semibold truncate {% if remaining_balance > 0 %}text-orange-700{% else %}text-emerald-600{% endif %}">₱{{ remaining_balance|floatformat:2 }}</p>
                 </div>
             </div>
         </div>
         <div class="bg-gray-50 rounded-lg p-3 md:p-4 border border-gray-100">
             <div class="flex items-center gap-2 md:gap-3">
-                <div class="p-1.5 md:p-2 bg-blue-100 rounded-lg flex-shrink-0">
-                    <i data-lucide="clock" class="w-4 h-4 md:w-5 md:h-5 text-blue-600"></i>
+                <div class="p-1.5 md:p-2 bg-violet-100 rounded-lg flex-shrink-0">
+                    <i data-lucide="clock" class="w-4 h-4 md:w-5 md:h-5 text-violet-600"></i>
                 </div>
                 <div class="min-w-0 flex-1">
                     <p class="text-xs md:text-sm text-gray-600">Pending</p>
                     <p class="text-base md:text-xl font-semibold text-gray-900">{{ pending_count }}</p>
-                </div>
-            </div>
-        </div>
-        <div class="bg-gray-50 rounded-lg p-3 md:p-4 border border-gray-100">
-            <div class="flex items-center gap-2 md:gap-3">
-                <div class="p-1.5 md:p-2 bg-red-100 rounded-lg flex-shrink-0">
-                    <i data-lucide="alert-circle" class="w-4 h-4 md:w-5 md:h-5 text-red-600"></i>
-                </div>
-                <div class="min-w-0 flex-1">
-                    <p class="text-xs md:text-sm text-gray-600">Outstanding</p>
-                    <p class="text-base md:text-xl font-semibold truncate {% if total_outstanding > 0 %}text-red-600{% else %}text-green-600{% endif %}">₱{{ total_outstanding|floatformat:2 }}</p>
                 </div>
             </div>
         </div>
@@ -174,7 +174,6 @@
                                 <option value="">All Statuses</option>
                                 <option value="paid">Paid</option>
                                 <option value="pending">Pending</option>
-                                <option value="unpaid">Unpaid</option>
                             </select>
                         </div>
                         <div>
@@ -214,7 +213,7 @@
                     <tbody class="divide-y divide-gray-200" id="fees-table-body">
                         {% for fee_info in all_fees_with_status %}
                         <tr class="hover:bg-gray-50 transition-colors fee-row" 
-                            data-status="{% if fee_info.is_paid %}paid{% elif fee_info.has_pending_request %}pending{% else %}unpaid{% endif %}"
+                            data-status="{% if fee_info.is_paid %}paid{% else %}pending{% endif %}"
                             data-org="{{ fee_info.organization.name }}"
                             data-semester="{{ fee_info.fee_type.semester }}">
                             <td class="px-4 py-4">
@@ -235,20 +234,10 @@
                                         <i data-lucide="check-circle" class="w-3 h-3"></i>
                                         Paid
                                     </span>
-                                {% elif fee_info.has_pending_request and fee_info.has_qr_generated %}
-                                    <span class="inline-flex items-center gap-1 px-2.5 py-1 bg-gradient-to-r from-blue-50 to-blue-100 text-blue-700 rounded-full text-xs font-semibold border border-blue-200 shadow-sm whitespace-nowrap">
+                                {% else %}
+                                    <span class="inline-flex items-center gap-1 px-2.5 py-1 bg-gradient-to-r from-violet-50 to-violet-100 text-violet-700 rounded-full text-xs font-semibold border border-violet-200 shadow-sm whitespace-nowrap">
                                         <i data-lucide="clock" class="w-3 h-3"></i>
                                         Pending
-                                    </span>
-                                {% elif fee_info.has_pending_request %}
-                                    <span class="inline-flex items-center gap-1 px-2.5 py-1 bg-gradient-to-r from-orange-50 to-orange-100 text-orange-700 rounded-full text-xs font-semibold border border-orange-200 shadow-sm whitespace-nowrap">
-                                        <i data-lucide="circle-dollar-sign" class="w-3 h-3"></i>
-                                        Unpaid
-                                    </span>
-                                {% else %}
-                                    <span class="inline-flex items-center gap-1 px-2.5 py-1 bg-gradient-to-r from-yellow-50 to-yellow-100 text-yellow-700 rounded-full text-xs font-semibold border border-yellow-200 shadow-sm whitespace-nowrap">
-                                        <i data-lucide="circle-dollar-sign" class="w-3 h-3"></i>
-                                        Unpaid
                                     </span>
                                 {% endif %}
                             </td>
@@ -308,7 +297,7 @@
                         <div class="p-4 fee-mobile-card" 
                              data-fee-name="{{ fee_info.fee_type.name|lower }}"
                              data-org-name="{{ fee_info.organization.name|lower }}"
-                             data-status="{% if fee_info.is_paid %}paid{% elif fee_info.has_pending_request and fee_info.has_qr_generated %}pending{% else %}unpaid{% endif %}"
+                             data-status="{% if fee_info.is_paid %}paid{% else %}pending{% endif %}"
                              data-semester="{{ fee_info.fee_type.semester|lower }}">
                             <div class="flex items-start justify-between mb-2">
                                 <div class="flex-1 min-w-0">
@@ -320,15 +309,10 @@
                                         <i data-lucide="check-circle" class="w-3 h-3"></i>
                                         Paid
                                     </span>
-                                {% elif fee_info.has_pending_request and fee_info.has_qr_generated %}
-                                    <span class="inline-flex items-center gap-1 px-2 py-1 bg-blue-50 text-blue-700 rounded-full text-xs font-medium">
+                                {% else %}
+                                    <span class="inline-flex items-center gap-1 px-2 py-1 bg-violet-50 text-violet-700 rounded-full text-xs font-medium">
                                         <i data-lucide="clock" class="w-3 h-3"></i>
                                         Pending
-                                    </span>
-                                {% else %}
-                                    <span class="inline-flex items-center gap-1 px-2 py-1 bg-yellow-50 text-yellow-700 rounded-full text-xs font-medium">
-                                        <i data-lucide="circle-dollar-sign" class="w-3 h-3"></i>
-                                        Unpaid
                                     </span>
                                 {% endif %}
                             </div>

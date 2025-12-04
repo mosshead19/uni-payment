@@ -1105,9 +1105,13 @@ class StudentDashboardView(StudentRequiredMixin, TemplateView):
         
         pending_payments = student.payment_requests.filter(status='PENDING').order_by('-created_at')
         
-        # Get academic year choices from all fee types
+        # Two-tiered fee system: Get ALL applicable fees for this student (before any filtering)
+        # This includes the academic year filter already applied by get_applicable_fees()
+        base_applicable_fees = student.get_applicable_fees()
+        
+        # Get academic year choices from the student's applicable fees only
         academic_year_choices = list(
-            FeeType.objects.values_list('academic_year', flat=True)
+            base_applicable_fees.values_list('academic_year', flat=True)
             .distinct()
             .order_by('-academic_year')
         )
@@ -1116,12 +1120,12 @@ class StudentDashboardView(StudentRequiredMixin, TemplateView):
         selected_academic_year = self.request.GET.get('academic_year', '')
         selected_semester = self.request.GET.get('semester', '')
         
-        # Default to most recent academic year if not specified
+        # Default to most recent academic year if not specified (and choices exist)
         if not selected_academic_year and academic_year_choices:
             selected_academic_year = academic_year_choices[0]
         
-        # Two-tiered fee system: Get applicable fees
-        applicable_fees = student.get_applicable_fees().order_by('-created_at')  # Most recently posted first
+        # Apply filters to get final applicable fees
+        applicable_fees = base_applicable_fees.order_by('-created_at')  # Most recently posted first
         
         # Apply academic year filter
         if selected_academic_year:
@@ -1144,16 +1148,15 @@ class StudentDashboardView(StudentRequiredMixin, TemplateView):
         total_paid = filtered_completed_payments.aggregate(Sum('amount'))['amount__sum'] or 0
         payments_count = filtered_completed_payments.count()
         
-        # Calculate outstanding for filtered fees
-        total_outstanding = 0
-        for fee in applicable_fees:
-            if not completed_payments.filter(fee_type=fee).exists():
-                total_outstanding += fee.amount
+        # Calculate total amount due (sum of all applicable fees)
+        total_amount_due = applicable_fees.aggregate(Sum('amount'))['amount__sum'] or 0
+        
+        # Calculate remaining balance
+        remaining_balance = total_amount_due - total_paid
         
         # Build a comprehensive list of all fees with their payment status
         all_fees_with_status = []
-        pending_count = 0  # Fees with QR generated, awaiting confirmation
-        unpaid_count = 0   # Fees not yet paid (no payment request OR no QR generated)
+        pending_count = 0  # Fees with pending payment request (waiting for approval)
         
         for fee in applicable_fees:
             # Check if student has paid this fee
@@ -1176,12 +1179,9 @@ class StudentDashboardView(StudentRequiredMixin, TemplateView):
                     pending_request.save()
                     pending_request = None
             
-            # Count for stats
-            if payment is None:  # Not paid
-                if has_qr_generated:
-                    pending_count += 1  # QR generated, waiting for confirmation
-                else:
-                    unpaid_count += 1   # Not paid and no QR generated yet
+            # Count for stats - count all pending (waiting for approval)
+            if payment is None and has_valid_pending:
+                pending_count += 1  # Has pending request, waiting for approval
             
             fee_info = {
                 'fee_type': fee,
@@ -1204,12 +1204,12 @@ class StudentDashboardView(StudentRequiredMixin, TemplateView):
             'student': student,
             'pending_payments': pending_payments,
             'completed_payments': filtered_completed_payments.order_by('-created_at')[:5],
+            'total_amount_due': total_amount_due,
             'total_paid': total_paid,
+            'remaining_balance': remaining_balance,
             'payments_count': payments_count,
-            'pending_count': pending_count,  # Fees with QR generated
-            'unpaid_count': unpaid_count,    # Fees without payment/QR
+            'pending_count': pending_count,  # Payments waiting for approval
             'applicable_fees': applicable_fees,
-            'total_outstanding': total_outstanding,
             'all_fees_with_status': all_fees_with_status,
             'student_organizations': student_organizations,
             # Filter context
