@@ -1159,8 +1159,11 @@ class StudentDashboardView(StudentRequiredMixin, TemplateView):
         # Calculate total amount due (sum of all applicable fees)
         total_amount_due = applicable_fees.aggregate(Sum('amount'))['amount__sum'] or 0
         
-        # Calculate remaining balance
-        remaining_balance = total_amount_due - total_paid
+        # Calculate total pending amount (fees with pending payment requests)
+        total_pending = filtered_pending_payments.aggregate(Sum('fee_type__amount'))['fee_type__amount__sum'] or 0
+        
+        # Calculate remaining balance = Total due - (Paid + Pending)
+        remaining_balance = total_amount_due - total_paid - total_pending
         
         # Build a comprehensive list of all fees with their payment status
         all_fees_with_status = []
