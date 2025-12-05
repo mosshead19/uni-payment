@@ -54,8 +54,8 @@ INSTALLED_APPS = [
 
 
 # SITE_ID: 7 for PythonAnywhere (deployed), 6 for local development
-import socket
-if 'pythonanywhere' in socket.gethostname().lower():
+import os
+if os.environ.get('PYTHONANYWHERE_DOMAIN') or os.path.exists('/home/palsucsunipay'):
     SITE_ID = 7
 else:
     SITE_ID = 6
