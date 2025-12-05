@@ -1167,8 +1167,8 @@ class StudentDashboardView(StudentRequiredMixin, TemplateView):
         pending_count = 0  # Fees with pending payment request (waiting for approval)
         
         for fee in applicable_fees:
-            # Check if student has paid this fee
-            payment = completed_payments.filter(fee_type=fee).first()
+            # Check if student has paid this fee (from filtered payments)
+            payment = filtered_completed_payments.filter(fee_type=fee).first()
             
             # Check if student has a VALID pending request for this fee (not expired)
             pending_request = filtered_pending_payments.filter(fee_type=fee).first()
