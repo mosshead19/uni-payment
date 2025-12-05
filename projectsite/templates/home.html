@@ -6,10 +6,16 @@
 
 {% block extra_head %}
 <style>
-    .up-container {
-        max-width: 100%;
-        padding: 0;
-        margin: 0;
+    body {
+        padding-top: 0 !important;
+    }
+    main {
+        padding: 0 !important;
+    }
+    main .up-container {
+        padding: 0 !important;
+        margin: 0 !important;
+        max-width: 100% !important;
     }
 </style>
 {% endblock %}
@@ -17,7 +23,7 @@
 {% block content %}
 <div class="bg-gradient-to-br from-white via-green-200/50 to-green-300/65">
     <!-- Navigation/Hero Section -->
-    <div class="relative overflow-hidden" style="padding-top: 4rem;">
+    <div class="relative overflow-hidden">
         <!-- Decorative Background Elements -->
         <div class="absolute top-20 right-0 w-[600px] h-[600px] bg-gradient-to-br from-green-400/10 to-emerald-500/10 rounded-full -translate-y-1/2 translate-x-1/2 blur-3xl"></div>
         <div class="absolute bottom-0 left-0 w-[500px] h-[500px] bg-gradient-to-tr from-green-300/10 to-teal-400/10 rounded-full translate-y-1/2 -translate-x-1/2 blur-3xl"></div>

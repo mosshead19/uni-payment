@@ -269,17 +269,22 @@ class Student(BaseModel):
     def get_total_outstanding_fees(self):
         """Calculate total amount of outstanding (unpaid) fees"""
         fees = self.get_applicable_fees()
+        total_outstanding = Decimal('0.00')
         
-        # Get fee IDs that have been paid (completed payments, not voided)
-        paid_fee_ids = Payment.objects.filter(
-            student=self,
-            status='COMPLETED',
-            is_void=False
-        ).values_list('fee_type_id', flat=True)
+        # Check each fee individually to match by academic year and semester
+        for fee in fees:
+            # Check if this specific fee (by type, year, semester) has been paid
+            payment_exists = Payment.objects.filter(
+                student=self,
+                fee_type=fee,
+                status='COMPLETED',
+                is_void=False
+            ).exists()
+            
+            if not payment_exists:
+                total_outstanding += fee.amount
         
-        # Calculate total of unpaid fees only
-        unpaid_fees = fees.exclude(id__in=paid_fee_ids)
-        return unpaid_fees.aggregate(total=Sum('amount'))['total'] or Decimal('0.00')
+        return total_outstanding
     
     def get_tier1_fees(self):
         """Get Tier 1 (Program-specific) fees - all semesters for current academic year"""
@@ -812,6 +817,16 @@ class PaymentRequest(BaseModel):
         """Check if payment request has expired"""
         return timezone.now() > self.expires_at and self.status == 'PENDING'
 
+    @classmethod
+    def expire_old_requests(cls):
+        """Mark expired pending requests as expired"""
+        expired = cls.objects.filter(
+            status='PENDING',
+            expires_at__lt=timezone.now()
+        )
+        count = expired.update(status='EXPIRED')
+        return count
+
     def mark_as_paid(self):
         """Update status to paid"""
         self.status = 'PAID'
@@ -1158,10 +1173,15 @@ class AcademicYearConfig(BaseModel):
 
     def save(self, *args, **kwargs):
         """Ensure only one period is marked as current"""
+        from django.db import transaction
+        
         if self.is_current:
-            # Prevents race conditions by excluding the current object (self.pk)
-            AcademicYearConfig.objects.filter(is_current=True).exclude(pk=self.pk).update(is_current=False) 
-        super().save(*args, **kwargs)
+            # Use atomic transaction to prevent race conditions in concurrent saves
+            with transaction.atomic():
+                AcademicYearConfig.objects.filter(is_current=True).exclude(pk=self.pk).update(is_current=False)
+                super().save(*args, **kwargs)
+        else:
+            super().save(*args, **kwargs)
 
 
 # ============================================
