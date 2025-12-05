@@ -1162,12 +1162,14 @@ class StudentDashboardView(StudentRequiredMixin, TemplateView):
         # Calculate total pending amount (fees with pending payment requests)
         total_pending = filtered_pending_payments.aggregate(Sum('fee_type__amount'))['fee_type__amount__sum'] or 0
         
-        # Calculate remaining balance = Total due - (Paid + Pending)
-        remaining_balance = total_amount_due - total_paid - total_pending
+        # Calculate remaining balance = Total due - Paid (includes both unpaid fees and pending requests)
+        remaining_balance = total_amount_due - total_paid
+        
+        # Count pending payment requests (waiting for approval)
+        pending_count = filtered_pending_payments.count()
         
         # Build a comprehensive list of all fees with their payment status
         all_fees_with_status = []
-        pending_count = 0  # Fees with pending payment request (waiting for approval)
         
         for fee in applicable_fees:
             # Check if student has paid this fee (from filtered payments)
@@ -1189,10 +1191,6 @@ class StudentDashboardView(StudentRequiredMixin, TemplateView):
                     pending_request.status = 'EXPIRED'
                     pending_request.save()
                     pending_request = None
-            
-            # Count for stats - count all pending (waiting for approval)
-            if payment is None and has_valid_pending:
-                pending_count += 1  # Has pending request, waiting for approval
             
             fee_info = {
                 'fee_type': fee,
