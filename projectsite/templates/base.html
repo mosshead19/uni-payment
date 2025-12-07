@@ -7,6 +7,7 @@
     
     <!-- Favicon -->
     {% load static %}
+    {% load pwa %}
     <link rel="icon" type="image/png" href="{% static 'uni.png' %}">
     
     <!-- Google Fonts -->
@@ -75,6 +76,7 @@
     <link rel="stylesheet" href="{% static 'css/style.css' %}">
     
     {% block extra_head %}{% endblock %}
+    {% progressive_web_app_meta %}
 </head>
 <body class="up-bg-gradient-fresh min-h-screen flex flex-col">
     {% load socialaccount %}
