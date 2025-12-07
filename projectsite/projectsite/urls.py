@@ -28,9 +28,7 @@ from django.conf.urls.static import static
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('', include('pwa.urls')),
-      path('accounts/', include('allauth.urls')),
-        
-
+    path('accounts/', include('allauth.urls')),
     path('', views.HomePageView.as_view(), name='home'),
     path('login/', views.CustomLoginView.as_view(), name='login'),
     path('complete-profile/', views.CompleteProfileView.as_view(), name='complete_profile'),

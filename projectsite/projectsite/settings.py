@@ -44,11 +44,10 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'django.contrib.sites',
-'allauth',
-'allauth.account',
-'allauth.socialaccount',
-'allauth.socialaccount.providers.google',
-
+    'allauth',
+    'allauth.account',
+    'allauth.socialaccount',
+    'allauth.socialaccount.providers.google',
     'paymentorg',
     'pwa',
 ]
@@ -100,6 +99,39 @@ TEMPLATES = [
 ]
 
 WSGI_APPLICATION = 'projectsite.wsgi.application'
+
+# PWA Configuration
+PWA_APP_NAME = 'UniPay'
+PWA_APP_DESCRIPTION = 'Streamlined Fee Payment System for PSU Palawan'
+PWA_APP_THEME_COLOR = '#22c370'
+PWA_APP_BACKGROUND_COLOR = '#ffffff'
+PWA_APP_DISPLAY = 'standalone'
+PWA_APP_SCOPE = '/'
+PWA_APP_ORIENTATION = 'portrait-primary'
+PWA_APP_START_URL = '/'
+PWA_APP_STATUS_BAR_COLOR = 'default'
+PWA_APP_ICONS = [
+    {
+        'src': '/static/uni.png',
+        'sizes': '192x192',
+        'type': 'image/png',
+        'purpose': 'any',
+    },
+    {
+        'src': '/static/uni.png',
+        'sizes': '512x512',
+        'type': 'image/png',
+        'purpose': 'maskable',
+    },
+]
+PWA_APP_SCREENSHOTS = [
+    {
+        'src': '/static/uni.png',
+        'sizes': '540x720',
+        'type': 'image/png',
+    },
+]
+PWA_SERVICE_WORKER_PATH = os.path.join(BASE_DIR, 'static', 'js', 'service-worker.js')
 
 
 # Database
