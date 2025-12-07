@@ -230,8 +230,8 @@ SOCIALACCOUNT_PROVIDERS = {
 
 
 # --- Progressive Web App Settings ---
-PWA_APP_NAME = 'ProjectSite'
-PWA_APP_DESCRIPTION = "A Progressive Web App version of ProjectSite"
+PWA_APP_NAME = 'UniPay'
+PWA_APP_DESCRIPTION = "UniPay - Student Fee Payment System"
 PWA_APP_THEME_COLOR = '#0A0A0A'
 PWA_APP_BACKGROUND_COLOR = '#FFFFFF'
 PWA_APP_DISPLAY = 'standalone'
