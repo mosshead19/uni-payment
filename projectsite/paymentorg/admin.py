@@ -193,6 +193,17 @@ class FeeTypeAdmin(admin.ModelAdmin):
     list_editable = ('is_active',)
     list_per_page = 50
     
+    # Allow deletion only for superusers
+    def has_delete_permission(self, request, obj=None):
+        return request.user.is_superuser
+    
+    # Hide delete action for non-superusers
+    def get_actions(self, request):
+        actions = super().get_actions(request)
+        if not request.user.is_superuser and 'delete_selected' in actions:
+            del actions['delete_selected']
+        return actions
+    
     def is_overdue_display(self, obj):
         overdue = obj.is_overdue()
         status = 'Yes' if overdue else 'No'
@@ -216,6 +227,17 @@ class PaymentRequestAdmin(admin.ModelAdmin):
     )
     list_per_page = 50
     actions = ['mark_as_cancelled_action', 'mark_as_expired_action']
+    
+    # Allow deletion only for superusers
+    def has_delete_permission(self, request, obj=None):
+        return request.user.is_superuser
+    
+    # Hide delete action for non-superusers
+    def get_actions(self, request):
+        actions = super().get_actions(request)
+        if not request.user.is_superuser and 'delete_selected' in actions:
+            del actions['delete_selected']
+        return actions
     
     def student_info(self, obj):
         return f"{obj.student.student_id_number} - {obj.student.get_full_name()}"

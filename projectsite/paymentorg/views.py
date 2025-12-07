@@ -1143,27 +1143,28 @@ class StudentDashboardView(StudentRequiredMixin, TemplateView):
         if selected_semester:  # Only filter if a specific semester is selected
             filtered_pending_payments = filtered_pending_payments.filter(fee_type__semester=selected_semester)
         
-        # Calculate statistics based on FILTERED fees
+       # Calculate statistics based on FILTERED fees
         completed_payments = student.get_completed_payments()
 
-        # Filter completed payments by the same criteria
-        filtered_completed_payments = completed_payments
-        if selected_academic_year:
-            filtered_completed_payments = filtered_completed_payments.filter(fee_type__academic_year=selected_academic_year)
-        if selected_semester:
-            filtered_completed_payments = filtered_completed_payments.filter(fee_type__semester=selected_semester)
+        # IMPORTANT: Filter completed payments to match the DISPLAYED applicable_fees
+        # Get the fee IDs that are currently displayed (after all filters applied)
+        displayed_fee_ids = list(applicable_fees.values_list('id', flat=True))
 
+        # Only count payments for fees that are CURRENTLY DISPLAYED
+        filtered_completed_payments = completed_payments.filter(fee_type_id__in=displayed_fee_ids)
+        
+        # Now calculate stats from ONLY the displayed fees' payments
         total_paid = filtered_completed_payments.aggregate(Sum('amount'))['amount__sum'] or 0
         payments_count = filtered_completed_payments.count()
 
-        # Get IDs of fees that have been paid
+        # Get IDs of fees that have been paid (from the filtered set)
         paid_fee_ids = filtered_completed_payments.values_list('fee_type_id', flat=True)
 
         # Calculate UNPAID fees only (fees in applicable_fees but NOT in paid_fee_ids)
         unpaid_fees = applicable_fees.exclude(id__in=paid_fee_ids)
         remaining_balance = unpaid_fees.aggregate(Sum('amount'))['amount__sum'] or 0
 
-        # Total amount due = sum of all applicable fees (for display)
+        # Total amount due = sum of all DISPLAYED applicable fees
         total_amount_due = applicable_fees.aggregate(Sum('amount'))['amount__sum'] or 0
 
         # Calculate pending total strictly from filtered pending requests
@@ -1499,6 +1500,13 @@ class OfficerDashboardView(OfficerRequiredMixin, TemplateView):
                 expires_at__gt=timezone.now()
             ).order_by('created_at')[:10]
             
+            # Count total pending requests (not just the first 10 displayed)
+            pending_requests_count = PaymentRequest.objects.filter(
+                organization=organization,
+                status='PENDING',
+                expires_at__gt=timezone.now()
+            ).count()
+            
             # Get posted payment postings (bulk fees posted by this officer or organization)
             posted_requests = BulkPaymentPosting.objects.filter(
                 organization=organization
@@ -1529,6 +1537,7 @@ class OfficerDashboardView(OfficerRequiredMixin, TemplateView):
                 'officer': officer,
                 'organization': organization,
                 'pending_requests': pending_requests,
+                'pending_requests_count': pending_requests_count,
                 'posted_requests': posted_requests,
                 'today_collections': organization.get_today_collection(),
                 'total_collected_system': organization.get_total_collected(),
