@@ -1,12 +1,10 @@
 # Uni-Pay — Updated Full Feature Overview  
 
 # 📘 Introduction
-Uni-Pay is a school-focused digital payment platform designed to make paying for **absences, school fees, penalties, and campus services** faster, easier, and fully cashless.  
+Uni-Pay is a school-focused digital payment platform designed to make paying for **absences, school fees and penalties** faster, easier, and fully cashless.  
 This document contains the **full feature overview** and the **marketing-style poster layout** for school use.
 
----
-
-# 🚀 Core System Features
+# 🚀 System Features
 
 ## 👤 User Accounts & Authentication
 - Student, Merchant, and Admin roles  
@@ -33,15 +31,12 @@ This document contains the **full feature overview** and the **marketing-style p
 - View absence fees  
 - Pay absence penalties instantly  
 - Auto-recording of payments  
-- Proof of payment for teachers/admin  
-- Reduces cashier lines  
+- Proof of payment for teachers/admin   
 - Prevents overdue penalties  
 
 ---
 
-## 🛒 Campus Service Payments
-- Cafeteria purchases  
-- Printing services  
+## 🛒 Campus Service Payments   
 - School events / tickets  
 - School supplies (if applicable)  
 - Tuition and other school fees (optional)  
@@ -106,8 +101,7 @@ This document contains the **full feature overview** and the **marketing-style p
 ---
 
 # 📈 Analytics
-- Student payment insights  
-- Merchant sales reports  
+- Student payment insights   
 - Fee collection breakdown  
 - Absence payment statistics  
 - Export data (CSV, PDF)  
