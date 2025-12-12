@@ -1770,11 +1770,19 @@ class PostBulkPaymentView(OfficerRequiredMixin, View):
                 fee_type.applicable_year_levels = applicable_year_level
                 fee_type.save()
             
-            # Get all students belonging to this organization
-            # Filter by year level if not "All"
-            students = Student.objects.filter(
-                is_active=True
-            )
+            # Select eligible students scoped to the organization level
+            # Program-level: only students whose course.program_type matches org.program_affiliation
+            # College-level: students in the same college/department
+            students = Student.objects.filter(is_active=True)
+            if organization.hierarchy_level == 'PROGRAM':
+                if organization.program_affiliation:
+                    students = students.filter(course__program_type=organization.program_affiliation)
+                else:
+                    # If program affiliation is missing, avoid cross-program posting
+                    students = students.none()
+            elif organization.hierarchy_level == 'COLLEGE':
+                # Match by college name to department string
+                students = students.filter(college__name=organization.department)
             
             if applicable_year_level != 'All':
                 students = students.filter(year_level=applicable_year_level)
