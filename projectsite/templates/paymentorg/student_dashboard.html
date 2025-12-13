@@ -3,6 +3,8 @@
 
 {% block content %}
 <div class="space-y-6">
+    <!-- Notification Toast Container -->
+    <div id="notification-container" class="fixed top-4 right-4 z-50 space-y-2"></div>
     
     <!-- Hero Section - Student Info -->
     <div class="bg-green-200 rounded-lg border border-green-400 p-4 md:p-8 shadow-md">
@@ -744,5 +746,120 @@
         }
     }
     {% endif %}
+
+    // Real-time payment notification system
+    class PaymentNotificationManager {
+        constructor() {
+            this.lastCheckTime = localStorage.getItem('lastPaymentCheck') || new Date().toISOString();
+            this.checkInterval = 10000; // Check every 10 seconds
+            this.startMonitoring();
+        }
+
+        startMonitoring() {
+            // Initial check
+            this.checkForNewPayments();
+            
+            // Set up periodic checks
+            setInterval(() => this.checkForNewPayments(), this.checkInterval);
+        }
+
+        checkForNewPayments() {
+            fetch(`{% url 'api_check_new_payments' %}?last_check=${encodeURIComponent(this.lastCheckTime)}`)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.has_new_payments && data.new_fees.length > 0) {
+                        this.showNewPaymentNotification(data.new_fees);
+                        // Auto-refresh the page to show new fees
+                        setTimeout(() => {
+                            window.location.reload();
+                        }, 5000);
+                    }
+                    // Update last check time
+                    this.lastCheckTime = data.current_time;
+                    localStorage.setItem('lastPaymentCheck', this.lastCheckTime);
+                })
+                .catch(error => console.error('Error checking for new payments:', error));
+        }
+
+        showNewPaymentNotification(fees) {
+            const container = document.getElementById('notification-container');
+            if (!container) return;
+
+            const notification = document.createElement('div');
+            notification.className = 'bg-green-50 border-l-4 border-green-500 p-4 rounded-lg shadow-lg animate-slide-in';
+            notification.style.cssText = `
+                animation: slideInRight 0.3s ease-out;
+                max-width: 400px;
+            `;
+
+            const fee = fees[0];
+            const feeList = fees.length > 1 
+                ? `<p class="text-sm text-gray-600 mt-2">+${fees.length} new ${fees.length === 1 ? 'fee' : 'fees'} posted</p>`
+                : '';
+
+            notification.innerHTML = `
+                <div class="flex items-start gap-3">
+                    <div class="flex-shrink-0">
+                        <i class="lucide lucide-check-circle text-green-600" style="width: 24px; height: 24px;"></i>
+                    </div>
+                    <div class="flex-1">
+                        <h3 class="font-semibold text-green-800">New Payment Posted!</h3>
+                        <p class="text-sm text-green-700 mt-1"><strong>${fee.organization}</strong> has posted a new fee</p>
+                        <p class="text-sm text-green-600 mt-1"><strong>${fee.name}</strong> - ₱${parseFloat(fee.amount).toFixed(2)}</p>
+                        ${feeList}
+                        <p class="text-xs text-green-500 mt-3">Page will refresh in 5 seconds...</p>
+                    </div>
+                    <button onclick="this.parentElement.parentElement.remove()" class="text-green-500 hover:text-green-700">
+                        <i class="lucide lucide-x" style="width: 20px; height: 20px;"></i>
+                    </button>
+                </div>
+            `;
+
+            container.appendChild(notification);
+
+            // Add CSS animations if not already present
+            if (!document.getElementById('notification-styles')) {
+                const style = document.createElement('style');
+                style.id = 'notification-styles';
+                style.textContent = `
+                    @keyframes slideInRight {
+                        from {
+                            transform: translateX(400px);
+                            opacity: 0;
+                        }
+                        to {
+                            transform: translateX(0);
+                            opacity: 1;
+                        }
+                    }
+                    .animate-slide-in {
+                        animation: slideInRight 0.3s ease-out;
+                    }
+                `;
+                document.head.appendChild(style);
+            }
+
+            // Update Lucide icons in the new notification
+            if (typeof lucide !== 'undefined') {
+                lucide.createIcons();
+            }
+
+            // Auto-remove after 8 seconds if not manually closed
+            setTimeout(() => {
+                if (notification.parentElement) {
+                    notification.remove();
+                }
+            }, 8000);
+        }
+    }
+
+    // Initialize notification manager when DOM is ready
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', () => {
+            new PaymentNotificationManager();
+        });
+    } else {
+        new PaymentNotificationManager();
+    }
 </script>
 {% endblock %}

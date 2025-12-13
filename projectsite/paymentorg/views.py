@@ -3047,3 +3047,56 @@ class CompleteProfileView(LoginRequiredMixin, View):
             'course_options_json': json.dumps(course_payload),
         }
         return render(request, self.template_name, context)
+
+
+# API endpoints for real-time updates
+class CheckNewPaymentsAPI(StudentRequiredMixin, View):
+    """Check if new payments have been posted for the student's organizations"""
+    
+    def get(self, request):
+        student = request.user.student_profile
+        
+        # Get student's applicable fees to determine their organizations
+        student_orgs = Organization.objects.filter(
+            fee_types__in=student.get_applicable_fees()
+        ).distinct()
+        
+        # Get the last check time from the request (client-side tracking)
+        last_check_time_str = request.GET.get('last_check', None)
+        
+        new_fees = []
+        has_new = False
+        
+        if last_check_time_str:
+            try:
+                last_check_time = timezone.datetime.fromisoformat(last_check_time_str)
+                # Find fees posted since last check
+                newly_posted_fees = FeeType.objects.filter(
+                    organization__in=student_orgs,
+                    created_at__gt=last_check_time
+                ).order_by('-created_at')
+                
+                if newly_posted_fees.exists():
+                    has_new = True
+                    new_fees = [
+                        {
+                            'id': fee.id,
+                            'name': fee.name,
+                            'organization': fee.organization.name,
+                            'organization_code': fee.organization.code,
+                            'amount': str(fee.amount),
+                            'academic_year': str(fee.academic_year),
+                            'semester': fee.semester,
+                            'posted_at': fee.created_at.isoformat(),
+                        }
+                        for fee in newly_posted_fees[:5]  # Limit to 5 most recent
+                    ]
+            except (ValueError, TypeError):
+                pass
+        
+        return JsonResponse({
+            'has_new_payments': has_new,
+            'new_fees': new_fees,
+            'current_time': timezone.now().isoformat(),
+            'student_organizations': [org.code for org in student_orgs],
+        })

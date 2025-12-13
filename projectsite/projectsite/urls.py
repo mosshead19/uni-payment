@@ -53,6 +53,7 @@ urlpatterns = [
     path('student/request/<uuid:request_id>/view-qr/', views.ViewPaymentRequestQRView.as_view(), name='view_payment_request_qr'),
     path('student/request/<uuid:request_id>/qr/', views.ShowPaymentQRView.as_view(), name='show_payment_qr'),
     path('api/request/<uuid:request_id>/status/', views.PaymentRequestStatusAPI.as_view(), name='api_request_status'),
+    path('api/check-new-payments/', views.CheckNewPaymentsAPI.as_view(), name='api_check_new_payments'),
 
     path('officer/dashboard/', views.OfficerDashboardView.as_view(), name='officer_dashboard'),
     path('officer/profile/update/', views.UpdateOfficerProfileView.as_view(), name='officer_profile_update'),
