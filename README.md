@@ -1,7 +1,116 @@
+# UniPay - Unified Payment Portal
+
+## 🎯 Problem Statement
+
+Managing fee payments in educational institutions, particularly at the college level, presents numerous challenges:
+
+- **Fragmented Payment Systems**: Different programs and organizations often use separate payment methods, leading to confusion and inefficiency
+- **Complex Fee Structures**: Students need to navigate multiple fee types (program-specific fees vs. college-wide fees) without a unified view
+- **Manual Processing**: Traditional payment processing is time-consuming, error-prone, and lacks real-time tracking
+- **Limited Transparency**: Students struggle to track payment history, outstanding fees, and payment status
+- **Access Control Issues**: Managing officer permissions across different organizational levels (college vs. program) requires complex authorization logic
+- **QR Code Integration**: Modern payment systems require seamless QR code generation and scanning capabilities
+
+**UniPay** solves these challenges by providing a **unified, intelligent payment portal** specifically designed for the College of Sciences, featuring a two-tiered fee system, role-based access control, and modern QR code payment processing.
+
+## ✨ Key Features
+
+### 🔐 Unified Authentication
+- **Single Sign-On**: All users (students and officers) authenticate through one portal using Google OAuth
+- **Role-Based Access Control**: Automatic role detection based on user profile (student vs. officer)
+- **Secure Authentication**: Integration with Django AllAuth for secure OAuth 2.0 authentication
+
+### 💰 Two-Tiered Fee System
+- **Tier 1 - Program Affiliation Fees**: Program-specific fees unique to each academic program
+  - Medical Biology, Marine Biology, Computer Science, Environmental Science, Information Technology
+- **Tier 2 - College-Wide Organization Fees**: Mandatory fees for all students across the College
+  - College Student Government (CSG),
+  -  Compendium
+- **Intelligent Fee Calculation**: Students only see fees relevant to their program and college requirements
+
+### 📱 QR Code Payment Processing
+- **QR Code Generation**: Students can generate unique QR codes for payment requests
+- **QR Code Scanning**: Officers can scan QR codes to process payments instantly
+- **Real-Time Status Updates**: Payment status updates immediately after processing
+
+### 👥 Multi-Level Organization Hierarchy
+- **College-Level Officers**: Can manage all programs under the college
+- **Program-Level Officers**: Limited to their specific program data
+- **Hierarchical Access Control**: Officers can only access data from their organization and child organizations
+- **Promotion Authority**: Designated  officers can promote students to officer status within their scope or demote officer of their respective program affiliation to student status 
+
+### 📊 Comprehensive Dashboards
+- **Student Dashboard**: 
+  - View all applicable fees (Tier 1 + Tier 2)
+  - Generate QR codes for payment requests
+  - Track payment history and outstanding fees
+  - View payment receipts
+- **Officer Dashboard**:
+  - Process payments via QR code scanning
+  - View organization-specific statistics
+  - Manage fee types and payment requests
+  - Access bulk payment posting
+  - View transaction history
+
+### 🔒 Security & Permissions
+- **Data Isolation**: Officers can only access data from their organization hierarchy
+- **Permission-Based Features**: Different officer roles have different capabilities
+- **Activity Logging**: All promotions, demotions, and critical actions are logged
+- **Audit Trail**: Complete history of payment transactions and officer actions
+
+### 📧 Email Notifications
+- **Payment Receipts**: Automatic email receipts after successful payment processing
+- **Payment Confirmations**: Real-time notifications for payment status changes
+
+### 📱 Progressive Web App (PWA)
+- **Mobile-Friendly**: Responsive design optimized for mobile devices
+- **Offline Capability**: Basic functionality available offline
+- **Installable**: Can be installed as a native app on mobile devices
+
+## 🛠️ Tech Stack
+
+### Backend
+- **Django 5.2.7**: High-level Python web framework for rapid development
+- **Django AllAuth 65.13.1**: Integrated authentication system with Google OAuth support
+- **SQLite**: Lightweight database for development (easily switchable to PostgreSQL for production)
+- **Python 3.11+**: Modern Python with type hints and async support
+
+### Frontend
+- **Tailwind CSS**: Utility-first CSS framework for rapid UI development
+- **Bootstrap 5**: Additional CSS framework for responsive components
+- **Lucide Icons**: Modern icon library for UI elements
+- **Custom CSS Design System**: Minimalist green-to-yellow gradient theme
+
+### Payment & QR Code
+- **QRCode 8.2**: Python library for QR code generation
+- **Pillow 12.0.0**: Image processing for QR code rendering
+
+### Email & Communication
+- **Django SendGrid V5 1.2.3**: Email service integration for receipts and notifications
+- **SendGrid 6.12.5**: Transactional email API
+
+### Development & Deployment
+- **Django PWA 2.0.1**: Progressive Web App support
+- **WhiteNoise 6.11.0**: Static file serving for production
+- **Python-Dotenv 1.2.1**: Environment variable management
+- **Faker 37.12.0**: Test data generation for development
+
+### Security
+- **Cryptography 46.0.3**: Cryptographic primitives for secure operations
+- **PyJWT 2.10.1**: JSON Web Token implementation for secure authentication
+
+## 🎨 Design Philosophy
+
+UniPay features a **minimalist, modern design** with a clean green-to-yellow gradient theme:
+- **Primary Gradient**: `linear-gradient(0deg, rgba(34, 195, 112, 1) 0%, rgba(60, 194, 104, 1) 39%, rgba(253, 187, 45, 1) 100%)`
+- **Simple & Clean**: Focus on usability and clarity
+- **Responsive Design**: Optimized for desktop, tablet, and mobile devices
+- **Accessible**: WCAG-compliant color contrasts and keyboard navigation
+
 ## System Architecture
 
 ### Scope
-- **College Focus**: This system is designed specifically for the **College of Sciences** only
+- **College Focus**: This system is designed specifically for the **College of Sciences** at the moment
 - All courses, students, and organizations are within the College of Sciences
 
 ### Unified Login System
@@ -148,125 +257,64 @@ This command is:
 - ✅ **Part of the codebase** - No need for external scripts
 - ✅ **Django-native** - Works with your deployment system
 
-## Test Accounts
+## Authentication
 
-### Superuser Accounts
+### Google OAuth Login Only
 
-| Username        | Password         | Role / Notes                                   |
-|-----------------|------------------|-----------------------------------------------|
-| `superofficer`  | `SuperOfficer@123` | Super Officer + Organization-level access    |
-| `admin2`        | `Admin2@12345`   | Full superuser + admin panel access           |
-| `superstudent`  | `SuperStudent@123` | Superuser + Student profile (for testing)     |
+UniPay uses **Google OAuth authentication exclusively**. All users must sign in using their PSU Palawan corporate email account (`@psu.palawan.edu.ph`).
 
-### Organization Hierarchy Test Accounts
+**Login Requirements:**
+- ✅ Must use Google account with `@psu.palawan.edu.ph` email domain
+- ✅ First-time users are automatically registered upon first login
+- ✅ User roles (Student/Officer) are determined by their profile in the system
+- ❌ Username/password login is **not supported**
 
-These accounts test the multi-level organization structure with different access permissions:
+### Test Account Setup
 
-#### College-Level Officer
-- **Username**: `college_officer`
-- **Password**: `CollegeOfficer@123`
+To create test accounts for development/testing:
+
+1. **Create users via Django admin or management commands:**
+   ```bash
+   python manage.py create_promotion_officers
+   ```
+
+2. **Users must have Google accounts with `@psu.palawan.edu.ph` email addresses**
+
+3. **User roles are assigned through:**
+   - Student profiles (automatic for students)
+   - Officer profiles (created by authorized officers or admins)
+   - Django admin panel (for superusers)
+
+### Test Account Types
+
+The system supports different account types for testing:
+
+#### College-Level Officers
 - **Organization**: College of Sciences Administration
 - **Role**: College Administrator
 - **Permissions**: Can process & void payments, generate reports, **promote officers**
 - **Access**: See and manage ALL programs under College of Sciences
-  - Computer Science
-  - Environmental Science
-  - Information Technology
+  - Computer Science, Environmental Science, Information Technology
 - **Use Case**: Test college-wide officer accessing data from all programs
 
-#### Program-Level Officer (No Promotion Authority)
-- **Username**: `cs_officer`
-- **Password**: `CSProgram@123`
-- **Organization**: Computer Science Student Government
+#### Program-Level Officers (No Promotion Authority)
+- **Organization**: Program-specific (e.g., Computer Science Student Government)
 - **Role**: Treasurer
 - **Permissions**: Can process payments only (no void, no reports, NO promotion)
-- **Access**: See ONLY Computer Science program data
-- **Use Case**: Test program-specific officer with limited access and no promotion capability
+- **Access**: See ONLY their specific program data
+- **Use Case**: Test program-specific officer with limited access
 
-#### Program-Level Officer (With Promotion Authority)
-- **Username**: `es_officer`
-- **Password**: `EnvScience@123`
-- **Organization**: Environmental Science Club
+#### Program-Level Officers (With Promotion Authority)
+- **Organization**: Program-specific (e.g., Environmental Science Club)
 - **Role**: President
-- **Permissions**: Can process & void payments, **promote officers** (no reports)
-- **Access**: See ONLY Environmental Science program data + promote/demote officers within program
+- **Permissions**: Can process & void payments, **promote officers**
+- **Access**: See ONLY their program data + can promote/demote officers within program
 - **Use Case**: Test program-level promotion authority
 
-### Promotion Authority Test Accounts (Multi-Organization)
-
-These accounts have promotion authority (`can_promote_officers = TRUE`) and can promote/demote officers within their accessible organizations:
-
-#### All Organizations Admin (College-Level)
-- **Username**: `all_org_officer`
-- **Password**: `AllOrg@123`
-- **Organization**: ALL Organizations Admin (COLLEGE level)
-- **Role**: College Administrator
-- **Permissions**: Can process & void payments, generate reports, **promote/demote officers**
-- **Access**: See and manage ALL programs (Medical Biology, Marine Biology, IT, Computer Science)
-- **Use Case**: Test college-wide promotion authority across multiple programs
-
-#### Medical Biology Officer
-- **Username**: `medbio_officer`
-- **Password**: `MedBio@123`
-- **Organization**: Medical Biology (PROGRAM level)
-- **Role**: Program Head
-- **Permissions**: Can process & void payments, generate reports, **promote/demote officers**
-- **Access**: See ONLY Medical Biology program data + full promotion authority within program
-- **Use Case**: Test program-level promotion authority with full management capabilities
-
-#### Marine Biology Officer
-- **Username**: `marinebio_officer`
-- **Password**: `MarineBio@123`
-- **Organization**: Marine Biology (PROGRAM level)
-- **Role**: Program Head
-- **Permissions**: Can process & void payments, generate reports, **promote/demote officers**
-- **Access**: See ONLY Marine Biology program data + full promotion authority within program
-- **Use Case**: Test program-level promotion authority with full management capabilities
-
-#### Information Technology Officer
-- **Username**: `it_officer`
-- **Password**: `IT@123`
-- **Organization**: Information Technology (PROGRAM level)
-- **Role**: Program Head
-- **Permissions**: Can process & void payments, generate reports, **promote/demote officers**
-- **Access**: See ONLY IT program data + full promotion authority within program
-- **Use Case**: Test program-level promotion authority with full management capabilities
-
-#### Computer Science Officer
-- **Username**: `comsci_officer`
-- **Password**: `ComSci@123`
-- **Organization**: Computer Science (PROGRAM level)
-- **Role**: Program Head
-- **Permissions**: Can process & void payments, generate reports, **promote/demote officers**
-- **Access**: See ONLY Computer Science program data + full promotion authority within program
-- **Use Case**: Test program-level promotion authority with full management capabilities
-
-### Original Officer Accounts (Tier 1 - Program-Specific Organizations)
-
-| Username             | Password   | Organization Code | Fee Tier | Program Affiliation                    |
-|----------------------|------------|-------------------|----------|----------------------------------------|
-| `officer_bio`        | `admin123` | BIO               | Tier 1   | Medical Biology                        |
-| `officer_mbio`       | `admin123` | MBIO              | Tier 1   | Marine Biology                         |
-| `officer_bscs`       | `admin123` | BSCS              | Tier 1   | Computer Science                       |
-| `officer_bses`       | `admin123` | BSES              | Tier 1   | Environmental Science                  |
-| `officer_bsit`       | `admin123` | BSIT              | Tier 1   | Information Technology                 |
-
-### Officer Accounts (Tier 2 - College-Wide Organizations)
-
-| Username             | Password   | Organization Code | Fee Tier | Description                            |
-|----------------------|------------|-------------------|----------|----------------------------------------|
-| `officer_csg`        | `admin123` | CSG               | Tier 2   | College Student Government              |
-| `officer_compendium` | `admin123` | COMPENDIUM        | Tier 2   | Compendium                              |
-
-### Sample Student Accounts
-
-The data seeder provisions 10 numbered students. All use the password `password123`.
-
-| Username     | Password     | Details                                           |
-|--------------|--------------|---------------------------------------------------|
-| `student001` | `password123`| Randomized course/year; sees Tier 1 + Tier 2 fees |
-| `student002` | `password123`| …                                                 |
-| `student010` | `password123`| …                                                 |
+#### Superuser Accounts
+- **Access**: Full Django admin panel access
+- **Permissions**: Unrestricted access to all features and data
+- **Use Case**: System administration and testing
 
 ## Key Features
 
@@ -322,32 +370,31 @@ College of Sciences (COLLEGE LEVEL)
 
 ### Testing Workflow
 
-1. **Test College-Level Officer (college_officer)**
-   - Login with `college_officer` / `CollegeOfficer@123`
+1. **Test College-Level Officer**
+   - Login with Google account (college-level officer email)
    - Go to Officer Dashboard
    - Verify you can see all 3 programs' data in admin pages
    - Click "Promote Officer" and verify you can select students from ALL programs
    - Try assigning officers to different programs
 
-2. **Test Program-Level Officer - No Promotion (cs_officer)**
-   - Login with `cs_officer` / `CSProgram@123`
+2. **Test Program-Level Officer - No Promotion**
+   - Login with Google account (program-level officer email without promotion authority)
    - Go to Officer Dashboard
-   - Verify you see ONLY Computer Science data
+   - Verify you see ONLY your program's data
    - Verify "Promote Officer" button is NOT visible
-   - Try accessing `/staff/students/` - should see only CS students
-   - Try accessing CS student detail page - should succeed
-   - Try accessing Environmental Science student - should be denied
+   - Try accessing `/staff/students/` - should see only your program's students
+   - Try accessing student detail page from your program - should succeed
+   - Try accessing student from another program - should be denied
 
-3. **Test Program-Level Officer - With Promotion (es_officer)**
-   - Login with `es_officer` / `EnvScience@123`
+3. **Test Program-Level Officer - With Promotion**
+   - Login with Google account (program-level officer email with promotion authority)
    - Go to Officer Dashboard
-   - Verify you see ONLY Environmental Science data
-   - Verify "Promote Officer" and "Demote Officer" buttons ARE visible
-   - Click "Promote Officer" and verify only ES students appear
-   - Try promoting a CS student - should be denied
+   - goto student > actions > promote / demote , you should onyl be able to do such actions to students within your program scope
+   - Click "Promote Officer" and verify only your program's students appear
+   - Try promoting a student from another program - should be denied
 
-4. **Test Super Admin (admin2)**
-   - Login with `admin2` / `Admin2@12345`
+4. **Test Super Admin**
+   - Login with Google account (superuser email)
    - Access `/admin/` - should see all data
    - Create new organizations or modify any student/officer
    - Use Django admin to manage hierarchy and permissions
@@ -356,9 +403,8 @@ College of Sciences (COLLEGE LEVEL)
 - [ ] cs_officer cannot view data from other programs
 - [ ] cs_officer cannot access promote/demote functions
 - [ ] es_officer can promote students only within their program
-- [ ] college_officer can manage all programs in the college
-- [ ] admin2 has unrestricted access to all data
-- [ ] Accessing denied resources returns 403 or redirects to login
+- [ ] superuser has unrestricted access to all data
+
 
 ## Management Commands
 
@@ -388,14 +434,7 @@ python create_promotion_officers.py
 python update_org_affiliations.py
 ```
 
-**Test Accounts Created:**
-- `all_org_officer` / `AllOrg@123` - College-level (all programs)
-- `medbio_officer` / `MedBio@123` - Medical Biology only
-- `marinebio_officer` / `MarineBio@123` - Marine Biology only
-- `it_officer` / `IT@123` - Information Technology only
-- `comsci_officer` / `ComSci@123` - Computer Science only
-
-All accounts have promotion authority (`can_promote_officers = TRUE`) and full payment processing permissions.
+**Note:** All test accounts must be created with Google accounts using `@psu.palawan.edu.ph` email addresses. The management command creates officer profiles with promotion authority (`can_promote_officers = TRUE`) and full payment processing permissions.
 
 ### Database Management
 ```bash
