@@ -1822,7 +1822,32 @@ class PostBulkPaymentView(OfficerRequiredMixin, View):
             students = Student.objects.filter(is_active=True)
             
             if organization.hierarchy_level == 'PROGRAM':
-                if organization.program_affiliation:
+                # For PROGRAM-level orgs:
+                # - If program_affiliation == 'ALL': cascade to all child organizations
+                # - Otherwise: filter to specific program type
+                
+                if organization.program_affiliation == 'ALL':
+                    # 'ALL' means get students from all child organizations
+                    child_orgs = organization.child_organizations.all()
+                    
+                    eligible_programs = []
+                    
+                    # Collect all program types from child organizations
+                    for child_org in child_orgs:
+                        if child_org.program_affiliation and child_org.program_affiliation != 'ALL':
+                            program_type = normalize_program_affiliation(child_org.program_affiliation)
+                            if program_type:
+                                eligible_programs.append(program_type)
+                    
+                    if eligible_programs:
+                        students = students.filter(course__program_type__in=eligible_programs)
+                    else:
+                        # If no child programs found with specific affiliations, include all students
+                        # Keep all students (already filtered by is_active=True above)
+                        pass
+                        
+                elif organization.program_affiliation:
+                    # Specific program affiliation
                     program_type = normalize_program_affiliation(organization.program_affiliation)
                     if program_type:
                         students = students.filter(course__program_type=program_type)
@@ -1885,8 +1910,6 @@ class PostBulkPaymentView(OfficerRequiredMixin, View):
             created_count = 0
             failed_count = 0
             
-            logger.info(f"Starting bulk payment posting: {len(list(students))} eligible students found")
-            
             # Determine expiry date - use payment_deadline if provided, otherwise 30 days
             if payment_deadline:
                 from datetime import datetime
@@ -1897,7 +1920,6 @@ class PostBulkPaymentView(OfficerRequiredMixin, View):
             # create paymentrequest objects for each student
             for student in students:
                 try:
-                    logger.debug(f"Creating payment request for student {student.student_id_number}")
                     # create paymentrequest with unique request_id
                     # NOTE: qr_signature is left empty - it will be generated when the student
                     # explicitly clicks "Generate QR" on their dashboard. This ensures the
@@ -1916,7 +1938,6 @@ class PostBulkPaymentView(OfficerRequiredMixin, View):
                     )
                     
                     created_count += 1
-                    logger.debug(f"Successfully created payment request {payment_request.request_id}")
                     
                 except Exception as e:
                     logger.error(f'Error creating payment request for {student.student_id_number}: {str(e)}', exc_info=True)
