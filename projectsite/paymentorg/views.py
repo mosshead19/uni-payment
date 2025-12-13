@@ -1818,8 +1818,9 @@ class PostBulkPaymentView(OfficerRequiredMixin, View):
             
             # Select eligible students scoped to the organization level
             # Program-level: only students whose course.program_type matches org.program_affiliation
-            # College-level: students whose course's college matches org.department
+            # College-level: students from all child program organizations
             students = Student.objects.filter(is_active=True)
+            
             if organization.hierarchy_level == 'PROGRAM':
                 if organization.program_affiliation:
                     program_type = normalize_program_affiliation(organization.program_affiliation)
@@ -1831,9 +1832,28 @@ class PostBulkPaymentView(OfficerRequiredMixin, View):
                 else:
                     # If program affiliation is missing, avoid cross-program posting
                     students = students.none()
+            
             elif organization.hierarchy_level == 'COLLEGE':
-                # Match by college: get all students whose course's college matches the department
-                students = students.filter(course__college__name=organization.department)
+                # For college-level orgs, get students from all child program organizations
+                # This includes all students whose programs are children of this college
+                child_orgs = organization.child_organizations.all()
+                
+                from django.db.models import Q
+                eligible_programs = []
+                
+                # Collect all program types from child organizations
+                for child_org in child_orgs:
+                    if child_org.program_affiliation and child_org.program_affiliation != 'ALL':
+                        program_type = normalize_program_affiliation(child_org.program_affiliation)
+                        if program_type:
+                            eligible_programs.append(program_type)
+                
+                # Filter students by eligible program types
+                if eligible_programs:
+                    students = students.filter(course__program_type__in=eligible_programs)
+                else:
+                    # Fallback: if no child programs found, get by college name
+                    students = students.filter(course__college__name=organization.department)
             
             if applicable_year_level != 'All':
                 students = students.filter(year_level=applicable_year_level)
