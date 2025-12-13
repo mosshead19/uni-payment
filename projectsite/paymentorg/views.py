@@ -874,6 +874,9 @@ class ListStudentsInOrgView(LoginRequiredMixin, UserPassesTestMixin, ListView):
     
     def test_func(self):
         user = self.request.user
+        # Allow superusers to access all students
+        if user.is_superuser:
+            return True
         # Only officers with promote/demote ability can view this
         if hasattr(user, 'officer_profile'):
             return user.officer_profile.is_super_officer or user.officer_profile.can_promote_officers
@@ -885,6 +888,11 @@ class ListStudentsInOrgView(LoginRequiredMixin, UserPassesTestMixin, ListView):
     
     def get_queryset(self):
         user = self.request.user
+        
+        # Superusers see all students across all organizations
+        if user.is_superuser:
+            return Student.objects.filter(is_active=True).select_related('user', 'course', 'course__college').order_by('last_name', 'first_name')
+        
         if not hasattr(user, 'officer_profile'):
             return Student.objects.none()
         
@@ -2403,9 +2411,9 @@ class StudentListView(SuperOfficerOrStaffMixin, ListView):
     def get_queryset(self):
         queryset = Student.objects.select_related('user').all()
         
-        # Filter by organization if super officer
+        # Superusers see all students; super officers see only their org's students
         org = self.get_user_organization()
-        if org:
+        if org and not self.request.user.is_superuser:
             # Get all students who have fees in this organization
             queryset = queryset.filter(applicable_fees__organization=org).distinct()
         
@@ -2503,9 +2511,9 @@ class OfficerListView(SuperOfficerOrStaffMixin, ListView):
     def get_queryset(self):
         queryset = Officer.objects.select_related('user', 'organization').all()
         
-        # Filter by organization if super officer
+        # Superusers see all officers; super officers see only their org's officers
         org = self.get_user_organization()
-        if org:
+        if org and not self.request.user.is_superuser:
             queryset = queryset.filter(organization=org)
         
         org_filter = self.request.GET.get('organization')
