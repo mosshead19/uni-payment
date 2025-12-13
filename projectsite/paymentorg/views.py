@@ -817,6 +817,9 @@ class ListOfficersInOrgView(LoginRequiredMixin, UserPassesTestMixin, ListView):
     
     def test_func(self):
         user = self.request.user
+        # Allow superusers to access all officers
+        if user.is_superuser:
+            return True
         # Only officers with promote/demote ability can view this
         if hasattr(user, 'officer_profile'):
             return user.officer_profile.is_super_officer or user.officer_profile.can_promote_officers
@@ -828,6 +831,11 @@ class ListOfficersInOrgView(LoginRequiredMixin, UserPassesTestMixin, ListView):
     
     def get_queryset(self):
         user = self.request.user
+        
+        # Superusers see all officers across all organizations
+        if user.is_superuser:
+            return Officer.objects.filter(is_active=True).select_related('user', 'organization').order_by('organization', 'user__last_name', 'user__first_name')
+        
         if not hasattr(user, 'officer_profile'):
             return Officer.objects.none()
         
@@ -2686,16 +2694,20 @@ class PaymentListView(LoginRequiredMixin, ListView):
     def get_queryset(self):
         user = self.request.user
         
+        # Superusers see ALL payments across all organizations first
+        if user.is_superuser:
+            queryset = Payment.objects.select_related(
+                'student', 'organization', 'fee_type', 'processed_by'
+            ).all()
         # Officers and admins see organization payments (transaction history)
-        # Check officer_profile FIRST since officers are also students
-        if hasattr(user, 'officer_profile'):
+        elif hasattr(user, 'officer_profile'):
             # Get all accessible organizations (including child orgs)
             accessible_org_ids = user.officer_profile.organization.get_accessible_organization_ids()
             queryset = Payment.objects.select_related(
                 'student', 'organization', 'fee_type', 'processed_by'
             ).filter(organization_id__in=accessible_org_ids)
-        elif user.is_staff or user.is_superuser:
-            # Staff/superuser see all payments
+        elif user.is_staff:
+            # Staff (non-superuser) see all payments
             queryset = Payment.objects.select_related(
                 'student', 'organization', 'fee_type', 'processed_by'
             ).all()
