@@ -26,6 +26,11 @@ load_dotenv(BASE_DIR / '.env')
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = 'django-insecure-1!)xo2$_c_p(@h@wz@l2gz+toc3^fuo%i7*wx51-1nqb=i!dpq'
 
+# QR Code Signature Key - IMPORTANT: Never change this value after generating QR codes
+# Set this to a long random string in .env as QR_SIGNATURE_KEY
+# This ensures QR codes remain valid even when SECRET_KEY is rotated during deployments
+QR_SIGNATURE_KEY = os.getenv('QR_SIGNATURE_KEY', 'default-qr-key-change-me-in-env')
+
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 

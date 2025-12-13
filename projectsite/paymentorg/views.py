@@ -47,7 +47,17 @@ def get_current_period():
         return AcademicYearConfig.objects.filter(is_current=True).order_by('-start_date').first()
 
 def create_signature(message_string):
-    secret_key = getattr(settings, 'SECRET_KEY', 'default-insecure-key').encode('utf-8')
+    # Use a persistent QR signature key that never changes between deployments
+    # This ensures QR codes remain valid even when SECRET_KEY is rotated
+    qr_signature_key = getattr(settings, 'QR_SIGNATURE_KEY', None)
+    
+    if not qr_signature_key:
+        raise ValueError(
+            "QR_SIGNATURE_KEY must be set in settings.py to ensure QR code stability across deployments. "
+            "Add a long random string to your .env file as QR_SIGNATURE_KEY and load it in settings.py"
+        )
+    
+    secret_key = qr_signature_key.encode('utf-8')
     message = str(message_string).encode('utf-8')
     signature = hmac.new(secret_key, message, hashlib.sha256).hexdigest()
     return signature
