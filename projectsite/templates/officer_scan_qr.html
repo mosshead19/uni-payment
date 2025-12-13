@@ -74,14 +74,8 @@ let html5QrcodeScanner = null;
 function onScanSuccess(decodedText, decodedResult) {
     console.log("QR Code scanned successfully:", decodedText);
     
-    // Stop scanning
-    if (html5QrcodeScanner) {
-        try {
-            html5QrcodeScanner.stop();
-        } catch (e) {
-            console.error("Error stopping scanner:", e);
-        }
-    }
+    // Keep scanner running - don't stop the camera feed
+    // The camera will continue to work until the user navigates away
     
     // Show processing message
     document.getElementById('qr-reader-results').style.display = 'block';
@@ -97,7 +91,7 @@ function onScanSuccess(decodedText, decodedResult) {
         
         console.log("Processing payment request:", requestId, "with signature:", signature);
         
-        // Redirect to process payment
+        // Redirect to process payment - this will automatically stop the scanner when user navigates away
         const url = `/officer/process/${requestId}/${signature}/`;
         console.log("Redirecting to:", url);
         window.location.href = url;
@@ -108,10 +102,9 @@ function onScanSuccess(decodedText, decodedResult) {
             '<i class="fas fa-exclamation-triangle me-2"></i><strong>Invalid QR Code:</strong> This QR code is not a valid payment request. Scanned: ' + decodedText.substring(0, 50) + '...';
         document.getElementById('error-message').style.display = 'block';
         
-        // Restart scanner after 3 seconds
-        setTimeout(() => {
-            startScanner();
-        }, 3000);
+        // Keep scanning - camera continues to run
+        // The scanner will automatically continue scanning after showing the error
+        // User can try scanning again immediately
     }
 }
 
@@ -230,6 +223,31 @@ window.addEventListener('load', function() {
     console.log("Window Load event fired");
     if (typeof Html5Qrcode !== 'undefined') {
         console.log("Html5Qrcode available on window load");
+    }
+});
+
+// Stop scanner when user leaves the page (navigate away, close tab, etc.)
+window.addEventListener('beforeunload', function() {
+    if (html5QrcodeScanner) {
+        try {
+            html5QrcodeScanner.stop().catch(() => {
+                // Already stopped, no action needed
+            });
+            console.log("Scanner stopped on page unload");
+        } catch (e) {
+            console.error("Error stopping scanner on unload:", e);
+        }
+    }
+});
+
+// Also handle page visibility changes (when user switches tabs)
+document.addEventListener('visibilitychange', function() {
+    if (document.hidden) {
+        // Page is hidden, consider stopping the scanner to save resources
+        console.log("Page hidden - scanner will continue running in background");
+    } else {
+        // Page is visible again, camera will continue
+        console.log("Page visible again");
     }
 });
 </script>
