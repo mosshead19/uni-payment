@@ -1,0 +1,75 @@
+{% extends 'base.html' %}
+
+{% block title %}Help & Support - UniPay{% endblock %}
+
+{% block content %}
+<div class="max-w-4xl mx-auto bg-white rounded-xl shadow-sm border border-gray-100 p-8">
+    <h1 class="text-3xl font-bold text-gray-900 mb-6">Help & Support</h1>
+    
+    <div class="grid md:grid-cols-2 gap-8 mb-12">
+        <div class="bg-emerald-50 p-6 rounded-lg border border-emerald-100">
+            <h2 class="text-xl font-semibold text-emerald-800 mb-3">Contact Support</h2>
+            <p class="text-emerald-700 mb-4">Need immediate assistance? Our support team is here to help.</p>
+            <div class="flex items-center gap-3 text-emerald-800 mb-2">
+                <i data-lucide="mail" class="w-5 h-5"></i>
+                <a href="mailto:palsucsunipay@gmail.com" class="hover:underline">palsucsunipay@gmail.com</a>
+            </div>
+        </div>
+        
+        <div class="bg-blue-50 p-6 rounded-lg border border-blue-100">
+            <h2 class="text-xl font-semibold text-blue-800 mb-3">Technical Issues</h2>
+            <p class="text-blue-700 mb-4">Experiencing technical difficulties? Let us know.</p>
+            <div class="flex items-center gap-3 text-blue-800">
+                <i data-lucide="alert-circle" class="w-5 h-5"></i>
+                <span>Report a bug or issue</span>
+            </div>
+        </div>
+    </div>
+
+    <div class="space-y-8">
+        <section>
+            <h2 class="text-2xl font-bold text-gray-900 mb-4">Frequently Asked Questions</h2>
+            
+            <div class="space-y-4">
+                <div class="border border-gray-200 rounded-lg p-4">
+                    <h3 class="font-semibold text-gray-900 mb-2">How do I reset my password?</h3>
+                    <p class="text-gray-600">You can reset your password by clicking on the "Forgot Password" link on the login page. Follow the instructions sent to your email to create a new password.</p>
+                </div>
+
+                <div class="border border-gray-200 rounded-lg p-4">
+                    <h3 class="font-semibold text-gray-900 mb-2">How do I make a payment?</h3>
+                    <p class="text-gray-600">Log in to your student dashboard, navigate to the "Payments" section, select the fee you wish to pay, and follow the payment instructions.</p>
+                </div>
+
+                <div class="border border-gray-200 rounded-lg p-4">
+                    <h3 class="font-semibold text-gray-900 mb-2">Where can I view my payment history?</h3>
+                    <p class="text-gray-600">Your payment history is available in your dashboard under the "History" tab. You can view and download receipts for all past transactions.</p>
+                </div>
+            </div>
+        </section>
+
+        <section>
+            <h2 class="text-2xl font-bold text-gray-900 mb-4">User Guides</h2>
+            <div class="grid md:grid-cols-3 gap-4">
+                <a href="#" class="block p-4 border border-gray-200 rounded-lg hover:border-emerald-500 hover:shadow-md transition-all">
+                    <i data-lucide="book-open" class="w-8 h-8 text-emerald-600 mb-3"></i>
+                    <h3 class="font-semibold text-gray-900">Student Guide</h3>
+                    <p class="text-sm text-gray-500 mt-1">Learn how to use the student portal</p>
+                </a>
+                
+                <a href="#" class="block p-4 border border-gray-200 rounded-lg hover:border-emerald-500 hover:shadow-md transition-all">
+                    <i data-lucide="shield" class="w-8 h-8 text-emerald-600 mb-3"></i>
+                    <h3 class="font-semibold text-gray-900">Officer Guide</h3>
+                    <p class="text-sm text-gray-500 mt-1">Documentation for officers</p>
+                </a>
+                
+                <a href="#" class="block p-4 border border-gray-200 rounded-lg hover:border-emerald-500 hover:shadow-md transition-all">
+                    <i data-lucide="video" class="w-8 h-8 text-emerald-600 mb-3"></i>
+                    <h3 class="font-semibold text-gray-900">Video Tutorials</h3>
+                    <p class="text-sm text-gray-500 mt-1">Watch step-by-step tutorials</p>
+                </a>
+            </div>
+        </section>
+    </div>
+</div>
+{% endblock %}

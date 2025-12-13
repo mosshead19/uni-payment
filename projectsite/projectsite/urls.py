@@ -118,5 +118,9 @@ urlpatterns = [
     path('staff/activity-logs/', views.ActivityLogListView.as_view(), name='activitylog_list'),
     path('staff/org/<str:code>/dashboard/', views.AdminOrganizationDashboardView.as_view(), name='admin_org_dashboard'),
     
+    path('privacy-policy/', TemplateView.as_view(template_name='privacy_policy.html'), name='privacy_policy'),
+    path('terms-of-service/', TemplateView.as_view(template_name='terms_of_service.html'), name='terms_of_service'),
+    path('help-support/', TemplateView.as_view(template_name='help_support.html'), name='help_support'),
+
     path('', include('pwa.urls')),
 ]
