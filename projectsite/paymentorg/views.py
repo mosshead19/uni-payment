@@ -56,6 +56,36 @@ def validate_signature(message_string, provided_signature):
     expected_signature = create_signature(message_string)
     return hmac.compare_digest(expected_signature, provided_signature)
 
+# affiliation helpers
+def normalize_program_affiliation(affiliation):
+    """Map organization program codes (e.g., ESSA, COMSCI, IT) to Course.program_type values.
+    Returns the canonical program_type or None if unknown.
+    """
+    if not affiliation:
+        return None
+    code = str(affiliation).strip().upper()
+    mapping = {
+        # Environmental Studies & Sciences Association
+        'ESSA': 'ENVIRONMENTAL_SCIENCE',
+        'ENVSCI': 'ENVIRONMENTAL_SCIENCE',
+        'ENVIRONMENTAL_SCIENCE': 'ENVIRONMENTAL_SCIENCE',
+        # Computer Science
+        'COMSCI': 'COMPUTER_SCIENCE',
+        'CS': 'COMPUTER_SCIENCE',
+        'COMPUTER_SCIENCE': 'COMPUTER_SCIENCE',
+        # Information Technology
+        'IT': 'INFORMATION_TECHNOLOGY',
+        
+        'INFORMATION_TECHNOLOGY': 'INFORMATION_TECHNOLOGY',
+        # Marine Biology
+        'MARBIO': 'MARINE_BIOLOGY',
+        'MARINE_BIOLOGY': 'MARINE_BIOLOGY',
+        # Medical Biology
+        'MEDBIO': 'MEDICAL_BIOLOGY',
+        'MEDICAL_BIOLOGY': 'MEDICAL_BIOLOGY',
+    }
+    return mapping.get(code)
+
 # authentication views
 class CustomLoginView(LoginView):
     template_name = 'registration/login.html'
@@ -861,7 +891,12 @@ class ListStudentsInOrgView(LoginRequiredMixin, UserPassesTestMixin, ListView):
         elif org.hierarchy_level == 'PROGRAM':
             # Program-level org: show only students in that program
             if org.program_affiliation and org.program_affiliation != 'ALL':
-                qs = qs.filter(course__program_type=org.program_affiliation)
+                program_type = normalize_program_affiliation(org.program_affiliation)
+                if program_type:
+                    qs = qs.filter(course__program_type=program_type)
+                else:
+                    # Unknown program code; show none to avoid cross-program exposure
+                    qs = qs.none()
         
         return qs.order_by('last_name', 'first_name')
     
@@ -1470,18 +1505,19 @@ class OfficerDashboardView(OfficerRequiredMixin, TemplateView):
             officer = user.officer_profile
             organization = officer.organization
             today = timezone.now().date()
+            current_period = get_current_period()
             
+            # SPEC: Show pending requests strictly by officer's organization and status
             pending_requests = PaymentRequest.objects.filter(
                 organization=organization,
-                status='PENDING',
-                expires_at__gt=timezone.now()
+                status='PENDING'
             ).order_by('created_at')[:10]
             
             # Count total pending requests (not just the first 10 displayed)
+            # SPEC: Count pending requests strictly by officer's organization and status
             pending_requests_count = PaymentRequest.objects.filter(
                 organization=organization,
-                status='PENDING',
-                expires_at__gt=timezone.now()
+                status='PENDING'
             ).count()
             
             # Get posted payment postings (bulk fees posted by this officer or organization)
@@ -1776,7 +1812,12 @@ class PostBulkPaymentView(OfficerRequiredMixin, View):
             students = Student.objects.filter(is_active=True)
             if organization.hierarchy_level == 'PROGRAM':
                 if organization.program_affiliation:
-                    students = students.filter(course__program_type=organization.program_affiliation)
+                    program_type = normalize_program_affiliation(organization.program_affiliation)
+                    if program_type:
+                        students = students.filter(course__program_type=program_type)
+                    else:
+                        # If program code is unknown, avoid cross-program posting
+                        students = students.none()
                 else:
                     # If program affiliation is missing, avoid cross-program posting
                     students = students.none()

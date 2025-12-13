@@ -825,32 +825,42 @@ class CompleteProfileForm(forms.ModelForm):
     student_id_number = forms.CharField(
         max_length=20,
         label="Student ID Number",
-        widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': '2021-12345'})
+        widget=forms.TextInput(attrs={
+            'class': 'form-control form-control-sm',
+            'placeholder': 'e.g., 2025-0001',
+            'autocomplete': 'off',
+            'inputmode': 'numeric'
+        })
     )
     phone_number = forms.CharField(
         max_length=15,
         label="Phone Number",
-        widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': '09XX-XXX-XXXX'}),
+        widget=forms.TextInput(attrs={
+            'class': 'form-control form-control-sm',
+            'placeholder': 'e.g., 09123456789',
+            'inputmode': 'numeric',
+            'aria-describedby': 'phoneHelp'
+        }),
         required=False
     )
     college = forms.ModelChoiceField(
         queryset=College.objects.none(),
         label="College/Department",
-        widget=forms.Select(attrs={'class': 'form-select'}),
+        widget=forms.Select(attrs={'class': 'form-select form-select-sm'}),
         empty_label="Select College/Department",
         help_text="College of Sciences (COS) - This system is designed for College of Sciences only"
     )
     course = forms.ModelChoiceField(
         queryset=Course.objects.none(),
         label="Course/Program",
-        widget=forms.Select(attrs={'class': 'form-select'}),
+        widget=forms.Select(attrs={'class': 'form-select form-select-sm'}),
         empty_label="Select Course/Program",
         help_text="Select one of the 5 supported programs: Medical Biology, Marine Biology, Computer Science, Environmental Science, or Information Technology"
     )
     year_level = forms.IntegerField(
         min_value=1, max_value=5,
         label="Year Level",
-        widget=forms.NumberInput(attrs={'class': 'form-control'})
+        widget=forms.NumberInput(attrs={'class': 'form-control form-control-sm'})
     )
 
     class Meta:
