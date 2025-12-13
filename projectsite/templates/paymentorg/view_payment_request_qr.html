@@ -191,7 +191,7 @@
             <!-- QR Code Display -->
             <div class="p-8">
                 <div class="bg-gray-50 rounded-lg p-8 mb-6 flex items-center justify-center">
-                    <div id="qrcode" class="bg-white p-4 rounded-lg shadow-sm"></div>
+                    <div id="qrcode" class="bg-white p-4 rounded-lg shadow-sm" style="padding: 24px !important;"></div>
                 </div>
 
                 <!-- Payment Details -->
@@ -277,7 +277,8 @@
                 height: 256,
                 colorDark: '#000000',
                 colorLight: '#ffffff',
-                correctLevel: QRCode.CorrectLevel.H
+                correctLevel: QRCode.CorrectLevel.H,
+                margin: 2  // Add margin around the QR code pattern itself
             });
             return true;
         }
@@ -294,11 +295,60 @@
     });
 
     function downloadQR() {
-        const canvas = document.querySelector('#qrcode canvas');
+        const qrcodeContainer = document.querySelector('#qrcode');
+        const canvas = qrcodeContainer.querySelector('canvas');
+        
         if (canvas) {
+            // Get fee details from the page
+            const organization = "{{ payment_request.organization.name }}";
+            const feeType = "{{ payment_request.fee_type.name }}";
+            const amount = "₱{{ payment_request.amount|floatformat:2 }}";
+            const requestId = "{{ payment_request.request_id|truncatechars:12 }}";
+            
+            // Create a new canvas with padding and info
+            const padding = 48;
+            const topPadding = 80; // Extra space for text at top
+            const bottomPadding = 120; // Extra space for text at bottom
+            const paddedCanvas = document.createElement('canvas');
+            const ctx = paddedCanvas.getContext('2d');
+            
+            // Set dimensions with padding
+            paddedCanvas.width = canvas.width + (padding * 2);
+            paddedCanvas.height = canvas.height + topPadding + bottomPadding;
+            
+            // Fill with white background
+            ctx.fillStyle = '#ffffff';
+            ctx.fillRect(0, 0, paddedCanvas.width, paddedCanvas.height);
+            
+            // Draw organization name at top
+            ctx.fillStyle = '#000000';
+            ctx.font = 'bold 18px Arial, sans-serif';
+            ctx.textAlign = 'center';
+            ctx.fillText(organization, paddedCanvas.width / 2, 35);
+            
+            // Draw fee type below organization
+            ctx.font = '14px Arial, sans-serif';
+            ctx.fillStyle = '#555555';
+            ctx.fillText(feeType, paddedCanvas.width / 2, 58);
+            
+            // Draw the QR code canvas onto the padded canvas
+            ctx.drawImage(canvas, padding, topPadding);
+            
+            // Draw amount at bottom
+            ctx.fillStyle = '#000000';
+            ctx.font = 'bold 20px Arial, sans-serif';
+            ctx.textAlign = 'center';
+            ctx.fillText(amount, paddedCanvas.width / 2, paddedCanvas.height - 75);
+            
+            // Draw request ID at bottom
+            ctx.font = '12px Arial, sans-serif';
+            ctx.fillStyle = '#888888';
+            ctx.fillText('ID: ' + requestId, paddedCanvas.width / 2, paddedCanvas.height - 50);
+            
+            // Download the padded QR code
             const link = document.createElement('a');
             link.download = 'payment-qr-{{ payment_request.request_id|truncatechars:8 }}.png';
-            link.href = canvas.toDataURL('image/png');
+            link.href = paddedCanvas.toDataURL('image/png');
             link.click();
         }
     }
