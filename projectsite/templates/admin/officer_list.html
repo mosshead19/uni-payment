@@ -4,7 +4,7 @@
 
 {% block content %}
 <div class="d-flex justify-content-between align-items-center mb-4">
-    <h2><i class="fas fa-user-tie me-2"></i>Officers</h2>
+    <h2><i class="fas fa-user-tie me-2"></i>{% if user.is_superuser %}All Officers{% else %}Officers{% endif %}</h2>
 </div>
 
 <div class="card shadow mb-3">

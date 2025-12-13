@@ -18,9 +18,9 @@
                             <div class="w-10 h-10 bg-white/20 backdrop-blur-sm rounded-lg flex items-center justify-center">
                                 <i data-lucide="users" class="w-5 h-5 text-white"></i>
                             </div>
-                            <h1 class="text-xl md:text-2xl font-bold text-white">View Students</h1>
+                            <h1 class="text-xl md:text-2xl font-bold text-white">{% if user.is_superuser %}All Students{% else %}View Students{% endif %}</h1>
                         </div>
-                        <p class="text-white/80 text-sm md:text-base">{{ user_organization.name }}</p>
+                        <p class="text-white/80 text-sm md:text-base">{% if user.is_superuser %}All students across all organizations{% else %}{{ user_organization.name }}{% endif %}</p>
                     </div>
                     <div class="flex flex-wrap gap-2 md:gap-3">
                         <button onclick="exportStudents()" 

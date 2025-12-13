@@ -21,7 +21,9 @@
                             <h1 class="text-xl md:text-2xl font-bold text-white">Fee Types</h1>
                         </div>
                         <p class="text-white/80 text-sm md:text-base">
-                            {% if is_super_officer %}
+                            {% if user.is_superuser %}
+                                Managing fee types for all organizations
+                            {% elif is_super_officer %}
                                 Managing fee types for {{ organization.name }}
                             {% else %}
                                 Manage organization fee types
